@@ -27,27 +27,30 @@
                 <ComboBox Name="filterCMB" MinWidth="100" MaxWidth="170" SelectionChanged="filterCMB_SelectionChanged" FontSize="16" MaxHeight="30" Padding="0"/>
             </StackPanel>
         </StackPanel>
-        <StackPanel Grid.Row="0" Grid.Column="1" Margin="6 0 10 0" VerticalAlignment="Bottom">
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                <Button Name="StaffAddBtn" Click="StaffAddBtn_Click" Width="40" Height="40" BorderBrush="Transparent" ToolTip="Добавить" Style="{StaticResource UpRoundedButtonStyle}" Background="Transparent" IsEnabled="True">
-                    <Image Source="/Resources/icons/misc/add.ico" MaxWidth="30" MaxHeight="30"/>
-                </Button>
-                <Button Name="StaffEditBtn" Click="StaffEditBtn_Click" Width="40" Height="40" BorderBrush="Transparent" ToolTip="Редактировать" Style="{StaticResource UpRoundedButtonStyle}" Background="Transparent" IsEnabled="False">
-                    <Image Source="/Resources/icons/misc/edit.ico" MaxWidth="30" MaxHeight="30"/>
-                </Button>
-                <Button Name="StaffRemoveBtn" Click="StaffRemoveBtn_Click" Width="40" Height="40" BorderBrush="Transparent" ToolTip="Удалить" Style="{StaticResource UpRoundedButtonStyle}" Background="Transparent" IsEnabled="False">
-                    <Image Source="/Resources/icons/misc/remove.ico" MaxWidth="30" MaxHeight="30"/>
-                </Button>
-                <Button Name="StaffRefreshBtn" Click="StaffRefreshBtn_Click" Width="40" Height="40" BorderBrush="Transparent" ToolTip="Изменить" Style="{StaticResource UpRoundedButtonStyle}" IsEnabled="True">
-                    <Image Source="/Resources/icons/misc/refresh.ico" MaxWidth="30" MaxHeight="30"/>
-                </Button>
-                <Button Name="ExcelBtn" Click="ExcelBtn_Click" Width="40" Height="40" BorderBrush="Transparent" ToolTip="Excel" Style="{StaticResource UpRoundedButtonStyle}" IsEnabled="True">
-                    <Image Source="/Resources/icons/software/excel.ico" MaxWidth="30" MaxHeight="30"/>
-                </Button>
-                <Button Name="ExportToBitrix24Btn" Click="ExportToBitrix24Btn_Click" Width="40" Height="40" BorderBrush="Transparent" ToolTip="Bitrix24" Style="{StaticResource UpRoundedButtonStyle}" IsEnabled="True">
-                    <Image Source="/Resources/icons/software/excel.ico" MaxWidth="30" MaxHeight="30"/>
-                </Button>
-            </StackPanel>
+        <StackPanel Grid.Row="0" Grid.Column="1" Margin="6 0 0 0" VerticalAlignment="Bottom">
+            <DockPanel Width="1115">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                    <Button Name="StaffAddBtn" Click="StaffAddBtn_Click" Width="40" Height="40" BorderBrush="Transparent" ToolTip="Добавить" Style="{StaticResource UpRoundedButtonStyle}" Background="Transparent" IsEnabled="True">
+                        <Image Source="/Resources/icons/misc/add.ico" MaxWidth="30" MaxHeight="30"/>
+                    </Button>
+                    <Button Name="StaffEditBtn" Click="StaffEditBtn_Click" Width="40" Height="40" BorderBrush="Transparent" ToolTip="Редактировать" Style="{StaticResource UpRoundedButtonStyle}" Background="Transparent" IsEnabled="False">
+                        <Image Source="/Resources/icons/misc/edit.ico" MaxWidth="30" MaxHeight="30"/>
+                    </Button>
+                    <Button Name="StaffRemoveBtn" Click="StaffRemoveBtn_Click" Width="40" Height="40" BorderBrush="Transparent" ToolTip="Удалить" Style="{StaticResource UpRoundedButtonStyle}" Background="Transparent" IsEnabled="False">
+                        <Image Source="/Resources/icons/misc/remove.ico" MaxWidth="30" MaxHeight="30"/>
+                    </Button>
+                    <Button Name="StaffRefreshBtn" Click="StaffRefreshBtn_Click" Width="40" Height="40" BorderBrush="Transparent" ToolTip="Изменить" Style="{StaticResource UpRoundedButtonStyle}" IsEnabled="True">
+                        <Image Source="/Resources/icons/misc/refresh.ico" MaxWidth="30" MaxHeight="30"/>
+                    </Button>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Name="ExcelBtn" Click="ExcelBtn_Click" Width="40" Height="40" BorderBrush="Transparent" ToolTip="Excel" Style="{StaticResource UpRoundedButtonStyle}" IsEnabled="True">
+                        <Image Source="/Resources/icons/software/excel.ico" MaxWidth="30" MaxHeight="30"/>
+                    </Button>
+                    
+                </StackPanel>
+            </DockPanel>
+            
         </StackPanel>
         <DataGrid x:Name="StaffDG" AutoGenerateColumns="False" CanUserAddRows="False" Grid.Row="1" Grid.Column="1" Margin="5 0 0 5" CanUserDeleteRows="False" Style="{StaticResource DataGridOwn}" SelectionChanged="StaffDG_SelectionChanged">
             <DataGrid.Columns>

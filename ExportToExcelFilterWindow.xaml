@@ -54,5 +54,8 @@
             </StackPanel>
         </StackPanel>
         <Button Name="ExportBtn" Width="100" Height="30" Content="Выгрузить" Click="ExportBtn_Click" Grid.Row="3" Grid.Column="1" Style="{StaticResource RoundedButtonStyle}" FontSize="12"/>
+        <Button Name="ExportToBitrix24Btn" Width="40" Height="40" BorderBrush="Transparent" ToolTip="Bitrix24" Style="{StaticResource UpRoundedButtonStyle}" Grid.Row="3" Grid.Column="1" HorizontalAlignment="Right" Click="ExportToBitrix24Btn_Click" IsEnabled="False" Margin="5 0">
+            <Image Source="/Resources/icons/software/bitrix.ico" MaxWidth="30" MaxHeight="30"/>
+        </Button>
     </Grid>
 </Window>

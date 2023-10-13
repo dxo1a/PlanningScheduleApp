@@ -17,6 +17,10 @@ using Excel = Microsoft.Office.Interop.Excel;
 using System.Net;
 using RestSharp;
 using System.Threading;
+using System.Collections.Specialized;
+using System.Web;
+using Newtonsoft.Json;
+using System.Security.Policy;
 
 namespace PlanningScheduleApp.Pages
 {
@@ -33,6 +37,8 @@ namespace PlanningScheduleApp.Pages
 
         DateTime SelectedDate;
         string mode;
+
+        
 
         public SelectedDepPage(DepModel selectedDep)
         {
@@ -156,30 +162,8 @@ namespace PlanningScheduleApp.Pages
             staffAddOrEditWindow.ShowDialog();
         }
 
-        // Метод для преобразования Windows.UI.Color в цвет, понимаемый Excel (RGB)
-        private object ColorToRgb(System.Drawing.Color color)
+        private void ExportToBitrix24Btn_Click(object sender, RoutedEventArgs e)
         {
-            return color.R + color.G * 256 + color.B * 256 * 256;
-        }
-
-        private async void ExportToBitrix24Btn_Click(object sender, RoutedEventArgs e)
-        {
-            string accessToken = "jodugywyhnzu9ftm";
-            int chatId = 634;
-            string message = "Это сообщение из приложения";
-
-            var client = new RestClient("https://steklm.bitrix24.ru/rest/797/jodugywyhnzu9ftm/im.message.add.json");
-
-            var request = new RestRequest(Method.POST);
-            request.AddHeader("Content-Type", "application/x-www-form-urlencoded");
-            request.AddParameter("chat_id", chatId);
-            request.AddParameter("message", message);
-            CancellationToken cancellationToken = new CancellationToken();
-
-            var response = new RestResponse();
-            response = await client.PostAsync(request, cancellationToken);
-            Console.WriteLine(response.Content);
-
 
         }
     }

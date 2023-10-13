@@ -20,7 +20,6 @@
             <converters:ZeroToEmptyStringConverter x:Key="ZeroToEmptyStringConverter"/>
 
 
-
             <DropShadowEffect x:Key="ShadowEffect" BlurRadius="15" Direction="310" ShadowDepth="8" Color="Black" Opacity="0.8"/>
             <DropShadowEffect x:Key="ShadowEffectDown" ShadowDepth="5" Direction="240" BlurRadius="10" Opacity="1" Color="Gray"/>
             <DropShadowEffect x:Key="ShadowEffectUp" ShadowDepth="5" Direction="90" BlurRadius="10" Opacity="1" Color="Gray"/>

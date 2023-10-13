@@ -1,4 +1,5 @@
 ﻿using Microsoft.Office.Interop.Excel;
+using Newtonsoft.Json;
 using PlanningScheduleApp.Models;
 using System;
 using System.Collections.Generic;
@@ -32,10 +33,18 @@ namespace PlanningScheduleApp
         double AcceptableFreeHoursFreeHours;
         double FreeHours;
 
+        #region Переменные для Bitrix24
+        public static readonly string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        string webhookUrl = "https://steklm.bitrix24.ru/rest/797/jodugywyhnzu9ftm/";
+        string filePath;
+        string saveFileName;
+        string unloadingDate, unloadingTime;
+        #endregion
+
         public ExportToExcelFilterWindow()
         {
             InitializeComponent();
-
+            
             AllStaffList = Odb.db.Database.SqlQuery<StaffModel>($"select distinct b.FIO as FIO, LTRIM(b.Tabel) as Tabel, a.WorkingHours, a.DTA, a.STAFF_ID, ID_Schedule from SerialNumber.dbo.Staff_Schedule as a left join SerialNumber.dbo.StaffView as b on a.STAFF_ID = b.STAFF_ID where b.VALID = 1 ORDER BY a.DTA DESC").ToList();
         }
 
@@ -80,9 +89,6 @@ namespace PlanningScheduleApp
 
         private void ExportToExcel()
         {
-            //MessageBox.Show($"Выгрузка может занять некоторое время...", "Выгрузка", MessageBoxButton.OK, MessageBoxImage.Information);
-            //StaffListForExcel = Odb.db.Database.SqlQuery<StaffModel>("select distinct b.FIO as FIO, LTRIM(b.Tabel) as Tabel, a.STAFF_ID from SerialNumber.dbo.Staff_Schedule as a left join SerialNumber.dbo.StaffView as b on a.STAFF_ID = b.STAFF_ID where b.VALID = 1 and b.Position = @pos", new SqlParameter("pos", SelectedDep.Position)).ToList();
-
             #region Вычисление свободных часов
             Dictionary<(int, DateTime), double> freeHoursDictionary = new Dictionary<(int, DateTime), double>();
             foreach (var staff in AllStaffList)
@@ -149,8 +155,10 @@ namespace PlanningScheduleApp
                 SELECT DISTINCT
                     c.SHORT_FIO as FIO,
                     sz.Product,
-                    sz.Detail,
+                    sz.Detail as DetailNum,
+                    dv.НазваниеД as DetailName,
                     sz.NUM,
+                    dv.Договор as PP,
 	                CAST(ROUND(sz.Cost, 2) as FLOAT) as Cost,
 	                sz.Count,
 	                a.WorkingHours,
@@ -162,6 +170,7 @@ namespace PlanningScheduleApp
                 LEFT JOIN PERCO...subdiv_ref AS d ON b.SUBDIV_ID = d.ID_REF
                 LEFT JOIN PERCO...appoint_ref AS e ON b.APPOINT_ID = e.ID_REF
                 LEFT JOIN Zarplats.dbo.SmenZadView as sz on LTRIM(c.TABEL_ID) = sz.id_Tabel and a.DTA = sz.DTE
+                LEFT JOIN Cooperation.dbo.DetailsView as dv on sz.NUM = dv.ПрП and sz.Detail = dv.НомерД
                 WHERE b.STAFF_ID = @staffid and a.DTA BETWEEN @startDate and @finishDate
             ", new SqlParameter("staffid", staff.STAFF_ID), new SqlParameter("startDate", StartDate), new SqlParameter("finishDate", FinishDate)).ToList();
                 szandschedulesDataDictionary[staff.STAFF_ID] = SZAndScheduleList;
@@ -186,17 +195,18 @@ namespace PlanningScheduleApp
                 worksheet2.Name = "Сменные задания";
 
 
-                Excel.Range headerRange2 = worksheet2.get_Range("A1", "G1");
+                Excel.Range headerRange2 = worksheet2.get_Range("A1", "H1");
                 headerRange2.Interior.Color = ColorTranslator.ToOle(System.Drawing.Color.LightGray);
                 headerRange2.HorizontalAlignment = XlHAlign.xlHAlignCenter;
 
                 worksheet2.Cells[1, 1] = "ФИО";
                 worksheet2.Cells[1, 2] = "Изделие";
-                worksheet2.Cells[1, 3] = "Деталь";
+                worksheet2.Cells[1, 3] = "ПП";
                 worksheet2.Cells[1, 4] = "ПрП";
-                worksheet2.Cells[1, 5] = "Время";
+                worksheet2.Cells[1, 5] = "Деталь";
                 worksheet2.Cells[1, 6] = "Количество";
-                worksheet2.Cells[1, 7] = "Дата";
+                worksheet2.Cells[1, 7] = "Время";
+                worksheet2.Cells[1, 8] = "Дата";
 
                 int rowCountSZ = 2;
 
@@ -221,11 +231,13 @@ namespace PlanningScheduleApp
                                 {
                                     worksheet2.Cells[rowCountSZ, 1] = sz.FIO;
                                     worksheet2.Cells[rowCountSZ, 2] = sz.Product;
-                                    worksheet2.Cells[rowCountSZ, 3] = sz.Detail;
+                                    worksheet2.Cells[rowCountSZ, 3].NumberFormat = "@";
+                                    worksheet2.Cells[rowCountSZ, 3] = sz.PP.ToString();
                                     worksheet2.Cells[rowCountSZ, 4] = sz.NUM;
-                                    worksheet2.Cells[rowCountSZ, 5] = sz.Cost;
+                                    worksheet2.Cells[rowCountSZ, 5] = sz.Detail;
                                     worksheet2.Cells[rowCountSZ, 6] = sz.Count;
-                                    worksheet2.Cells[rowCountSZ, 7] = sz.DTA.ToShortDateString();
+                                    worksheet2.Cells[rowCountSZ, 7] = sz.Cost;
+                                    worksheet2.Cells[rowCountSZ, 8] = sz.DTA.ToShortDateString();
 
                                     rowCountSZ++;
                                 }
@@ -286,9 +298,15 @@ namespace PlanningScheduleApp
 
                 workbook.Title = $"Загруженность сотрудников";
 
-                // Сохраните книгу Excel в файле
-                string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-                workbook.SaveAs($"{documentsPath}/Загруженность сотрудников.xlsx");
+                // Ставится дата и время на момент сохранения документа
+                unloadingDate = DateTime.Now.ToShortDateString();
+                unloadingTime = DateTime.Now.ToString("HH_mm");
+                filePath = $"{documentsPath}\\Общая загруженность сотрудников ({unloadingDate} {unloadingTime}).xlsx";
+
+                workbook.SaveAs(filePath);
+
+                Dispatcher.Invoke(() => { ExportToBitrix24Btn.IsEnabled = true; });
+                saveFileName = $"Общая загруженность сотрудников ({unloadingDate} {unloadingTime}).xlsx";
             }
             finally
             {
@@ -296,7 +314,153 @@ namespace PlanningScheduleApp
             }
             #endregion
         }
-    
-        
+
+        private async void ExportToBitrix24()
+        {
+            var result = MessageBox.Show("Выгрузить файл? (Файл будет загружен на диск и отправлен в группу)", "Bitrix24", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result == MessageBoxResult.Yes)
+            {
+                int fileId = await UploadFileToBitrix24(filePath, 305001); // путь до файла, ID папки
+
+                await SendMessageToChatWebhook(797, "Текст сообщения", "Имя для ссылки на файл", "Описание", fileId);
+            }
+        }
+
+        public async Task<int> UploadFileToBitrix24(string filePath, int folderId)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                byte[] fileBytes = File.ReadAllBytes(filePath);         // используется документ который был создан при создании файла эксель
+                string base64File = Convert.ToBase64String(fileBytes);
+
+                var requestData = new
+                {
+                    id = folderId, // ID папки, в которую загружается файл
+                    data = new
+                    {
+                        NAME = saveFileName
+                    },
+                    fileContent = base64File,
+                    generateUniqueName = true // Уникализировать имя файла, если файл с таким именем уже существует
+                };
+
+                string jsonRequestData = JsonConvert.SerializeObject(requestData);
+                Console.WriteLine($"{jsonRequestData}");
+                var content = new StringContent(jsonRequestData, Encoding.UTF8, "application/json");
+
+                HttpResponseMessage response = await client.PostAsync($"{webhookUrl}disk.folder.uploadfile.json", content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string responseBody = await response.Content.ReadAsStringAsync();
+                    dynamic responseData = JsonConvert.DeserializeObject(responseBody);
+                    Console.WriteLine($"Файл [{saveFileName}] успешно сохранён в папку [{folderId}].");
+
+                    if (responseData.result != null && responseData.result.ID != null)
+                    {
+                        int fileId = responseData.result.ID;
+                        Console.WriteLine($"Присвоен ID: [{fileId}]");
+                        return fileId;
+                    }
+                    else
+                    {
+                        MessageBox.Show("ID файла в ответе от сервера является null или недопустимого формата.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                        throw new Exception("ID файла в ответе от сервера является null или недопустимого формата.");
+                    }
+                }
+                else
+                {
+                    string errorContent = await response.Content.ReadAsStringAsync();
+                    MessageBox.Show($"Ошибка при загрузке файла на диск: {response.StatusCode} - {errorContent}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    throw new Exception($"Ошибка при загрузке файла на личный диск: {response.StatusCode} - {errorContent}");
+                }
+            }
+        }
+
+        public async Task<string> GetFileUrlById(int fileId)
+        {
+            using (HttpClient client = new HttpClient())
+            {
+                HttpResponseMessage response = await client.GetAsync($"{webhookUrl}disk.file.get.json?id={fileId}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string responseBody = await response.Content.ReadAsStringAsync();
+                    dynamic responseData = JsonConvert.DeserializeObject(responseBody);
+
+                    if (responseData.result != null && responseData.result.DOWNLOAD_URL != null)
+                    {
+                        string fileUrl = responseData.result.DETAIL_URL;
+                        Console.WriteLine($"Ссылка на файл с ID [{fileId}]: {fileUrl}");
+                        return fileUrl;
+                    }
+                    else
+                    {
+                        MessageBox.Show("Невозможно получить ссылку на файл. Ответ от сервера не содержит ожидаемых данных.", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                        throw new Exception("Невозможно получить ссылку на файл. Ответ от сервера не содержит ожидаемых данных.");
+                    }
+                }
+                else
+                {
+                    string errorContent = await response.Content.ReadAsStringAsync();
+                    MessageBox.Show($"Ошибка при получении ссылки на файл: {response.StatusCode} - {errorContent}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    throw new Exception($"Ошибка при получении ссылки на файл: {response.StatusCode} - {errorContent}");
+                }
+            }
+        }
+
+        private void ExportToBitrix24Btn_Click(object sender, RoutedEventArgs e)
+        {
+            ExportToBitrix24();
+        }
+
+        public async Task<string> SendMessageToChatWebhook(int chatId, string message, string nameForUrl, string description, int fileId)
+        {
+            string fileUrl = await GetFileUrlById(fileId);
+
+            using (HttpClient client = new HttpClient())
+            {
+                var attachments = new[]
+                {
+                    new
+                    {
+                        LINK = new
+                        {
+                            PREVIEW = fileUrl,
+                            WIDTH = 1000,
+                            HEIGHT = 638,
+                            NAME = nameForUrl,
+                            DESC = description,
+                            LINK = fileUrl
+                        }
+                    }
+                };
+
+                var messageData = new
+                {
+                    DIALOG_ID = chatId.ToString(),
+                    MESSAGE = message,
+                    ATTACH = attachments
+                };
+
+                string jsonMessageData = JsonConvert.SerializeObject(messageData);
+                var content = new StringContent(jsonMessageData, Encoding.UTF8, "application/json");
+
+                HttpResponseMessage response = await client.PostAsync($"{webhookUrl}im.message.add.json", content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    string responseBody = await response.Content.ReadAsStringAsync();
+                    MessageBox.Show("Файл выгружен и сообщение отправлено!", "Bitrix24", MessageBoxButton.OK, MessageBoxImage.Information);
+                    return responseBody;
+                }
+                else
+                {
+                    string errorContent = await response.Content.ReadAsStringAsync();
+                    MessageBox.Show($"Ошибка при отправке сообщения в чат: {response.StatusCode} - {errorContent}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+                    throw new Exception($"Ошибка при отправке сообщения в чат: {response.StatusCode} - {errorContent}");
+                }
+            }
+        }
     }
 }

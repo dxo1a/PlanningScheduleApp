@@ -10,19 +10,29 @@ namespace PlanningScheduleApp.Models
         public double? TotalHours { get; set; }
         public double? Cost { get; set; }
         public double? FreeHours { get; set; }
-        public string Detail { get; set; }
+        public string DetailNum { get; set; }
+        public string DetailName { get; set; }
         public string NUM { get; set; }
+        public string PP { get; set; }
         public double? Count { get; set; }
         public string Product { get; set; }
         public double? WorkingHours { get; set; }
         public DateTime DTA { get; set; }
         public string FIO { get; set; }
 
+        public string Detail
+        {
+            get
+            {
+                return $"{DetailNum} {DetailName}";
+            }
+        }
+
         public string ScheduleFull
         {
             get
             {
-                return $"{Product} {Detail} {NUM} {Cost} {Count} {WorkingHours} {DTA} {FreeHours}";
+                return $"{Product} {Detail} {NUM} {PP} {Cost} {Count} {WorkingHours} {DTA} {FreeHours}";
             }
         }
 

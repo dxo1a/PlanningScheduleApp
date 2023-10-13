@@ -1,13 +1,4 @@
-﻿using PlanningScheduleApp.Models;
-using PlanningScheduleApp.Pages;
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Data.Entity;
-using System.Data.Odbc;
-using System.Data.SqlClient;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using PlanningScheduleApp.Pages;
 using System.Windows;
 
 namespace PlanningScheduleApp
