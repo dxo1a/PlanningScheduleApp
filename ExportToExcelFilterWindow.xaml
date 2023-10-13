@@ -1,0 +1,58 @@
+﻿<Window x:Class="PlanningScheduleApp.ExportToExcelFilterWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PlanningScheduleApp"
+        xmlns:sys="clr-namespace:System;assembly=mscorlib"
+        mc:Ignorable="d"
+        Title="ExportToExcelFilterWindow" Height="550" Width="500" WindowStyle="None"
+        xmlns:themes="clr-namespace:StyledWindow.WPF.Themes;assembly=StyledWindow.WPF" xmlns:components="clr-namespace:StyledWindow.WPF.Components;assembly=StyledWindow.WPF"
+        Style="{StaticResource StyledWindow}"
+        themes:StyledWindow.LanguageButtonVisible="False"
+        themes:StyledWindow.ThemeButtonVisible="False"
+        themes:StyledWindow.ThemeToggleVisible="False"
+        themes:StyledWindow.TopmostButtonVisible="True">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20"/>
+            <RowDefinition Height="0.7*"/>
+            <RowDefinition Height="0.3*"/>
+            <RowDefinition Height="50"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="20"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="20"/>
+        </Grid.ColumnDefinitions>
+        <StackPanel Orientation="Vertical" Grid.Row="1" Grid.Column="1">
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <DataGrid Name="FreeHoursDataGrid" Grid.Row="1" Grid.Column="1" AutoGenerateColumns="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn x:Name="Date" Header="Дата" Binding="{Binding DTA}" IsReadOnly="True"/>
+                        <DataGridTextColumn x:Name="AcceptableFreeHours" Header="Допустимые свободные часы" Binding="{Binding AcceptableFreeHours}"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </ScrollViewer>
+            <!--<TextBlock Text="Рабочие часы" FontSize="14" HorizontalAlignment="Center"/>
+            <StackPanel Orientation="Horizontal">
+                --><!--<TextBlock Text="Допустимое свободное время: " TextAlignment="Center" VerticalAlignment="Center" MaxWidth="120" TextWrapping="Wrap"/>
+                <TextBox Name="AcceptableFreeHoursTBX" Width="80" Height="30" Margin="5 0" Style="{StaticResource TBXStyle}" Padding="3 0"/>--><!--
+            </StackPanel>-->
+        </StackPanel>
+        <StackPanel Orientation="Vertical" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center" VerticalAlignment="Center">
+            <TextBlock Text="Диапазон дат" FontSize="14" HorizontalAlignment="Center"/>
+            <StackPanel Orientation="Horizontal">
+                <StackPanel Orientation="Vertical">
+                    <DatePicker Name="StartDP" Margin="5 0" Width="100"/>
+                    <TextBlock Text="Начальная дата" FontSize="10" Foreground="Gray" TextAlignment="Center"/>
+                </StackPanel>
+                <StackPanel Orientation="Vertical">
+                    <DatePicker Name="FinishDP" Margin="5 0" Width="100" SelectedDateChanged="FinishDP_SelectedDateChanged"/>
+                    <TextBlock Text="Конечная дата" FontSize="10" Foreground="Gray" TextAlignment="Center"/>
+                </StackPanel>
+            </StackPanel>
+        </StackPanel>
+        <Button Name="ExportBtn" Width="100" Height="30" Content="Выгрузить" Click="ExportBtn_Click" Grid.Row="3" Grid.Column="1" Style="{StaticResource RoundedButtonStyle}" FontSize="12"/>
+    </Grid>
+</Window>
