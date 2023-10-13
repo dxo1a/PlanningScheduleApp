@@ -36,9 +36,15 @@ namespace PlanningScheduleApp
         #region Переменные для Bitrix24
         public static readonly string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
         string webhookUrl = "https://steklm.bitrix24.ru/rest/797/jodugywyhnzu9ftm/";
-        string filePath;
-        string saveFileName;
+        string filePath, saveFileName;
         string unloadingDate, unloadingTime;
+
+        int selectedChat = 634;                       // ID диалога (если чат, то заменить DIALOG_ID на CHAT_ID в SendMessageToChatWebhook.messageData)
+        int selectedFolder = 305001;                  // ID папки (личная 305001, сменные 305175)
+        string selectedMessageText = "Текст сообщения";
+        string selectedUrlText = "Текст ссылки";
+        string selectedDescriptionText = "Описание";
+
         #endregion
 
         public ExportToExcelFilterWindow()
@@ -57,7 +63,6 @@ namespace PlanningScheduleApp
 
                 await LoadDataAsync();
             }
-
         }
 
         private async Task LoadDataAsync()
@@ -85,6 +90,11 @@ namespace PlanningScheduleApp
                 }
             }
             FreeHoursDataGrid.ItemsSource = staffModels;
+        }
+
+        private void ExportToBitrix24Btn_Click(object sender, RoutedEventArgs e)
+        {
+            ExportToBitrix24(filePath, selectedFolder, selectedChat, selectedMessageText, selectedUrlText, selectedDescriptionText);
         }
 
         private void ExportToExcel()
@@ -315,14 +325,14 @@ namespace PlanningScheduleApp
             #endregion
         }
 
-        private async void ExportToBitrix24()
+        private async void ExportToBitrix24(string filePath, int folder, int chat, string messageText, string urlText, string descriptionText)
         {
             var result = MessageBox.Show("Выгрузить файл? (Файл будет загружен на диск и отправлен в группу)", "Bitrix24", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result == MessageBoxResult.Yes)
             {
-                int fileId = await UploadFileToBitrix24(filePath, 305001); // путь до файла, ID папки
+                int fileId = await UploadFileToBitrix24(filePath, folder);
 
-                await SendMessageToChatWebhook(797, "Текст сообщения", "Имя для ссылки на файл", "Описание", fileId);
+                await SendMessageToChatWebhook(chat, messageText, urlText, descriptionText, fileId);
             }
         }
 
@@ -409,10 +419,7 @@ namespace PlanningScheduleApp
             }
         }
 
-        private void ExportToBitrix24Btn_Click(object sender, RoutedEventArgs e)
-        {
-            ExportToBitrix24();
-        }
+        
 
         public async Task<string> SendMessageToChatWebhook(int chatId, string message, string nameForUrl, string description, int fileId)
         {
@@ -439,6 +446,7 @@ namespace PlanningScheduleApp
                 var messageData = new
                 {
                     DIALOG_ID = chatId.ToString(),
+                    //CHAT_ID = chatId.ToString(), если чат
                     MESSAGE = message,
                     ATTACH = attachments
                 };
