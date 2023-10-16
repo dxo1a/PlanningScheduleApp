@@ -65,7 +65,7 @@
                                                 </TextBlock>
                                                 <TextBlock Text="Рабочие часы: " VerticalAlignment="Center" Margin="30 0 0 0"/>
                                                 <StackPanel Style="{StaticResource SP}" VerticalAlignment="Center">
-                                                    <TextBox Name="WorkingHoursTBX" MinWidth="30" MaxWidth="50" Text="{Binding WorkingHours, Mode=TwoWay, Converter={StaticResource ZeroToEmptyStringConverter}, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center" Style="{StaticResource TBXStyleEdited}" Margin="0 0 0 10" LostFocus="WorkingHoursTBX_LostFocus"/>
+                                                    <TextBox Name="WorkingHoursTBX" MinWidth="30" MaxWidth="50" Text="{Binding WorkingHours, Mode=TwoWay, Converter={StaticResource ZeroToEmptyStringConverter}, UpdateSourceTrigger=PropertyChanged}" TextAlignment="Center" Style="{StaticResource TBXStyleEdited}" Margin="0 0 0 10" Loaded="WorkingHoursTBX_Loaded"/>
                                                 </StackPanel>
                                             </StackPanel>
                                             <TextBlock Text="Сегодня" Style="{StaticResource BorderTodayTBStyle}" HorizontalAlignment="Right" Margin="0 -40 10 0" FontStyle="Italic" Foreground="Gray"/>

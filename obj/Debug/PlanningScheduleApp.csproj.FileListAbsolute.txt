@@ -74,3 +74,6 @@ C:\Users\it01\Desktop\PlanningScheduleApp\bin\Debug\Newtonsoft.Json.dll
 C:\Users\it01\Desktop\PlanningScheduleApp\bin\Debug\RestSharp.dll
 C:\Users\it01\Desktop\PlanningScheduleApp\bin\Debug\Newtonsoft.Json.xml
 C:\Users\it01\Desktop\PlanningScheduleApp\bin\Debug\RestSharp.xml
+C:\Users\it01\Desktop\PlanningScheduleApp\obj\Debug\PlanningScheduleApp_Content.g.cs
+C:\Users\it01\Desktop\PlanningScheduleApp\bin\Debug\FontAwesome.WPF.dll
+C:\Users\it01\Desktop\PlanningScheduleApp\bin\Debug\FontAwesome.WPF.xml

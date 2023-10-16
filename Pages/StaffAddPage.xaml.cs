@@ -6,6 +6,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Media;
 
 namespace PlanningScheduleApp.Pages
 {
@@ -18,6 +19,7 @@ namespace PlanningScheduleApp.Pages
         DepModel SelectedDep { get; set; }
 
         double resultWorkingHours;
+        List<TextBox> textBoxes = new List<TextBox>();
 
         public StaffAddPage(DepModel selectedDep)
         {
@@ -168,8 +170,26 @@ namespace PlanningScheduleApp.Pages
         private void StaffLV_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             SelectedStaff = (StaffModel)StaffLV.SelectedItem;
-            StaffTBX.Text = $"{SelectedStaff.StaffFIOTabel}";
-            LoadStaffSchedule();
+            if (SelectedStaff != null)
+            {
+                StaffTBX.Text = $"{SelectedStaff.StaffFIOTabel}";
+                for (int i = 0; i < textBoxes.Count; i++)
+                {
+                    textBoxes[i].IsEnabled = true;
+                }
+                LoadStaffSchedule();
+            }
+            
+        }
+        
+        private void WorkingHoursTBX_Loaded(object sender, RoutedEventArgs e)
+        {
+            TextBox textBox = sender as TextBox;
+            if (textBox != null)
+            {
+                textBox.IsEnabled = false;
+                textBoxes.Add(textBox);
+            }
         }
     }
 }

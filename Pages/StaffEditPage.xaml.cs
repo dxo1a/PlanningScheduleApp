@@ -28,7 +28,8 @@ namespace PlanningScheduleApp.Pages
             FrameApp.SetCurrentMainFrame(FrameApp.FrameMain);
 
             SelectedStaff = selectedStaff;
-            StaffTB.Text = $"{SelectedStaff.StaffFIOTabel}";
+            if (SelectedStaff != null )
+                StaffTB.Text = $"{SelectedStaff.StaffFIOTabel}";
 
             SubdivisionsList = Odb.db.Database.SqlQuery<StaffModel>("select distinct Subdivision from SerialNumber.dbo.StaffView where STAFF_ID = @staffid", new SqlParameter("staffid", SelectedStaff.STAFF_ID)).ToList();
             StaffSubdivisionTB.Text = string.Join(", ", SubdivisionsList.Select(item => item.Subdivision));

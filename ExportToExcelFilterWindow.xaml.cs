@@ -8,7 +8,6 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -34,6 +33,7 @@ namespace PlanningScheduleApp
         double FreeHours;
 
         #region Переменные для Bitrix24
+
         public static readonly string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
         string webhookUrl = "https://steklm.bitrix24.ru/rest/797/jodugywyhnzu9ftm/";
         string filePath, saveFileName;
@@ -67,7 +67,7 @@ namespace PlanningScheduleApp
 
         private async Task LoadDataAsync()
         {
-            loadingWindow = new LoadingWindow();
+            loadingWindow = new LoadingWindow("выгрузка в Excel");
             loadingWindow.Show();
 
             await Task.Run(() => { ExportToExcel(); });

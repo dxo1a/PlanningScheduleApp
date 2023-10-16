@@ -6,9 +6,10 @@ namespace PlanningScheduleApp
     {
         public bool CanClose { get; set; }
 
-        public LoadingWindow()
+        public LoadingWindow(string task)
         {
             InitializeComponent();
+            TaskTB.Text = $"Выполняется: {task}.";
             ResizeMode = ResizeMode.NoResize;
             App.DisableAllWindowsExcept(this);
             CanClose = false;

@@ -5,13 +5,18 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PlanningScheduleApp"
         mc:Ignorable="d"
-        Title="Изменение" Height="650" Width="650" WindowStyle="None"
+        Title="Изменение" Height="650" Width="650" WindowStyle="None" Icon="Resources/icon.ico"
         xmlns:themes="clr-namespace:StyledWindow.WPF.Themes;assembly=StyledWindow.WPF" xmlns:components="clr-namespace:StyledWindow.WPF.Components;assembly=StyledWindow.WPF"
         Style="{StaticResource StyledWindow}"
         themes:StyledWindow.LanguageButtonVisible="False"
         themes:StyledWindow.ThemeButtonVisible="False"
         themes:StyledWindow.ThemeToggleVisible="False"
-        themes:StyledWindow.TopmostButtonVisible="True">
+        themes:StyledWindow.TopmostButtonVisible="False">
+    <themes:StyledWindow.HeaderContent>
+        <Border Background="Gray" MaxHeight="35" Width="125" CornerRadius="0 0 10 10" Opacity="0.5">
+            <TextBlock Text='АО "Стекломаш"' VerticalAlignment="Center" HorizontalAlignment="Center"/>
+        </Border>
+    </themes:StyledWindow.HeaderContent>
     <Grid>
         <Frame Name="MainFrame"/>
     </Grid>

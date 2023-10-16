@@ -4,8 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PlanningScheduleApp"
+        xmlns:fa="http://schemas.fontawesome.io/icons/"
         mc:Ignorable="d"
-        Title="Выполнение" Height="100" Width="250" WindowStyle="None"
+        Title="Выполнение" Height="100" Width="250" WindowStyle="None" Icon="Resources/icon.ico"
         xmlns:themes="clr-namespace:StyledWindow.WPF.Themes;assembly=StyledWindow.WPF" xmlns:components="clr-namespace:StyledWindow.WPF.Components;assembly=StyledWindow.WPF"
         Style="{StaticResource StyledWindow}"
         themes:StyledWindow.LanguageButtonVisible="False"
@@ -14,6 +15,10 @@
         themes:StyledWindow.TopmostButtonVisible="False"
         >
     <Grid>
-        <TextBlock Text="Выполняется запрос, подождите..." VerticalAlignment="Center" HorizontalAlignment="Center"/>
+        <StackPanel Orientation="Vertical" VerticalAlignment="Center">
+            <TextBlock x:Name="TaskTB" Text="Выполняется запрос, подождите..." VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="16"/>
+            <fa:ImageAwesome Icon="Spinner" Spin="True" SpinDuration="2" Width="35" Height="35" Margin="0 15 0 0"/>
+        </StackPanel>
+        
     </Grid>
 </Window>

@@ -152,6 +152,37 @@
                 </Setter>
             </Style>
 
+            <Style x:Key="RoundedButtonStyle" TargetType="Button">
+                <Setter Property="Template">
+                    <Setter.Value>
+                        <ControlTemplate TargetType="Button">
+                            <Border x:Name="ButtonBorder" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="10 10 10 10">
+                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <Trigger Property="IsEnabled" Value="False">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="Foreground" Value="Black"/>
+                                    <Setter Property="Opacity" Value="0.4"/>
+                                    <Setter Property="BorderBrush" Value="Transparent"/>
+                                </Trigger>
+                                <Trigger Property="IsEnabled" Value="True">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="Foreground" Value="Black"/>
+                                    <Setter Property="Opacity" Value="1"/>
+                                    <Setter Property="BorderBrush" Value="Transparent"/>
+                                </Trigger>
+                                <Trigger Property="IsMouseOver" Value="True">
+                                    <Setter TargetName="ButtonBorder" Property="Background" Value="LightGray" />
+                                    <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="DarkGray" />
+                                    <Setter TargetName="ButtonBorder" Property="BorderThickness" Value="2 2 2 2" />
+                                </Trigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
             <Style x:Key="UpRoundedButtonStyle" TargetType="Button">
                 <Setter Property="Template">
                     <Setter.Value>
@@ -181,34 +212,7 @@
                 </Setter>
             </Style>
 
-            <Style x:Key="RoundedButtonStyle" TargetType="Button">
-                <Setter Property="Template">
-                    <Setter.Value>
-                        <ControlTemplate TargetType="Button">
-                            <Border x:Name="ButtonBorder" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="10">
-                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                            </Border>
-                            <ControlTemplate.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="ButtonBorder" Property="Background" Value="#cacaca" />
-                                    <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="#FF4C4C4C" />
-                                    <Setter TargetName="ButtonBorder" Property="BorderThickness" Value="0" />
-                                    <Setter TargetName="ButtonBorder" Property="Cursor" Value="Hand" />
-                                </Trigger>
-                                <Trigger Property="IsMouseOver" Value="False">
-                                    <Setter TargetName="ButtonBorder" Property="Background" Value="Transparent" />
-                                    <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="#FF4C4C4C" />
-                                    <Setter TargetName="ButtonBorder" Property="BorderThickness" Value="0" />
-                                </Trigger>
-                                <Trigger Property="IsEnabled" Value="False">
-                                    <Setter Property="Background" Value="Gray"/>
-                                    <Setter Property="Foreground" Value="Black"/>
-                                </Trigger>
-                            </ControlTemplate.Triggers>
-                        </ControlTemplate>
-                    </Setter.Value>
-                </Setter>
-            </Style>
+            
 
             <Style x:Key="RightRoundedButtonStyle" TargetType="Button">
                 <Setter Property="Template">
