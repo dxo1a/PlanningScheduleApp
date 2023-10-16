@@ -77,3 +77,4 @@ C:\Users\it01\Desktop\PlanningScheduleApp\obj\Release\PlanningScheduleApp.csproj
 C:\Users\it01\Desktop\PlanningScheduleApp\obj\Release\PlanningScheduleApp.csproj.CopyComplete
 C:\Users\it01\Desktop\PlanningScheduleApp\obj\Release\PlanningScheduleApp.exe
 C:\Users\it01\Desktop\PlanningScheduleApp\obj\Release\PlanningScheduleApp.pdb
+C:\Users\it01\Desktop\PlanningScheduleApp\bin\Release\config.json

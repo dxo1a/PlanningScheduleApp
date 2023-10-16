@@ -26,9 +26,9 @@
             <RowDefinition Height="50"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="20"/>
+            <ColumnDefinition Width="10"/>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="20"/>
+            <ColumnDefinition Width="10"/>
         </Grid.ColumnDefinitions>
         <DataGrid Name="FreeHoursDataGrid" Grid.Column="1" Grid.Row="1" AutoGenerateColumns="False" CanUserAddRows="False">
             <DataGrid.Columns>
@@ -40,7 +40,7 @@
             <TextBlock Text="Диапазон дат" FontSize="14" HorizontalAlignment="Center"/>
             <StackPanel Orientation="Horizontal">
                 <StackPanel Orientation="Vertical">
-                    <DatePicker Name="StartDP" Margin="5 0" Width="100"/>
+                    <DatePicker Name="StartDP" Margin="5 0" Width="100" SelectedDateChanged="StartDP_SelectedDateChanged"/>
                     <TextBlock Text="Начальная дата" FontSize="10" Foreground="Gray" TextAlignment="Center"/>
                 </StackPanel>
                 <StackPanel Orientation="Vertical">
@@ -49,9 +49,20 @@
                 </StackPanel>
             </StackPanel>
         </StackPanel>
+        <Button Name="OpenExportedFolderBtn" Width="45" Height="45" BorderBrush="Transparent" ToolTip="Открыть папку" Style="{StaticResource RoundedButtonStyle}" Grid.Row="3" Grid.Column="1" HorizontalAlignment="Left" Click="OpenExportedFolderBtn_Click" IsEnabled="False" Margin="5 0">
+            <StackPanel Orientation="Vertical">
+                <Image Source="/Resources/icons/misc/folder.ico" MaxWidth="30" MaxHeight="30"/>
+                <TextBlock Text="открыть" FontSize="10" Foreground="Gray"/>
+            </StackPanel>
+            
+        </Button>
         <Button Name="ExportBtn" Width="100" Height="30" Content="Выгрузить" Click="ExportBtn_Click" Grid.Row="3" Grid.Column="1" Style="{StaticResource RoundedButtonStyle}" FontSize="12"/>
         <Button Name="ExportToBitrix24Btn" Width="45" Height="45" BorderBrush="Transparent" ToolTip="Bitrix24" Style="{StaticResource RoundedButtonStyle}" Grid.Row="3" Grid.Column="1" HorizontalAlignment="Right" Click="ExportToBitrix24Btn_Click" IsEnabled="False" Margin="5 0">
-            <Image Source="/Resources/icons/software/bitrix.ico" MaxWidth="30" MaxHeight="30"/>
+            <StackPanel Orientation="Vertical">
+                <Image Source="/Resources/icons/software/bitrix.ico" MaxWidth="30" MaxHeight="30"/>
+                <TextBlock Text="Bitrix24" FontSize="10" Foreground="Gray"/>
+            </StackPanel>
+            
         </Button>
     </Grid>
 </Window>

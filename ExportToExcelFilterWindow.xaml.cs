@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using PlanningScheduleApp.Models;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Data.SqlClient;
 using System.Drawing;
 using System.IO;
@@ -11,7 +12,9 @@ using System.Net.Http;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Web.UI.WebControls;
 using System.Windows;
+using System.Windows.Controls;
 using Excel = Microsoft.Office.Interop.Excel;
 
 namespace PlanningScheduleApp
@@ -19,7 +22,6 @@ namespace PlanningScheduleApp
     public partial class ExportToExcelFilterWindow : System.Windows.Window
     {
         DateTime StartDate, FinishDate;
-        double filterValue = 0;
 
         List<StaffModel> AllStaffList = new List<StaffModel>();
         List<StaffModel> TotalHours = new List<StaffModel>();
@@ -35,14 +37,12 @@ namespace PlanningScheduleApp
         #region Переменные для Bitrix24
 
         public static readonly string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-        string webhookUrl = "https://steklm.bitrix24.ru/rest/771/qmsi75y8cfdg2vv1/";
+        
         string filePath, saveFileName;
-        string unloadingDate, unloadingTime;
+        string unloadingDate, unloadingTime, webhook;
 
-        int selectedChat = 1222;                       // ID диалога (если чат, то заменить DIALOG_ID на CHAT_ID в SendMessageToChatWebhook.messageData)
-        int selectedFolder = 305175;                  // ID папки (личная 305001, сменные 305175)
-        string selectedMessageText = "Загруженность сменных заданий";
-        string selectedUrlText = "Таблица со сменными заданиями";
+        int selectedChat, selectedFolder, chatType;
+        string selectedMessageText, selectedUrlText;
         //string selectedDescriptionText = "Описание";
 
         #endregion
@@ -50,7 +50,17 @@ namespace PlanningScheduleApp
         public ExportToExcelFilterWindow()
         {
             InitializeComponent();
-            
+            SettingsManager settingsManager = new SettingsManager();
+            AppSettings settings = settingsManager.LoadSettings();
+
+            webhook = settings.webhook;
+            chatType = settings.chatType;
+            selectedChat = settings.chatid;                       // ID диалога (если чат, то заменить DIALOG_ID на CHAT_ID в SendMessageToChatWebhook.messageData)
+            selectedFolder = settings.folderid;                  // ID папки (личная 305001, сменные 305175)
+            selectedMessageText = "Загруженность сменных заданий";
+            selectedUrlText = "Таблица со сменными заданиями";
+
+
             AllStaffList = Odb.db.Database.SqlQuery<StaffModel>($"select distinct b.FIO as FIO, LTRIM(b.Tabel) as Tabel, a.WorkingHours, a.DTA, a.STAFF_ID, ID_Schedule from SerialNumber.dbo.Staff_Schedule as a left join SerialNumber.dbo.StaffView as b on a.STAFF_ID = b.STAFF_ID where b.VALID = 1 ORDER BY a.DTA DESC").ToList();
         }
 
@@ -76,20 +86,46 @@ namespace PlanningScheduleApp
             loadingWindow.Close();
         }
 
+        private void StartDP_SelectedDateChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            if (FinishDP.SelectedDate == null)
+                FinishDP.SelectedDate = StartDP.SelectedDate;
+        }
+
+        private void OpenExportedFolderBtn_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start($"{documentsPath}\\График сотрудников");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Не удалось открыть папку: {ex.Message}", "Ошибка", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         private void FinishDP_SelectedDateChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
         {
-            staffModels = new List<StaffModel>();
-            if (StartDP.SelectedDate.HasValue && FinishDP.SelectedDate.HasValue)
+            if (FinishDP.SelectedDate < StartDP.SelectedDate)
             {
-                StartDate = StartDP.SelectedDate ?? DateTime.MinValue;
-                FinishDate = FinishDP.SelectedDate ?? DateTime.MaxValue;
-
-                for (DateTime date = StartDate; date <= FinishDate; date = date.AddDays(1))
-                {
-                    staffModels.Add(new StaffModel { DTA = date, AcceptableFreeHours = 0 }); // Устанавливаем начальное значение для AcceptableFreeHours
-                }
+                FinishDP.SelectedDate = StartDP.SelectedDate;
+                MessageBox.Show("Конечная дата не может быть раньше начальной!", "Дата", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
-            FreeHoursDataGrid.ItemsSource = staffModels;
+            else
+            {
+                staffModels = new List<StaffModel>();
+                if (StartDP.SelectedDate.HasValue && FinishDP.SelectedDate.HasValue)
+                {
+                    StartDate = StartDP.SelectedDate ?? DateTime.MinValue;
+                    FinishDate = FinishDP.SelectedDate ?? DateTime.MaxValue;
+
+                    for (DateTime date = StartDate; date <= FinishDate; date = date.AddDays(1))
+                    {
+                        staffModels.Add(new StaffModel { DTA = date, AcceptableFreeHours = 0 }); // Устанавливаем начальное значение для AcceptableFreeHours
+                    }
+                }
+                FreeHoursDataGrid.ItemsSource = staffModels;
+            } 
         }
 
         private void ExportToBitrix24Btn_Click(object sender, RoutedEventArgs e)
@@ -195,7 +231,7 @@ namespace PlanningScheduleApp
             Excel.Application excelApp = new Excel.Application();
             try
             {
-                excelApp.DisplayAlerts = false;
+                excelApp.DisplayAlerts = true;
                 excelApp.Visible = true;
 
                 Workbook workbook = excelApp.Workbooks.Add();
@@ -311,20 +347,31 @@ namespace PlanningScheduleApp
                 // Ставится дата и время на момент сохранения документа
                 unloadingDate = DateTime.Now.ToShortDateString();
                 unloadingTime = DateTime.Now.ToString("HH_mm");
-                filePath = $"{documentsPath}\\Общая загруженность сотрудников ({unloadingDate} {unloadingTime}).xlsx";
+
+                string folderPath = $"{documentsPath}\\График сотрудников";
+                filePath = $"{documentsPath}\\График сотрудников\\Общая загруженность сотрудников ({unloadingDate} {unloadingTime}).xlsx";
+
+                if (!Directory.Exists(folderPath))
+                    Directory.CreateDirectory(folderPath);
 
                 workbook.SaveAs(filePath);
 
-                Dispatcher.Invoke(() => { ExportToBitrix24Btn.IsEnabled = true; });
+                Dispatcher.Invoke(() =>
+                {
+                    ExportToBitrix24Btn.IsEnabled = true;
+                    OpenExportedFolderBtn.IsEnabled = true;
+                });
                 saveFileName = $"Общая загруженность сотрудников ({unloadingDate} {unloadingTime}).xlsx";
+
+                Marshal.ReleaseComObject(worksheet2);
+                Marshal.ReleaseComObject(worksheet1);
+                Marshal.ReleaseComObject(workbook);
+                Marshal.ReleaseComObject(excelApp);
+                
             }
             catch (Exception ex)
             {
                 throw new Exception($"Ошибка: {ex}");
-            }
-            finally
-            {
-                Marshal.ReleaseComObject(excelApp);
             }
             #endregion
         }
@@ -362,7 +409,7 @@ namespace PlanningScheduleApp
                 Console.WriteLine($"{jsonRequestData}");
                 var content = new StringContent(jsonRequestData, Encoding.UTF8, "application/json");
 
-                HttpResponseMessage response = await client.PostAsync($"{webhookUrl}disk.folder.uploadfile.json", content);
+                HttpResponseMessage response = await client.PostAsync($"{webhook}disk.folder.uploadfile.json", content);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -395,7 +442,7 @@ namespace PlanningScheduleApp
         {
             using (HttpClient client = new HttpClient())
             {
-                HttpResponseMessage response = await client.GetAsync($"{webhookUrl}disk.file.get.json?id={fileId}");
+                HttpResponseMessage response = await client.GetAsync($"{webhook}disk.file.get.json?id={fileId}");
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -423,8 +470,6 @@ namespace PlanningScheduleApp
             }
         }
 
-        
-
         public async Task<string> SendMessageToChatWebhook(int chatId, string message, string nameForUrl, int fileId)
         {
             string fileUrl = await GetFileUrlById(fileId);
@@ -437,27 +482,39 @@ namespace PlanningScheduleApp
                     {
                         LINK = new
                         {
-                            PREVIEW = fileUrl,
-                            WIDTH = 1000,
-                            HEIGHT = 638,
+                            //чтобы получить ссылку на изображение надо получить публичную в битриксе, а потом пкм->открыть изображение в новой вкладке
+                            PREVIEW = "https://bitrix24public.com/steklm.bitrix24.ru/docs/pub/84ca3be9cf47ecddbe03382923800783/showPreview/?&token=51i2y7x57cuw",
                             NAME = nameForUrl,
-                            LINK = fileUrl
+                            LINK = fileUrl,
                         }
                     }
                 };
 
-                var messageData = new
+                string jsonMessageData;
+                if (chatType == 0)
                 {
-                    DIALOG_ID = chatId.ToString(),
-                    //CHAT_ID = chatId.ToString(), если чат
-                    MESSAGE = message,
-                    ATTACH = attachments
-                };
-
-                string jsonMessageData = JsonConvert.SerializeObject(messageData);
+                    var messageData = new
+                    {
+                        DIALOG_ID = chatId.ToString(),
+                        MESSAGE = message,
+                        ATTACH = attachments
+                    };
+                    jsonMessageData = JsonConvert.SerializeObject(messageData);
+                }
+                else
+                {
+                    var messageData = new
+                    {
+                        CHAT_ID = chatId.ToString(),
+                        MESSAGE = message,
+                        ATTACH = attachments
+                    };
+                    jsonMessageData = JsonConvert.SerializeObject(messageData);
+                }
+                
                 var content = new StringContent(jsonMessageData, Encoding.UTF8, "application/json");
 
-                HttpResponseMessage response = await client.PostAsync($"{webhookUrl}im.message.add.json", content);
+                HttpResponseMessage response = await client.PostAsync($"{webhook}im.message.add.json", content);
 
                 if (response.IsSuccessStatusCode)
                 {

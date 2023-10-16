@@ -1,0 +1,8 @@
+{
+  "chatid": 797,
+  "folderid": 305001,
+  "webhook": "https://steklm.bitrix24.ru/rest/797/jodugywyhnzu9ftm/",
+
+  // 0 - диалог, 1 - чат/группа
+  "chatType": 0
+}

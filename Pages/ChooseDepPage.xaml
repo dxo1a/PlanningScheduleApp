@@ -18,7 +18,6 @@
                 <Button x:Name="ClearBtn" Width="30" Height="30" HorizontalAlignment="Right" Margin="-20 0 5 0" Style="{StaticResource ClearButton}"  BorderBrush="Transparent" BorderThickness="0" Click="ClearBtn_Click" VerticalAlignment="Top">
                     <Image Source="/Resources/icons/misc/cross_1.ico" MaxWidth="30" MaxHeight="30" ToolTip="Очистить" Opacity="0.5"/>
                 </Button>
-                <!--<DatePicker Name="WorkingDateDP" SelectedDateChanged="WorkingDateDP_SelectedDateChanged" IsEnabled="False" VerticalAlignment="Top" Margin="0 2 0 0"/>-->
             </StackPanel>
         </StackPanel>
     </Grid>
