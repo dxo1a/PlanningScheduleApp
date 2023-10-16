@@ -155,7 +155,7 @@ namespace PlanningScheduleApp.Pages
             }
             else
             {
-                MessageBox.Show("Выберите записи для удаления.", "Предупрждение", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Выберите записи для удаления.", "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 

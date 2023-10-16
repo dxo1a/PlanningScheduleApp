@@ -12,8 +12,8 @@
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="Отдел: " FontSize="16"/>
                 <StackPanel Orientation="Vertical">
-                    <TextBox x:Name="SearchDepTBX" MinWidth="250" Width="auto" MaxWidth="350" FontSize="16" TextChanged="SearchDepTBX_TextChanged" TextAlignment="Center" Margin="0 0 -10 0" Style="{StaticResource TBXStyle}" BorderBrush="LightGray" GotFocus="SearchDepTBX_GotFocus" LostFocus="SearchDepTBX_LostFocus"/>
-                    <ListView Name="DepLV" MinWidth="150" Width="auto" MaxWidth="200" MinHeight="100" MaxHeight="200" Height="150" Visibility="Collapsed" Background="LightGray" Panel.ZIndex="2" Grid.RowSpan="3" Style="{x:Null}" SelectionMode="Single" SelectionChanged="DepLV_SelectionChanged"/>
+                    <TextBox x:Name="SearchDepTBX" MinWidth="250" Width="auto" MaxWidth="410" FontSize="16" TextChanged="SearchDepTBX_TextChanged" TextAlignment="Center" Margin="0 0 -10 0" Style="{StaticResource TBXStyle}" BorderBrush="LightGray" GotFocus="SearchDepTBX_GotFocus" LostFocus="SearchDepTBX_LostFocus"/>
+                    <ListView Name="DepLV" MinWidth="150" Width="auto" MaxWidth="410" MinHeight="100" MaxHeight="200" Height="150" Visibility="Collapsed" Background="LightGray" Panel.ZIndex="2" Grid.RowSpan="3" Style="{x:Null}" SelectionMode="Single" SelectionChanged="DepLV_SelectionChanged"/>
                 </StackPanel>
                 <Button x:Name="ClearBtn" Width="30" Height="30" HorizontalAlignment="Right" Margin="-20 0 5 0" Style="{StaticResource ClearButton}"  BorderBrush="Transparent" BorderThickness="0" Click="ClearBtn_Click" VerticalAlignment="Top">
                     <Image Source="/Resources/icons/misc/cross_1.ico" MaxWidth="30" MaxHeight="30" ToolTip="Очистить" Opacity="0.5"/>

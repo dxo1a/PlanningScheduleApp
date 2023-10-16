@@ -54,7 +54,7 @@
         </StackPanel>
         <DataGrid x:Name="StaffDG" SelectionMode="Extended" AutoGenerateColumns="False" CanUserAddRows="False" Grid.Row="1" Grid.Column="1" Margin="5 0 0 5" CanUserDeleteRows="False" Style="{StaticResource DataGridOwn}" SelectionChanged="StaffDG_SelectionChanged" PreviewKeyDown="StaffDG_PreviewKeyDown">
             <DataGrid.Columns>
-                <DataGridTextColumn Binding="{Binding StaffFIOTabel}" Header="Рабочие часы" Width="*" IsReadOnly="True"/>
+                <DataGridTextColumn Binding="{Binding StaffFIOTabel}" Header="Сотрудник" Width="*" IsReadOnly="True"/>
                 <DataGridTextColumn Binding="{Binding WorkingHours}" Header="Рабочие часы" Width="*" IsReadOnly="True"/>
                 <DataGridTextColumn Binding="{Binding DTA, Converter={StaticResource DateWithDayConverter}}" Header="Дата" Width="*" IsReadOnly="True"/>
             </DataGrid.Columns>

@@ -10,25 +10,17 @@ namespace PlanningScheduleApp.Pages
 {
     public partial class ChooseDepPage : Page
     {
-        //List<StaffModel> StaffList = new List<StaffModel>();
         List<DepModel> DepList = new List<DepModel>();
         List<StaffModel> StaffPositionsList = new List<StaffModel>();
 
-        //StaffModel SelectedStaff { get; set; }
         DepModel SelectedDep { get; set; }
-
-        //DateTime SelectedDate;
 
         public ChooseDepPage()
         {
             InitializeComponent();
 
-            //WorkingDateDP.SelectedDate = DateTime.Today;
-
-            //StaffList = Odb.db.Database.SqlQuery<StaffModel>(@"SELECT DISTINCT FIO, Tabel, STAFF_ID FROM [SerialNumber].[dbo].[StaffView] WHERE Valid = 1 AND Position != '(не определена)'").ToList();
-            //StaffLV.ItemsSource = StaffList;
             DepList = Odb.db.Database.SqlQuery<DepModel>("SELECT DISTINCT Position FROM SerialNumber.dbo.StaffView").ToList();
-            DepLV.ItemsSource = DepList;
+            DepLV.ItemsSource = DepList.OrderBy(u => u.Position);
         }
 
         private void SearchDepTBX_TextChanged(object sender, TextChangedEventArgs e)
@@ -45,27 +37,6 @@ namespace PlanningScheduleApp.Pages
             deps = DepList.Where(u => u.Position.ToLower().Contains(txt.ToLower())).ToList();
             DepLV.ItemsSource = deps;
         }
-
-        
-
-        //private void StaffLV_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        //{
-        //    SelectedStaff = (StaffModel)StaffLV.SelectedItem;
-        //    if (SelectedStaff == null)
-        //        return;
-        //    SearchStaffTBX.Text = $"{SelectedStaff.FIO} ({SelectedStaff.Tabel})";
-        //    FIOTB.Text = SearchStaffTBX.Text;
-        //    StaffPositionsList = Odb.db.Database.SqlQuery<StaffModel>(@"SELECT DISTINCT TOP(1) Position FROM [SerialNumber].[dbo].[StaffView] WHERE LTRIM(Tabel)=@tabel", new SqlParameter("tabel", SelectedStaff.Tabel)).ToList();
-        //    PositionTB.Text = string.Join(", ", StaffPositionsList.Select(item => item.Position));
-        //    InfoStaffSP.Visibility = Visibility.Visible;
-        //    MainWindow mainWindow = Window.GetWindow(this) as MainWindow;
-        //    if (mainWindow != null)
-        //    {
-        //        //mainWindow.MainFrame.Navigate(new SelectedStaffPage(SelectedStaff/*, SelectedDate*/));
-        //        mainWindow.EditFrame.Navigate(new AddSchedulePage(SelectedStaff));
-        //    }
-        //    ChooseStaffSP.Visibility = Visibility.Collapsed;
-        //}
 
         private void SearchDepTBX_LostFocus(object sender, RoutedEventArgs e)
         {

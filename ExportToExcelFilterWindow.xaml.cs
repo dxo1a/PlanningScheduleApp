@@ -35,15 +35,15 @@ namespace PlanningScheduleApp
         #region Переменные для Bitrix24
 
         public static readonly string documentsPath = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-        string webhookUrl = "https://steklm.bitrix24.ru/rest/797/jodugywyhnzu9ftm/";
+        string webhookUrl = "https://steklm.bitrix24.ru/rest/771/qmsi75y8cfdg2vv1/";
         string filePath, saveFileName;
         string unloadingDate, unloadingTime;
 
-        int selectedChat = 634;                       // ID диалога (если чат, то заменить DIALOG_ID на CHAT_ID в SendMessageToChatWebhook.messageData)
-        int selectedFolder = 305001;                  // ID папки (личная 305001, сменные 305175)
-        string selectedMessageText = "Текст сообщения";
-        string selectedUrlText = "Текст ссылки";
-        string selectedDescriptionText = "Описание";
+        int selectedChat = 1222;                       // ID диалога (если чат, то заменить DIALOG_ID на CHAT_ID в SendMessageToChatWebhook.messageData)
+        int selectedFolder = 305175;                  // ID папки (личная 305001, сменные 305175)
+        string selectedMessageText = "Загруженность сменных заданий";
+        string selectedUrlText = "Таблица со сменными заданиями";
+        //string selectedDescriptionText = "Описание";
 
         #endregion
 
@@ -94,7 +94,7 @@ namespace PlanningScheduleApp
 
         private void ExportToBitrix24Btn_Click(object sender, RoutedEventArgs e)
         {
-            ExportToBitrix24(filePath, selectedFolder, selectedChat, selectedMessageText, selectedUrlText, selectedDescriptionText);
+            ExportToBitrix24(filePath, selectedFolder, selectedChat, selectedMessageText, selectedUrlText);
         }
 
         private void ExportToExcel()
@@ -318,6 +318,10 @@ namespace PlanningScheduleApp
                 Dispatcher.Invoke(() => { ExportToBitrix24Btn.IsEnabled = true; });
                 saveFileName = $"Общая загруженность сотрудников ({unloadingDate} {unloadingTime}).xlsx";
             }
+            catch (Exception ex)
+            {
+                throw new Exception($"Ошибка: {ex}");
+            }
             finally
             {
                 Marshal.ReleaseComObject(excelApp);
@@ -325,14 +329,14 @@ namespace PlanningScheduleApp
             #endregion
         }
 
-        private async void ExportToBitrix24(string filePath, int folder, int chat, string messageText, string urlText, string descriptionText)
+        private async void ExportToBitrix24(string filePath, int folder, int chat, string messageText, string urlText)
         {
             var result = MessageBox.Show("Выгрузить файл? (Файл будет загружен на диск и отправлен в группу)", "Bitrix24", MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (result == MessageBoxResult.Yes)
             {
                 int fileId = await UploadFileToBitrix24(filePath, folder);
 
-                await SendMessageToChatWebhook(chat, messageText, urlText, descriptionText, fileId);
+                await SendMessageToChatWebhook(chat, messageText, urlText, fileId);
             }
         }
 
@@ -421,7 +425,7 @@ namespace PlanningScheduleApp
 
         
 
-        public async Task<string> SendMessageToChatWebhook(int chatId, string message, string nameForUrl, string description, int fileId)
+        public async Task<string> SendMessageToChatWebhook(int chatId, string message, string nameForUrl, int fileId)
         {
             string fileUrl = await GetFileUrlById(fileId);
 
@@ -437,7 +441,6 @@ namespace PlanningScheduleApp
                             WIDTH = 1000,
                             HEIGHT = 638,
                             NAME = nameForUrl,
-                            DESC = description,
                             LINK = fileUrl
                         }
                     }
