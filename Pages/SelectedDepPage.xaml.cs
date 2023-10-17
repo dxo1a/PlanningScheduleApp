@@ -22,19 +22,13 @@ namespace PlanningScheduleApp.Pages
         public SelectedDepPage(DepModel selectedDep)
         {
             InitializeComponent();
+            FrameApp.SetCurrentMainFrame(FrameApp.FrameMain);
+            UpdateGrid();
 
             SelectedDep = selectedDep;
-
-            FrameApp.SetCurrentMainFrame(FrameApp.FrameMain);
-
-            UpdateGrid();
-            AssignCMB();
         }
 
-        private void StaffRemoveBtn_Click(object sender, RoutedEventArgs e)
-        {
-            DeleteRow();
-        }
+        private void StaffRemoveBtn_Click(object sender, RoutedEventArgs e) => DeleteRow();
 
         private void StaffDG_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -51,10 +45,7 @@ namespace PlanningScheduleApp.Pages
             }
         }
 
-        private void StaffRefreshBtn_Click(object sender, RoutedEventArgs e)
-        {
-            UpdateGrid();
-        }
+        private void StaffRefreshBtn_Click(object sender, RoutedEventArgs e) => UpdateGrid();
 
         private void UpdateGrid()
         {
@@ -63,13 +54,11 @@ namespace PlanningScheduleApp.Pages
                 StaffDG.ItemsSource = StaffList;
 
             StaffDG.SelectedItem = null;
+            AssignCMB();
         }
 
         #region Search Functionality
-        private void SearchTBX_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e)
-        {
-            Search();
-        }
+        private void SearchTBX_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e) => Search();
 
         private void Search()
         {
@@ -100,10 +89,7 @@ namespace PlanningScheduleApp.Pages
             StaffDG.ItemsSource = staff;
         }
 
-        private void filterCMB_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
-        {
-            SearchTBX.Clear();
-        }
+        private void filterCMB_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e) => SearchTBX.Clear();
 
         public void AssignCMB()
         {

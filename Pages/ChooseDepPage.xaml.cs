@@ -1,7 +1,5 @@
 ﻿using PlanningScheduleApp.Models;
-using System;
 using System.Collections.Generic;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
@@ -23,10 +21,7 @@ namespace PlanningScheduleApp.Pages
             DepLV.ItemsSource = DepList.OrderBy(u => u.Position);
         }
 
-        private void SearchDepTBX_TextChanged(object sender, TextChangedEventArgs e)
-        {
-            search();
-        }
+        private void SearchDepTBX_TextChanged(object sender, TextChangedEventArgs e) => search();
 
         private void search()
         {
@@ -38,15 +33,9 @@ namespace PlanningScheduleApp.Pages
             DepLV.ItemsSource = deps;
         }
 
-        private void SearchDepTBX_LostFocus(object sender, RoutedEventArgs e)
-        {
-            DepLV.Visibility = Visibility.Collapsed;
-        }
+        private void SearchDepTBX_LostFocus(object sender, RoutedEventArgs e) => DepLV.Visibility = Visibility.Collapsed;
 
-        private void SearchDepTBX_GotFocus(object sender, RoutedEventArgs e)
-        {
-            DepLV.Visibility = Visibility.Visible;
-        }
+        private void SearchDepTBX_GotFocus(object sender, RoutedEventArgs e) => DepLV.Visibility = Visibility.Visible;
 
         private void DepLV_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
@@ -55,10 +44,7 @@ namespace PlanningScheduleApp.Pages
             {
                 SearchDepTBX.Text = $"{SelectedDep.Position}";
                 MainWindow mainWindow = Window.GetWindow(this) as MainWindow;
-                if (mainWindow != null)
-                {
-                    mainWindow.MainFrame.Navigate(new SelectedDepPage(SelectedDep));
-                }
+                mainWindow.MainFrame.Navigate(new SelectedDepPage(SelectedDep));
             }
         }
 
