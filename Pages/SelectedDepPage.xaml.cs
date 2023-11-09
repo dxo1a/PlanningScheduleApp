@@ -218,8 +218,42 @@ namespace PlanningScheduleApp.Pages
                 }
                 else if (!SelectedTemplate.isFlexible)
                 {
+                    DateTime selectedStartDate = ScheduleStartDP.SelectedDate ?? DateTime.Now;
+                    DateTime selectedFinishDate = ScheduleEndDP.SelectedDate ?? DateTime.Now;
+
+
+                    // Проверка, является ли текущий день рабочим днем
+                    //if (currentDay.DayOfWeek != DayOfWeek.Saturday && currentDay.DayOfWeek != DayOfWeek.Sunday) // если этот день не является isRestingDay (нужно заранее сформировать и получить список дней типа ScheduleTemplateModel там и будет isRestingDay
+                    //{
+                    //    DateTime workBegin = new DateTime(currentDay.Year, currentDay.Month, currentDay.Day, combinedStartDateTime.Hour, combinedStartDateTime.Minute, 0);
+                    //    DateTime workEnd = new DateTime(currentDay.Year, currentDay.Month, currentDay.Day, combinedFinishDateTime.Hour, combinedFinishDateTime.Minute, 0);
+                    //
+                    //    Odb.db.Database.ExecuteSqlCommand("INSERT INTO Zarplats.dbo.Staff_Schedule(WorkBegin, WorkEnd, DTA, STAFF_ID, LunchTime, WorkingHours) VALUES (@workbegin, @workend, @dta, @staffid, @lunchtime, @workinghours)",
+                    //        new SqlParameter("workbegin", workBegin), new SqlParameter("workend", workEnd), new SqlParameter("dta", currentDay.Date), new SqlParameter("staffid", SelectedStaff.STAFF_ID), new SqlParameter("lunchtime", LunchTime), new SqlParameter("workinghours", WorkingHours));
+                    //}
+                }
+            }
+        }
+
+        IEnumerable<DateTime> GenerateStaticSchedule(DateTime start, DateTime end, int workdays, int restdays)
+        {
+            int daysCountInSchedule = Odb.db.Database.SqlQuery<int>("select count(*) from Schedule_Template as template left join Schedule_StaticDays as staticc on template.ID_Template = staticc.Template_ID where template.isFlexible = 0").SingleOrDefault();
+            int workingDaysCountInSchedule = Odb.db.Database.SqlQuery<int>("select count(*) from Schedule_Template as template left join Schedule_StaticDays as staticc on template.ID_Template = staticc.Template_ID where template.isFlexible = 0 and isRestingDay = 0").SingleOrDefault();
+            DateTime current = start;
+            while (current <= end)
+            {
+                for (int i = 0; i < daysCountInSchedule; i++)
+                {
+                    for (int j = 0; j < workingDaysCountInSchedule; i++)
+                    {
+                        if (current > end) yield break;
+                        yield return current;
+                        current = current.AddDays(1);
+                    }
+
 
                 }
+                current = current.AddDays(SelectedTemplate.RestingDaysCount);
             }
         }
 
@@ -322,7 +356,7 @@ namespace PlanningScheduleApp.Pages
                 while (currentDay <= selectedFinishDate)
                 {
                     // Проверка, является ли текущий день рабочим днем (пн-пт)
-                    if (currentDay.DayOfWeek != DayOfWeek.Saturday && currentDay.DayOfWeek != DayOfWeek.Sunday)
+                    if (currentDay.DayOfWeek != DayOfWeek.Saturday && currentDay.DayOfWeek != DayOfWeek.Sunday) // если этот день не является isRestingDay (нужно заранее сформировать и получить список дней типа ScheduleTemplateModel там и будет isRestingDay
                     {
                         DateTime workBegin = new DateTime(currentDay.Year, currentDay.Month, currentDay.Day, combinedStartDateTime.Hour, combinedStartDateTime.Minute, 0);
                         DateTime workEnd = new DateTime(currentDay.Year, currentDay.Month, currentDay.Day, combinedFinishDateTime.Hour, combinedFinishDateTime.Minute, 0);
