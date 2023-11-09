@@ -41,6 +41,9 @@
     <ApplicationIcon>icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Bitrix24Export">
+      <HintPath>..\..\Bitrix24Export\bin\Debug\Bitrix24Export.dll</HintPath>
+    </Reference>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
       <HintPath>packages\EntityFramework.6.4.4\lib\net45\EntityFramework.dll</HintPath>
     </Reference>
@@ -126,6 +129,21 @@
     <Reference Include="WindowsBase" />
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
+    <Reference Include="Xceed.Wpf.AvalonDock, Version=4.5.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
+      <HintPath>packages\Extended.Wpf.Toolkit.4.5.1\lib\net40\Xceed.Wpf.AvalonDock.dll</HintPath>
+    </Reference>
+    <Reference Include="Xceed.Wpf.AvalonDock.Themes.Aero, Version=4.5.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
+      <HintPath>packages\Extended.Wpf.Toolkit.4.5.1\lib\net40\Xceed.Wpf.AvalonDock.Themes.Aero.dll</HintPath>
+    </Reference>
+    <Reference Include="Xceed.Wpf.AvalonDock.Themes.Metro, Version=4.5.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
+      <HintPath>packages\Extended.Wpf.Toolkit.4.5.1\lib\net40\Xceed.Wpf.AvalonDock.Themes.Metro.dll</HintPath>
+    </Reference>
+    <Reference Include="Xceed.Wpf.AvalonDock.Themes.VS2010, Version=4.5.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
+      <HintPath>packages\Extended.Wpf.Toolkit.4.5.1\lib\net40\Xceed.Wpf.AvalonDock.Themes.VS2010.dll</HintPath>
+    </Reference>
+    <Reference Include="Xceed.Wpf.Toolkit, Version=4.5.0.0, Culture=neutral, PublicKeyToken=3e4669d2f30244f4, processorArchitecture=MSIL">
+      <HintPath>packages\Extended.Wpf.Toolkit.4.5.1\lib\net40\Xceed.Wpf.Toolkit.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <ApplicationDefinition Include="App.xaml">
@@ -135,6 +153,8 @@
     <Compile Include="AppSettings.cs" />
     <Compile Include="Converters\DateWithDayConverter.cs" />
     <Compile Include="Converters\DayOfWeekConverter.cs" />
+    <Compile Include="Converters\IsStringNonemptyConverter.cs" />
+    <Compile Include="Converters\MinutesConverter.cs" />
     <Compile Include="Converters\ZeroToEmptyConverter.cs" />
     <Compile Include="ExportToExcelFilterWindow.xaml.cs">
       <DependentUpon>ExportToExcelFilterWindow.xaml</DependentUpon>
@@ -145,16 +165,25 @@
     <Compile Include="Models\AddScheduleViewModel.cs" />
     <Compile Include="Models\DateViewModel.cs" />
     <Compile Include="Models\ScheduleModel.cs" />
-    <Compile Include="Pages\StaffAddPage.xaml.cs">
-      <DependentUpon>StaffAddPage.xaml</DependentUpon>
+    <Compile Include="Pages\DeprecatedStaffAddPage.xaml.cs">
+      <DependentUpon>DeprecatedStaffAddPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Pages\StaffEditPage.xaml.cs">
-      <DependentUpon>StaffEditPage.xaml</DependentUpon>
+    <Compile Include="Pages\DeprecatedStaffEditPage.xaml.cs">
+      <DependentUpon>DeprecatedStaffEditPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ScheduleAddWindow.xaml.cs">
+      <DependentUpon>ScheduleAddWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ScheduleEditWindow.xaml.cs">
+      <DependentUpon>ScheduleEditWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ScheduleManageWindow.xaml.cs">
+      <DependentUpon>ScheduleManageWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="SearchInDatagrid.cs" />
     <Compile Include="SettingsManager.cs" />
-    <Compile Include="StaffAddOrEditWindow.xaml.cs">
-      <DependentUpon>StaffAddOrEditWindow.xaml</DependentUpon>
+    <Compile Include="DeprecatedStaffAddOrEditWindow.xaml.cs">
+      <DependentUpon>DeprecatedStaffAddOrEditWindow.xaml</DependentUpon>
     </Compile>
     <Page Include="ExportToExcelFilterWindow.xaml">
       <SubType>Designer</SubType>
@@ -185,11 +214,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Pages\StaffAddPage.xaml">
+    <Page Include="Pages\DeprecatedStaffAddPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Pages\StaffEditPage.xaml">
+    <Page Include="Pages\DeprecatedStaffEditPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -201,7 +230,19 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="StaffAddOrEditWindow.xaml">
+    <Page Include="ScheduleAddWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ScheduleEditWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ScheduleManageWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="DeprecatedStaffAddOrEditWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

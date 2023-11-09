@@ -4,10 +4,43 @@
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
       xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
       xmlns:local="clr-namespace:PlanningScheduleApp.Pages"
+      xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+      xmlns:s="clr-namespace:System;assembly=mscorlib"
       mc:Ignorable="d" 
       d:DesignHeight="650" d:DesignWidth="1200"
       Title="SelectedDepPage">
-
+    <Page.Resources>
+        <Style x:Key="TextBoxWithToolTipStyle" TargetType="TextBox" BasedOn="{StaticResource TBXStyle}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+                            <Grid>
+                                <ScrollViewer x:Name="PART_ContentHost" Margin="2"/>
+                                <TextBlock x:Name="PlaceholderText" Text="{TemplateBinding Tag}" Visibility="Collapsed" VerticalAlignment="Center" Foreground="Gray" Padding="5 0"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource Self}, Converter={StaticResource ToolTipVisibilityConveter}}" Value="True">
+                                <Setter TargetName="PlaceholderText" Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource Self}, Converter={StaticResource ToolTipVisibilityConveter}}" Value="False">
+                                <Setter TargetName="PlaceholderText" Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource Self}, Converter={StaticResource ToolTipVisibilityConveter}}" Value="True">
+                    <Setter Property="ToolTip" Value="Введите текст"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
+            <Setter Property="Padding" Value="10 7.5"/>
+        </Style>
+    </Page.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="0.10*"/>
@@ -15,11 +48,10 @@
             <RowDefinition Height="20"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="20"/>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="20"/>
+            <ColumnDefinition Width="0.3*"/>
         </Grid.ColumnDefinitions>
-        <StackPanel Grid.Row="0" Margin="10 5 10 5" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="1">
+        <StackPanel Grid.Row="0" Margin="10 5 10 5" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="0">
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="Поиск " FontSize="16" MaxHeight="30"/>
                 <TextBox x:Name="SearchTBX" Width="150" MaxWidth="220" TextChanged="SearchTBX_TextChanged" FontSize="16" TextAlignment="Center" Margin="0" MaxHeight="25" Style="{StaticResource TBXStyle}" BorderBrush="LightGray" Padding="0"/>
@@ -27,15 +59,9 @@
                 <ComboBox Name="filterCMB" MinWidth="100" MaxWidth="170" SelectionChanged="filterCMB_SelectionChanged" FontSize="16" MaxHeight="30" Padding="0"/>
             </StackPanel>
         </StackPanel>
-        <StackPanel Grid.Row="0" Grid.Column="1" Margin="6 0 0 0" VerticalAlignment="Bottom">
-            <DockPanel Width="1115">
+        <StackPanel Grid.Row="0" Grid.Column="0" Margin="6 0 0 0" VerticalAlignment="Bottom" Grid.ColumnSpan="2">
+            <DockPanel HorizontalAlignment="Stretch">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
-                    <Button Name="StaffAddBtn" Click="StaffAddBtn_Click" Width="40" Height="40" BorderBrush="Transparent" ToolTip="Добавить" Style="{StaticResource UpRoundedButtonStyle}" Background="Transparent" IsEnabled="True">
-                        <Image Source="/Resources/icons/misc/add.ico" MaxWidth="30" MaxHeight="30"/>
-                    </Button>
-                    <Button Name="StaffEditBtn" Click="StaffEditBtn_Click" Width="40" Height="40" BorderBrush="Transparent" ToolTip="Редактировать" Style="{StaticResource UpRoundedButtonStyle}" Background="Transparent" IsEnabled="False">
-                        <Image Source="/Resources/icons/misc/edit.ico" MaxWidth="30" MaxHeight="30"/>
-                    </Button>
                     <Button Name="StaffRemoveBtn" Click="StaffRemoveBtn_Click" Width="40" Height="40" BorderBrush="Transparent" ToolTip="Удалить" Style="{StaticResource UpRoundedButtonStyle}" Background="Transparent" IsEnabled="False">
                         <Image Source="/Resources/icons/misc/remove.ico" MaxWidth="30" MaxHeight="30"/>
                     </Button>
@@ -47,18 +73,102 @@
                     <Button Name="ExcelBtn" Click="ExcelBtn_Click" Width="40" Height="40" BorderBrush="Transparent" ToolTip="Excel" Style="{StaticResource UpRoundedButtonStyle}" IsEnabled="True">
                         <Image Source="/Resources/icons/software/excel.ico" MaxWidth="30" MaxHeight="30"/>
                     </Button>
-                    
                 </StackPanel>
             </DockPanel>
-            
         </StackPanel>
-        <DataGrid x:Name="StaffDG" SelectionMode="Extended" AutoGenerateColumns="False" CanUserAddRows="False" Grid.Row="1" Grid.Column="1" Margin="5 0 0 5" CanUserDeleteRows="False" Style="{StaticResource DataGridOwn}" SelectionChanged="StaffDG_SelectionChanged" PreviewKeyDown="StaffDG_PreviewKeyDown">
+        <DataGrid x:Name="StaffDG" SelectionMode="Extended" AutoGenerateColumns="False" CanUserAddRows="False" Grid.Row="1" Grid.Column="0" ColumnHeaderHeight="60" Margin="5 0 0 5" CanUserDeleteRows="False" Style="{StaticResource DataGridOwn}" SelectionChanged="StaffDG_SelectionChanged" PreviewKeyDown="StaffDG_PreviewKeyDown">
+            <DataGrid.ColumnHeaderStyle>
+                <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+                    <Setter Property="Padding" Value="5 0"/>
+                    <Setter Property="ContentTemplate">
+                        <Setter.Value>
+                            <DataTemplate>
+                                <TextBlock TextWrapping="WrapWithOverflow" TextAlignment="Center" Text="{Binding}"></TextBlock>
+                            </DataTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </DataGrid.ColumnHeaderStyle>
             <DataGrid.Columns>
-                <DataGridTextColumn Binding="{Binding StaffFIOTabel}" Header="Сотрудник" Width="*" IsReadOnly="True"/>
-                <DataGridTextColumn Binding="{Binding WorkingHours}" Header="Рабочие часы" Width="*" IsReadOnly="True"/>
-                <DataGridTextColumn Binding="{Binding DTA, Converter={StaticResource DateWithDayConverter}}" Header="Дата" Width="*" IsReadOnly="True"/>
+                <DataGridTextColumn Binding="{Binding STAFF_ID}" Header="Код сотрудника" Width="*" IsReadOnly="True" MinWidth="80"/>
+                <DataGridTextColumn Binding="{Binding TABEL_ID}" Header="Таб. номер" Width="*" IsReadOnly="True" MinWidth="55"/>
+                <DataGridTextColumn Binding="{Binding SHORT_FIO}" Header="ФИО" Width="*" IsReadOnly="True" MinWidth="90"/>
+                <DataGridTextColumn Binding="{Binding WorkBegin}" Header="Начало" Width="*" IsReadOnly="True" MinWidth="55"/>
+                <DataGridTextColumn Binding="{Binding WorkEnd}" Header="Окончание" Width="*" IsReadOnly="True" MinWidth="55"/>
+                <DataGridTextColumn Binding="{Binding DTA, StringFormat=dd.MM.yyyy}" Header="Дата" Width="*" IsReadOnly="True" MinWidth="85"/>
+                <DataGridTextColumn Binding="{Binding LunchTime}" Header="Обед" Width="*" IsReadOnly="True" MinWidth="45"/>
+                <DataGridTextColumn Binding="{Binding WorkingHours}" Header="Рабочие часы" Width="*" IsReadOnly="True" MinWidth="60"/>
+                <DataGridTextColumn Header="Отсутствия" MinWidth="90">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Text" Value="{Binding CauseAbsence}" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding CauseAbsence}" Value="">
+                                    <Setter Property="Text" Value="{x:Null}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding DateBegin, StringFormat=dd.MM.yyyy}" Header="Начало" Width="*" IsReadOnly="True" MinWidth="85"/>
+                <DataGridTextColumn Binding="{Binding DateEnd, StringFormat=dd.MM.yyyy}" Header="Окончание" Width="*" IsReadOnly="True" MinWidth="85"/>
+                <DataGridTextColumn Header="Отпрашивания" MinWidth="100">
+                    <DataGridTextColumn.ElementStyle>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Text" Value="{Binding CauseTimeOff}" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding CauseAbsence}" Value="">
+                                    <Setter Property="Text" Value="{x:Null}" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </DataGridTextColumn.ElementStyle>
+                </DataGridTextColumn>
+                <DataGridTextColumn Binding="{Binding TimeBegin}" Header="Начало" Width="*" IsReadOnly="True" MinWidth="55"/>
+                <DataGridTextColumn Binding="{Binding TimeEnd}" Header="Окончание" Width="*" IsReadOnly="True" MinWidth="55"/>
             </DataGrid.Columns>
         </DataGrid>
+        <DockPanel Grid.Row="1" Grid.Column="2" Background="#F0F0F0" Margin="0 0 0 5">
+            <Border BorderThickness="0 1 1 1" BorderBrush="#DDDDDD">
+                <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" MinWidth="220" Margin="15 0">
+                    <TextBlock Text="График" FontSize="14" FontWeight="SemiBold" Margin="0 5"/>
+                    <StackPanel Orientation="Vertical" Margin="0 0 0 5">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBox Name="StaffTBX" MinWidth="220" Style="{StaticResource TextBoxWithToolTipStyle}"  Tag="Сотрудник" ToolTip="Сотрудник" GotFocus="StaffTBX_GotFocus" LostFocus="StaffTBX_LostFocus" KeyDown="StaffTBX_KeyDown" Margin="5 10 5 0"/>
+                            <Button x:Name="ClearBtn" Width="30" Height="30" HorizontalAlignment="Right" Margin="-35 0 5 0" Style="{StaticResource ClearButton}"  BorderBrush="Transparent" BorderThickness="0" Click="ClearBtn_Click" VerticalAlignment="Top">
+                                <Image Source="/Resources/icons/misc/cross_1.ico" MaxWidth="30" MaxHeight="30" ToolTip="Очистить" Opacity="0.5"/>
+                            </Button>
+                        </StackPanel>
+                        <ListView Name="StaffLV" ScrollViewer.CanContentScroll="False" HorizontalAlignment="Center" MinWidth="220" Visibility="Collapsed" MaxHeight="90" FontSize="12" Margin="5 0" Style="{x:Null}" Background="LightGray" BorderThickness="1 0 1 1" SelectionChanged="StaffLV_SelectionChanged"/>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBlock Text="Тип графика" Margin="5 0" VerticalAlignment="Center"/>
+                        <ComboBox Name="TemplateCB" Width="75" Padding="25 2.5 0 2.5"/>
+                        <Button Name="ManageScheduleBtn" Width="25" Height="25" Padding="0" Margin="10 0 0 0" Click="ManageScheduleBtn_Click"/>
+                    </StackPanel>
+                    
+                    <Separator Margin="0 10" BorderBrush="LightGray" Width="100" Effect="{StaticResource shadForText}"/>
+                    <StackPanel Orientation="Horizontal" Margin="0 0 0 5">
+                        <TextBlock Text="Отсутствие" FontSize="14" FontWeight="SemiBold"/>
+                        <TextBlock Text="(не обязательно)" FontSize="10" Margin="3 3 0 0" Opacity="0.5"/>
+                    </StackPanel>
+                    
+                    <TextBox Name="Cause" MinWidth="240" Style="{StaticResource TextBoxWithToolTipStyle}" Tag="Причина отсутствия" ToolTip="Причина отсутствия" Margin="5 0 5 5"/>
+                    <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" Margin="0 5">
+                        <StackPanel Orientation="Vertical" Margin="5 0 5 5">
+                            <TextBlock Text="Дата начала" Margin="5 0"/>
+                            <DatePicker Name="AbsenceStartDP" MinWidth="75"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical" Margin="5 0">
+                            <TextBlock Text="Дата окончания" Margin="5 0"/>
+                            <DatePicker Name="AbsenceFinishDP" MinWidth="75"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <Button Name="AddScheduleBtn" Width="95" Content="Добавить" Padding="0" FontSize="12" Margin="0 15 0 0" Click="AddScheduleBtn_Click"/>
+                </StackPanel>
+            </Border>
+        </DockPanel>
         <StackPanel Orientation="Horizontal" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center">
             <TextBlock Name="ResultTB"/>
             <TextBlock Name="ActionTB" Text="33.5" HorizontalAlignment="Center"/>

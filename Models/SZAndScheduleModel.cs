@@ -42,33 +42,42 @@ namespace PlanningScheduleApp.Models
     public class StaffModel
     {
         public int ID_Schedule { get; set; }
-        public string Tabel { get; set; }
-        public string FIO { get; set; }
-        public string Subdivision { get; set; }
-        public string Position { get; set; }
-        public int STAFF_ID { get; set; }
+        public int STAFF_ID { get; private set; }
+        public string TABEL_ID { get; set; }
+        public string SHORT_FIO { get; private set; }
+        public string WorkBegin { get; private set; }
+        public string WorkEnd { get; private set; }
         public DateTime DTA { get; set; }
+        public double? LunchTime { get; private set; }
         public double? WorkingHours { get; set; }
+        public string CauseAbsence { get; private set; }
+        public DateTime? DateBegin { get; private set; }
+        public DateTime? DateEnd { get; private set; }
+        public string CauseTimeOff { get; private set; }
+        public string TimeBegin { get; private set; }
+        public string TimeEnd { get; private set; }
+
         public double? TotalHours { get; set; }
         public double? FreeHours { get; set; }
         public double AcceptableFreeHours { get; set; }
 
-        public string StaffFIOTabel
+        public string Subdivision { get; set; }
+        public string Position { get; set; }
+
+        public string StaffForSearch
         {
             get
             {
-                return $"{FIO} ({Tabel})";
+                return $"{STAFF_ID} {TABEL_ID.Trim()} {SHORT_FIO} {CauseAbsence} {DTA}";
             }
-        }
-
-        public string StaffFull
-        {
-            get { return $"{FIO} {Tabel} {DTA} {WorkingHours}"; }
         }
 
         public override string ToString()
         {
-            return $"{FIO} ({Tabel})";
+            if (TABEL_ID != null)
+                return $"{SHORT_FIO} ({TABEL_ID.Trim()})";
+            else
+                return $"{SHORT_FIO}";
         }
     }
 
@@ -78,6 +87,18 @@ namespace PlanningScheduleApp.Models
         public override string ToString()
         {
             return $"{Position}";
+        }
+    }
+
+    public class ScheduleTemplateModel
+    {
+        public int ID_Template { get; set; }
+        public string TemplateName { get; set; }
+        public bool isFlexible { get; set; }
+        public int RestingDaysCount { get; set; }
+        public override string ToString()
+        {
+            return $"{TemplateName}";
         }
     }
 }

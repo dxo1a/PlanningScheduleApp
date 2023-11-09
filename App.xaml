@@ -18,6 +18,8 @@
             <converters:DayOfWeekConverter x:Key="DayOfWeekConverter"/>
             <converters:DateWithDayConverter x:Key="DateWithDayConverter"/>
             <converters:ZeroToEmptyStringConverter x:Key="ZeroToEmptyStringConverter"/>
+            <converters:MinutesConverter x:Key="MinutesConverter" />
+            <converters:IsStringNonemptyConverter x:Key="ToolTipVisibilityConveter" />
 
 
             <DropShadowEffect x:Key="ShadowEffect" BlurRadius="15" Direction="310" ShadowDepth="8" Color="Black" Opacity="0.8"/>
@@ -112,7 +114,7 @@
                                 </Trigger>
                             </Style.Triggers>
                             <!-- Add some padding around the contents of a cell -->
-                            <Setter Property="Padding" Value="4,3,4,3" />
+                            <Setter Property="Padding" Value="0,3,0,3" />
                             <Setter Property="BorderBrush" Value="Transparent"/>
                             <Setter Property="BorderThickness" Value="1"/>
                             <Setter Property="Template">
@@ -212,8 +214,6 @@
                 </Setter>
             </Style>
 
-            
-
             <Style x:Key="RightRoundedButtonStyle" TargetType="Button">
                 <Setter Property="Template">
                     <Setter.Value>
@@ -244,7 +244,12 @@
             </Style>
 
             <Style x:Key="TBXStyle" TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
-                <Setter Property="Padding" Value="5 5 35 0"/>
+                <Setter Property="Padding" Value="10 5 35 0"/>
+                <Setter Property="materialDesign:TextFieldAssist.CharacterCounterStyle">
+                    <Setter.Value>
+                        <Style TargetType="TextBlock" />
+                    </Setter.Value>
+                </Setter>
             </Style>
 
             <Style TargetType="TextBox">
@@ -388,7 +393,7 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="{x:Type Thumb}">
-                            <Border CornerRadius="4 0 0 4" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="0"  Width="Auto" Margin="0,0,0,0"/>
+                            <Border CornerRadius="0 0 0 0" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="0"  Width="Auto" Margin="0,-2,0,-2"/>
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
@@ -402,7 +407,7 @@
                 <Setter Property="Template">
                     <Setter.Value>
                         <ControlTemplate TargetType="{x:Type Thumb}">
-                            <Border CornerRadius="4 4 0 0" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="0"  Width="Auto" Margin="0,0,0,0"/>
+                            <Border CornerRadius="0 0 0 0" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="0"  Width="Auto" Margin="0,0,0,0"/>
                         </ControlTemplate>
                     </Setter.Value>
                 </Setter>
@@ -486,8 +491,32 @@
                                     <RowDefinition Height="Auto"/>
                                 </Grid.RowDefinitions>
                                 <ScrollContentPresenter Grid.Column="1"/>
-                                <ScrollBar Name="PART_VerticalScrollBar" Value="{TemplateBinding VerticalOffset}" Maximum="{TemplateBinding ScrollableHeight}" ViewportSize="{TemplateBinding ViewportHeight}" Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}"/>
-                                <ScrollBar Name="PART_HorizontalScrollBar" Orientation="Horizontal" Grid.Row="1" Grid.Column="1" Value="{TemplateBinding HorizontalOffset}" Maximum="{TemplateBinding ScrollableWidth}" ViewportSize="{TemplateBinding ViewportWidth}" Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}"/>
+                                <ScrollBar Name="PART_VerticalScrollBar" Value="{TemplateBinding VerticalOffset}" Maximum="{TemplateBinding ScrollableHeight}" ViewportSize="{TemplateBinding ViewportHeight}" Visibility="{TemplateBinding ComputedVerticalScrollBarVisibility}">
+                                    <ScrollBar.Triggers>
+                                        <EventTrigger RoutedEvent="ScrollBar.Scroll">
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <DoubleAnimation Storyboard.TargetProperty="Value"
+                                                         To="{Binding Value, ElementName=PART_VerticalScrollBar}"
+                                                         Duration="0:0:2"/>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </EventTrigger>
+                                    </ScrollBar.Triggers>
+                                </ScrollBar>
+                                <ScrollBar Name="PART_HorizontalScrollBar" Orientation="Horizontal" Grid.Row="1" Grid.Column="1" Value="{TemplateBinding HorizontalOffset}" Maximum="{TemplateBinding ScrollableWidth}" ViewportSize="{TemplateBinding ViewportWidth}" Visibility="{TemplateBinding ComputedHorizontalScrollBarVisibility}">
+                                    <ScrollBar.Triggers>
+                                        <EventTrigger RoutedEvent="ScrollBar.Scroll">
+                                            <BeginStoryboard>
+                                                <Storyboard>
+                                                    <DoubleAnimation Storyboard.TargetProperty="Value"
+                                                         To="{Binding Value, ElementName=PART_HorizontalScrollBar}"
+                                                         Duration="0:0:0.5"/>
+                                                </Storyboard>
+                                            </BeginStoryboard>
+                                        </EventTrigger>
+                                    </ScrollBar.Triggers>
+                                </ScrollBar>
                             </Grid>
                         </ControlTemplate>
                     </Setter.Value>

@@ -9,7 +9,7 @@ namespace PlanningScheduleApp.Pages
     public partial class ChooseDepPage : Page
     {
         List<DepModel> DepList = new List<DepModel>();
-        List<StaffModel> StaffPositionsList = new List<StaffModel>();
+        List<SZAndScheduleModel> StaffPositionsList = new List<SZAndScheduleModel>();
 
         DepModel SelectedDep { get; set; }
 
@@ -17,7 +17,7 @@ namespace PlanningScheduleApp.Pages
         {
             InitializeComponent();
 
-            DepList = Odb.db.Database.SqlQuery<DepModel>("SELECT DISTINCT Position FROM SerialNumber.dbo.StaffView").ToList();
+            DepList = Odb.db.Database.SqlQuery<DepModel>("SELECT DISTINCT Position FROM Zarplats.dbo.StaffView").ToList();
             DepLV.ItemsSource = DepList.OrderBy(u => u.Position);
         }
 

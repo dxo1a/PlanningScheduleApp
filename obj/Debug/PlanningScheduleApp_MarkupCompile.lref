@@ -1,11 +1,14 @@
-﻿
-FC:\Users\it01\Desktop\PlanningScheduleApp\App.xaml;;
-FC:\Users\it01\Desktop\PlanningScheduleApp\ExportToExcelFilterWindow.xaml;;
-FC:\Users\it01\Desktop\PlanningScheduleApp\LoadingWindow.xaml;;
-FC:\Users\it01\Desktop\PlanningScheduleApp\MainWindow.xaml;;
-FC:\Users\it01\Desktop\PlanningScheduleApp\Pages\ChooseDepPage.xaml;;
-FC:\Users\it01\Desktop\PlanningScheduleApp\Pages\SelectedDepPage.xaml;;
-FC:\Users\it01\Desktop\PlanningScheduleApp\Pages\StaffAddPage.xaml;;
-FC:\Users\it01\Desktop\PlanningScheduleApp\Pages\StaffEditPage.xaml;;
-FC:\Users\it01\Desktop\PlanningScheduleApp\StaffAddOrEditWindow.xaml;;
+﻿C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\GeneratedInternalTypeHelper.g.cs
+FC:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\App.xaml;;
+FC:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\ExportToExcelFilterWindow.xaml;;
+FC:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\LoadingWindow.xaml;;
+FC:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\MainWindow.xaml;;
+FC:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\Pages\ChooseDepPage.xaml;;
+FC:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\Pages\SelectedDepPage.xaml;;
+FC:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\Pages\DeprecatedStaffAddPage.xaml;;
+FC:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\Pages\DeprecatedStaffEditPage.xaml;;
+FC:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\ScheduleAddWindow.xaml;;
+FC:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\ScheduleEditWindow.xaml;;
+FC:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\ScheduleManageWindow.xaml;;
+FC:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\DeprecatedStaffAddOrEditWindow.xaml;;
 

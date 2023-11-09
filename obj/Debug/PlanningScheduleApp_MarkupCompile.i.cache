@@ -4,17 +4,17 @@
 winexe
 C#
 .cs
-C:\Users\it01\Desktop\PlanningScheduleApp\obj\Debug\
+C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\
 PlanningScheduleApp
 none
 false
 DEBUG;TRACE
-C:\Users\it01\Desktop\PlanningScheduleApp\App.xaml
-10-57166712
+C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\App.xaml
+13-2069859724
 8-889547177
-24-829774857
-41-2072811329
-ExportToExcelFilterWindow.xaml;LoadingWindow.xaml;MainWindow.xaml;Pages\ChooseDepPage.xaml;Pages\SelectedDepPage.xaml;Pages\StaffAddPage.xaml;Pages\StaffEditPage.xaml;Resources\Icons.xaml;Resources\IconsNonShared.xaml;StaffAddOrEditWindow.xaml;
+291745065765
+47-217297865
+ExportToExcelFilterWindow.xaml;LoadingWindow.xaml;MainWindow.xaml;Pages\ChooseDepPage.xaml;Pages\SelectedDepPage.xaml;Pages\DeprecatedStaffAddPage.xaml;Pages\DeprecatedStaffEditPage.xaml;Resources\Icons.xaml;Resources\IconsNonShared.xaml;ScheduleAddWindow.xaml;ScheduleEditWindow.xaml;ScheduleManageWindow.xaml;DeprecatedStaffAddOrEditWindow.xaml;
 
 True
 
