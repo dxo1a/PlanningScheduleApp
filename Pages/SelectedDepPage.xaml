@@ -145,6 +145,7 @@
                         <TextBlock Text="Тип графика" Margin="5 0" VerticalAlignment="Center"/>
                         <ComboBox Name="TemplateCB" Width="75" Padding="25 2.5 0 2.5" SelectionChanged="TemplateCB_SelectionChanged"/>
                         <Button Name="ManageScheduleBtn" Width="25" Height="25" Padding="0" Margin="10 0 0 0" Click="ManageScheduleBtn_Click"/>
+                        <Button Name="TestBtn" Width="25" Height="25" Padding="0" Content="Test" FontSize="12" Margin="10 0 0 0" Click="TestBtn_Click"/>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 5">
                         <StackPanel Orientation="Vertical" Margin="5 0 5 5">

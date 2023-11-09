@@ -209,6 +209,7 @@ namespace PlanningScheduleApp.Pages
                 {
                     DateTime selectedStartDate = ScheduleStartDP.SelectedDate ?? DateTime.Now;
                     DateTime selectedFinishDate = ScheduleEndDP.SelectedDate ?? DateTime.Now;
+                    
 
                     foreach (var day in GenerateFlexibleSchedule(selectedStartDate, selectedFinishDate, SelectedTemplate.WorkingDaysCount, SelectedTemplate.RestingDaysCount))
                     {
@@ -220,6 +221,47 @@ namespace PlanningScheduleApp.Pages
                 {
                     DateTime selectedStartDate = ScheduleStartDP.SelectedDate ?? DateTime.Now;
                     DateTime selectedFinishDate = ScheduleEndDP.SelectedDate ?? DateTime.Now;
+                    DateTime current = selectedStartDate;
+
+                    List<ScheduleTemplateModel> Days = GetDaysInfo();
+                    List<ScheduleTemplateModel> RestingDays = new List<ScheduleTemplateModel>();
+                    foreach (var day in Days)
+                    {
+                        if (day.isRestingDay == true)
+                        {
+                            RestingDays.Add(day);
+                            MessageBox.Show($"Добавлен выходной день: {day.Day}");
+                        }
+                    }
+
+                    /*while (current <= selectedFinishDate)
+                    {
+                        foreach (var day in RestingDays)
+                        {
+                            while (current.DayOfWeek.ToString() == day.Day)
+                            {
+                                current = current.AddDays(1);
+                            }
+
+                            while (current <= selectedFinishDate)
+                            {
+                                // Проверка, является ли текущий день рабочим днем (пн-пт)
+                                if (current.DayOfWeek.ToString() != day.Day) // если этот день не является isRestingDay (нужно заранее сформировать и получить список дней типа ScheduleTemplateModel там и будет isRestingDay
+                                {
+                                    Odb.db.Database.ExecuteSqlCommand("INSERT INTO Zarplats.dbo.Staff_Schedule(WorkBegin, WorkEnd, DTA, STAFF_ID, LunchTime, WorkingHours) VALUES (@workbegin, @workend, @dta, @staffid, @lunchtime, @workinghours)",
+                                        new SqlParameter("workbegin", SelectedTemplate.WorkBegin), new SqlParameter("workend", SelectedTemplate.WorkEnd), new SqlParameter("dta", current.Date), new SqlParameter("staffid", SelectedStaff.STAFF_ID), new SqlParameter("lunchtime", SelectedTemplate.LunchTime), new SqlParameter("workinghours", 8));
+                                }
+
+                                // Переход к следующему дню
+                                current = current.AddDays(1);
+                                while (current.DayOfWeek.ToString() == day.Day)
+                                {
+                                    current = current.AddDays(1);
+                                }
+                            }
+                        }
+                    }*/
+                    
 
 
                     // Проверка, является ли текущий день рабочим днем
@@ -235,25 +277,28 @@ namespace PlanningScheduleApp.Pages
             }
         }
 
-        IEnumerable<DateTime> GenerateStaticSchedule(DateTime start, DateTime end, int workdays, int restdays)
+        public List<ScheduleTemplateModel> GetDaysInfo() // информация о каждом дне в статик таблице
         {
-            int daysCountInSchedule = Odb.db.Database.SqlQuery<int>("select count(*) from Schedule_Template as template left join Schedule_StaticDays as staticc on template.ID_Template = staticc.Template_ID where template.isFlexible = 0").SingleOrDefault();
-            int workingDaysCountInSchedule = Odb.db.Database.SqlQuery<int>("select count(*) from Schedule_Template as template left join Schedule_StaticDays as staticc on template.ID_Template = staticc.Template_ID where template.isFlexible = 0 and isRestingDay = 0").SingleOrDefault();
-            DateTime current = start;
-            while (current <= end)
+            List<ScheduleTemplateModel> staticDaysList = new List<ScheduleTemplateModel>();
+            staticDaysList = Odb.db.Database.SqlQuery<ScheduleTemplateModel>("select distinct * from Zarplats.dbo.Schedule_StaticDays").ToList();
+            foreach (var day in staticDaysList)
             {
-                for (int i = 0; i < daysCountInSchedule; i++)
+                MessageBox.Show($"Day: {day.Day}\nWorkTime: {day.WorkBegin} - {day.WorkEnd}\nLunchTime: {day.LunchTime}\nisRestingDay: {day.isRestingDay}");
+            }
+            return staticDaysList;
+        }
+
+        private void TestBtn_Click(object sender, RoutedEventArgs e)
+        {
+            List<ScheduleTemplateModel> Days = GetDaysInfo();
+            List<ScheduleTemplateModel> RestingDays = new List<ScheduleTemplateModel>();
+            foreach (var day in Days)
+            {
+                if (day.isRestingDay == true)
                 {
-                    for (int j = 0; j < workingDaysCountInSchedule; i++)
-                    {
-                        if (current > end) yield break;
-                        yield return current;
-                        current = current.AddDays(1);
-                    }
-
-
+                    RestingDays.Add(day);
+                    MessageBox.Show($"Добавлен выходной день: {day.Day}");
                 }
-                current = current.AddDays(SelectedTemplate.RestingDaysCount);
             }
         }
 

@@ -103,6 +103,9 @@ namespace PlanningScheduleApp.Models
         public double? LunchTime { get; set; }
         public double? WorkingHours { get; set; }
 
+        public string Day { get; set; }
+        public bool isRestingDay { get; set; }
+
         public override string ToString()
         {
             return $"{TemplateName}";
