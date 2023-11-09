@@ -96,6 +96,13 @@ namespace PlanningScheduleApp.Models
         public string TemplateName { get; set; }
         public bool isFlexible { get; set; }
         public int RestingDaysCount { get; set; }
+        public int WorkingDaysCount { get; set; }
+
+        public string WorkBegin { get; set; }
+        public string WorkEnd { get; set; }
+        public double? LunchTime { get; set; }
+        public double? WorkingHours { get; set; }
+
         public override string ToString()
         {
             return $"{TemplateName}";
