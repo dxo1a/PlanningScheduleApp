@@ -204,8 +204,8 @@
                                     <Setter Property="Opacity" Value="1"/>
                                 </Trigger>
                                 <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter TargetName="ButtonBorder" Property="Background" Value="LightGray" />
-                                    <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="DarkGray" />
+                                    <Setter TargetName="ButtonBorder" Property="Background" Value="#F0F0F0" />
+                                    <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="#DDDDDD" />
                                     <Setter TargetName="ButtonBorder" Property="BorderThickness" Value="2 2 2 0" />
                                 </Trigger>
                             </ControlTemplate.Triggers>
@@ -245,9 +245,18 @@
 
             <Style x:Key="TBXStyle" TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
                 <Setter Property="Padding" Value="10 5 35 0"/>
+                <Setter Property="BorderBrush" Value="Black"/>
+                <Setter Property="Background" Value="White"/>
                 <Setter Property="materialDesign:TextFieldAssist.CharacterCounterStyle">
                     <Setter.Value>
                         <Style TargetType="TextBlock" />
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="materialDesign:TextFieldAssist.TextFieldCornerRadius" Value="5"/>
+                <Setter Property="Validation.ErrorTemplate">
+                    <Setter.Value>
+                        <ControlTemplate>
+                        </ControlTemplate>
                     </Setter.Value>
                 </Setter>
             </Style>

@@ -35,10 +35,16 @@ namespace PlanningScheduleApp.Pages
             FrameApp.SetCurrentMainFrame(FrameApp.FrameMain);
             UpdateGrid();
             AssignCMB();
+            UpdateTemplatesList();
 
             StaffListInPosition = Odb.db.Database.SqlQuery<StaffModel>("select distinct b.SHORT_FIO, b.TABEL_ID, b.ID_STAFF as STAFF_ID from perco...staff_ref as a left join perco...staff as b on a.STAFF_ID = b.ID_STAFF left join perco...subdiv_ref as c on a.SUBDIV_ID = c.ID_REF where c.DISPLAY_NAME = @padrazd", new SqlParameter("padrazd", SelectedDep.Position)).OrderBy(s => s.SHORT_FIO).ToList();
             StaffLV.ItemsSource = StaffListInPosition;
-            ScheduleTemplateList = Odb.db.Database.SqlQuery<ScheduleTemplateModel>("select distinct ID_Template, TemplateName, isFlexible, RestingDaysCount, WorkingDaysCount, b.WorkBegin, b.WorkEnd, b.LunchTime from Zarplats.dbo.Schedule_Template as a left join Zarplats.dbo.Schedule_FlexibleDays as b on a.ID_Template = b.Template_ID").ToList();
+            
+        }
+
+        public void UpdateTemplatesList()
+        {
+            ScheduleTemplateList = Odb.db.Database.SqlQuery<ScheduleTemplateModel>("select distinct ID_Template, TemplateName, isFlexible, RestingDaysCount, WorkingDaysCount from Zarplats.dbo.Schedule_Template as a").ToList();
             TemplateCB.ItemsSource = ScheduleTemplateList;
         }
 
@@ -166,6 +172,7 @@ namespace PlanningScheduleApp.Pages
 
         private void UpdateGrid()
         {
+            SearchTBX.Clear();
             StaffList = Odb.db.Database.SqlQuery<StaffModel>("SELECT DISTINCT a.ID_Schedule, a.STAFF_ID, LTRIM(e.TABEL_ID) as TABEL_ID, e.SHORT_FIO, a.WorkBegin, a.WorkEnd, a.DTA, a.LunchTime, a.WorkingHours, c.Cause as CauseAbsence, b.DateBegin, b.DateEnd, d.Cause as CauseTimeOff, d.TimeBegin, d.TimeEnd FROM [Zarplats].[dbo].[Staff_Schedule] as a left join Zarplats.dbo.Schedule_Absence as b on a.STAFF_ID = b.id_Staff and a.DTA between b.DateBegin and b.DateEnd left join Zarplats.dbo.AbsenceRef as c on b.AbsenceRef_ID = c.ID_AbsenceRef left join Zarplats.dbo.Schedule_TimeOff as d on a.STAFF_ID = d.id_Staff and a.DTA = d.DTA left join perco...staff as e on a.STAFF_ID = e.ID_STAFF left join Zarplats.dbo.StaffView as f on a.STAFF_ID = f.STAFF_ID where f.Position = @podrazd order by a.DTA", new SqlParameter("podrazd", SelectedDep.Position)).ToList();
             StaffDG.ItemsSource = StaffList;
         }
@@ -207,15 +214,32 @@ namespace PlanningScheduleApp.Pages
             {
                 if (SelectedTemplate.isFlexible)
                 {
+                    List<ScheduleTemplateModel> flexibleDays = GetFlexibleDaysInfo(SelectedTemplate.ID_Template);
+
                     DateTime selectedStartDate = ScheduleStartDP.SelectedDate ?? DateTime.Now;
                     DateTime selectedFinishDate = ScheduleEndDP.SelectedDate ?? DateTime.Now;
-                    
+                    DateTime current = selectedStartDate;
 
-                    foreach (var day in GenerateFlexibleSchedule(selectedStartDate, selectedFinishDate, SelectedTemplate.WorkingDaysCount, SelectedTemplate.RestingDaysCount))
+                    int flexibleDaysIndex = 0;
+
+                    while (current <= selectedFinishDate)
                     {
+                        if (flexibleDaysIndex >= flexibleDays.Count)
+                        {
+                            flexibleDaysIndex = 0;
+                            current = current.AddDays(SelectedTemplate.RestingDaysCount);
+                        }
+
+                        var flexibleDay = flexibleDays[flexibleDaysIndex];
+
                         Odb.db.Database.ExecuteSqlCommand("INSERT INTO Zarplats.dbo.Staff_Schedule(WorkBegin, WorkEnd, DTA, STAFF_ID, LunchTime, WorkingHours) VALUES (@workbegin, @workend, @dta, @staffid, @lunchtime, @workinghours)",
-                                new SqlParameter("workbegin", SelectedTemplate.WorkBegin), new SqlParameter("workend", SelectedTemplate.WorkEnd), new SqlParameter("dta", day.Date), new SqlParameter("staffid", SelectedStaff.STAFF_ID), new SqlParameter("lunchtime", SelectedTemplate.LunchTime), new SqlParameter("workinghours", 8));
+                            new SqlParameter("workbegin", flexibleDay.WorkBegin), new SqlParameter("workend", flexibleDay.WorkEnd), new SqlParameter("dta", current.Date), new SqlParameter("staffid", SelectedStaff.STAFF_ID), new SqlParameter("lunchtime", flexibleDay.LunchTime), new SqlParameter("workinghours", 8));
+
+                        flexibleDaysIndex++;
+                        current = current.AddDays(1);
                     }
+                    MessageBox.Show($"График заполнен!");
+                    UpdateGrid();
                 }
                 else if (!SelectedTemplate.isFlexible)
                 {
@@ -223,74 +247,50 @@ namespace PlanningScheduleApp.Pages
                     DateTime selectedFinishDate = ScheduleEndDP.SelectedDate ?? DateTime.Now;
                     DateTime current = selectedStartDate;
 
-                    List<ScheduleTemplateModel> Days = GetDaysInfo();
-                    List<ScheduleTemplateModel> RestingDays = new List<ScheduleTemplateModel>();
-                    foreach (var day in Days)
+                    List<ScheduleTemplateModel> Days = GetDaysInfo(SelectedTemplate.ID_Template);
+
+                    DayOfWeek startDayOfWeek = selectedStartDate.DayOfWeek;
+                    var currentDay = Days.FirstOrDefault(d => d.Day == startDayOfWeek.ToString());
+
+                    while (current <= selectedFinishDate.AddDays(1))
                     {
-                        if (day.isRestingDay == true)
+                        if (currentDay != null && !currentDay.isRestingDay)
                         {
-                            RestingDays.Add(day);
-                            MessageBox.Show($"Добавлен выходной день: {day.Day}");
+                            Odb.db.Database.ExecuteSqlCommand("INSERT INTO Zarplats.dbo.Staff_Schedule(WorkBegin, WorkEnd, DTA, STAFF_ID, LunchTime, WorkingHours) VALUES (@workbegin, @workend, @dta, @staffid, @lunchtime, @workinghours)",
+                                new SqlParameter("workbegin", currentDay.WorkBegin), new SqlParameter("workend", currentDay.WorkEnd), new SqlParameter("dta", current.Date), new SqlParameter("staffid", SelectedStaff.STAFF_ID), new SqlParameter("lunchtime", currentDay.LunchTime), new SqlParameter("workinghours", 8));
                         }
+
+                        current = current.AddDays(1);
+                        currentDay = Days.FirstOrDefault(d => d.Day == current.DayOfWeek.ToString());   // переход к следующему дню недели в записях из базы данных
                     }
-
-                    /*while (current <= selectedFinishDate)
-                    {
-                        foreach (var day in RestingDays)
-                        {
-                            while (current.DayOfWeek.ToString() == day.Day)
-                            {
-                                current = current.AddDays(1);
-                            }
-
-                            while (current <= selectedFinishDate)
-                            {
-                                // Проверка, является ли текущий день рабочим днем (пн-пт)
-                                if (current.DayOfWeek.ToString() != day.Day) // если этот день не является isRestingDay (нужно заранее сформировать и получить список дней типа ScheduleTemplateModel там и будет isRestingDay
-                                {
-                                    Odb.db.Database.ExecuteSqlCommand("INSERT INTO Zarplats.dbo.Staff_Schedule(WorkBegin, WorkEnd, DTA, STAFF_ID, LunchTime, WorkingHours) VALUES (@workbegin, @workend, @dta, @staffid, @lunchtime, @workinghours)",
-                                        new SqlParameter("workbegin", SelectedTemplate.WorkBegin), new SqlParameter("workend", SelectedTemplate.WorkEnd), new SqlParameter("dta", current.Date), new SqlParameter("staffid", SelectedStaff.STAFF_ID), new SqlParameter("lunchtime", SelectedTemplate.LunchTime), new SqlParameter("workinghours", 8));
-                                }
-
-                                // Переход к следующему дню
-                                current = current.AddDays(1);
-                                while (current.DayOfWeek.ToString() == day.Day)
-                                {
-                                    current = current.AddDays(1);
-                                }
-                            }
-                        }
-                    }*/
-                    
-
-
-                    // Проверка, является ли текущий день рабочим днем
-                    //if (currentDay.DayOfWeek != DayOfWeek.Saturday && currentDay.DayOfWeek != DayOfWeek.Sunday) // если этот день не является isRestingDay (нужно заранее сформировать и получить список дней типа ScheduleTemplateModel там и будет isRestingDay
-                    //{
-                    //    DateTime workBegin = new DateTime(currentDay.Year, currentDay.Month, currentDay.Day, combinedStartDateTime.Hour, combinedStartDateTime.Minute, 0);
-                    //    DateTime workEnd = new DateTime(currentDay.Year, currentDay.Month, currentDay.Day, combinedFinishDateTime.Hour, combinedFinishDateTime.Minute, 0);
-                    //
-                    //    Odb.db.Database.ExecuteSqlCommand("INSERT INTO Zarplats.dbo.Staff_Schedule(WorkBegin, WorkEnd, DTA, STAFF_ID, LunchTime, WorkingHours) VALUES (@workbegin, @workend, @dta, @staffid, @lunchtime, @workinghours)",
-                    //        new SqlParameter("workbegin", workBegin), new SqlParameter("workend", workEnd), new SqlParameter("dta", currentDay.Date), new SqlParameter("staffid", SelectedStaff.STAFF_ID), new SqlParameter("lunchtime", LunchTime), new SqlParameter("workinghours", WorkingHours));
-                    //}
+                    MessageBox.Show($"График заполнен!");
+                    UpdateGrid();
                 }
             }
         }
 
-        public List<ScheduleTemplateModel> GetDaysInfo() // информация о каждом дне в статик таблице
+        public List<ScheduleTemplateModel> GetFlexibleDaysInfo(int templateid) // информация о каждом дне в статик таблице
         {
             List<ScheduleTemplateModel> staticDaysList = new List<ScheduleTemplateModel>();
-            staticDaysList = Odb.db.Database.SqlQuery<ScheduleTemplateModel>("select distinct * from Zarplats.dbo.Schedule_StaticDays").ToList();
-            foreach (var day in staticDaysList)
-            {
-                MessageBox.Show($"Day: {day.Day}\nWorkTime: {day.WorkBegin} - {day.WorkEnd}\nLunchTime: {day.LunchTime}\nisRestingDay: {day.isRestingDay}");
-            }
+            staticDaysList = Odb.db.Database.SqlQuery<ScheduleTemplateModel>("select distinct * from Zarplats.dbo.Schedule_FlexibleDays where Template_ID = @templateid", new SqlParameter("templateid", templateid)).ToList();
             return staticDaysList;
+        }
+
+        public List<ScheduleTemplateModel> GetDaysInfo(int templateid) // информация о каждом дне в статик таблице
+        {
+            List<ScheduleTemplateModel> staticDaysList = new List<ScheduleTemplateModel>();
+            staticDaysList = Odb.db.Database.SqlQuery<ScheduleTemplateModel>("select distinct * from Zarplats.dbo.Schedule_StaticDays where Template_ID = @templateid", new SqlParameter("templateid", templateid)).ToList();
+            return staticDaysList;
+        }
+
+        private void TemplateCB_DropDownOpened(object sender, EventArgs e)
+        {
+            UpdateTemplatesList();
         }
 
         private void TestBtn_Click(object sender, RoutedEventArgs e)
         {
-            List<ScheduleTemplateModel> Days = GetDaysInfo();
+            List<ScheduleTemplateModel> Days = GetDaysInfo(SelectedTemplate.ID_Template);
             List<ScheduleTemplateModel> RestingDays = new List<ScheduleTemplateModel>();
             foreach (var day in Days)
             {
@@ -299,22 +299,6 @@ namespace PlanningScheduleApp.Pages
                     RestingDays.Add(day);
                     MessageBox.Show($"Добавлен выходной день: {day.Day}");
                 }
-            }
-        }
-
-        IEnumerable<DateTime> GenerateFlexibleSchedule(DateTime start, DateTime end, int workdays, int restdays)
-        {
-            DateTime current = start;
-            while (current <= end)
-            {
-                for (int i = 0; i < workdays; i++)
-                {
-                    if (current > end) yield break;
-                    yield return current;
-                    current = current.AddDays(1);
-                }
-
-                current = current.AddDays(restdays);
             }
         }
 

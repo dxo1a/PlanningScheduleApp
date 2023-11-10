@@ -6,17 +6,13 @@
         xmlns:local="clr-namespace:PlanningScheduleApp"
         mc:Ignorable="d"
         Title="График сотрудников" Height="650" Width="1450" WindowStyle="None" Icon="Resources/icon.ico"
-        xmlns:themes="clr-namespace:StyledWindow.WPF.Themes;assembly=StyledWindow.WPF" xmlns:components="clr-namespace:StyledWindow.WPF.Components;assembly=StyledWindow.WPF"
+        xmlns:themes="clr-namespace:StyledWindow.WPF.Themes;assembly=StyledWindow.WPF"
+        xmlns:components="clr-namespace:StyledWindow.WPF.Components;assembly=StyledWindow.WPF"
         Style="{StaticResource StyledWindow}"
         themes:StyledWindow.LanguageButtonVisible="False"
         themes:StyledWindow.ThemeButtonVisible="False"
         themes:StyledWindow.ThemeToggleVisible="False"
         themes:StyledWindow.TopmostButtonVisible="True">
-    <themes:StyledWindow.HeaderContent>
-        <Border Background="Gray" MaxHeight="35" Width="125" CornerRadius="0 0 10 10" Opacity="0.5">
-            <TextBlock Text='АО "Стекломаш"' VerticalAlignment="Center" HorizontalAlignment="Center"/>
-        </Border>
-    </themes:StyledWindow.HeaderContent>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="20"/>

@@ -49,7 +49,7 @@
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="0.3*"/>
+            <ColumnDefinition Width="0.24*"/>
         </Grid.ColumnDefinitions>
         <StackPanel Grid.Row="0" Margin="10 5 10 5" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="0">
             <StackPanel Orientation="Horizontal">
@@ -95,7 +95,7 @@
                 <DataGridTextColumn Binding="{Binding SHORT_FIO}" Header="ФИО" Width="*" IsReadOnly="True" MinWidth="90"/>
                 <DataGridTextColumn Binding="{Binding WorkBegin}" Header="Начало" Width="*" IsReadOnly="True" MinWidth="55"/>
                 <DataGridTextColumn Binding="{Binding WorkEnd}" Header="Окончание" Width="*" IsReadOnly="True" MinWidth="55"/>
-                <DataGridTextColumn Binding="{Binding DTA, StringFormat=dd.MM.yyyy}" Header="Дата" Width="*" IsReadOnly="True" MinWidth="85"/>
+                <DataGridTextColumn Binding="{Binding DTA, Converter={StaticResource DateWithDayConverter}}" Header="Дата" Width="*" IsReadOnly="True" MinWidth="170"/>
                 <DataGridTextColumn Binding="{Binding LunchTime}" Header="Обед" Width="*" IsReadOnly="True" MinWidth="45"/>
                 <DataGridTextColumn Binding="{Binding WorkingHours}" Header="Рабочие часы" Width="*" IsReadOnly="True" MinWidth="60"/>
                 <DataGridTextColumn Header="Отсутствия" MinWidth="90">
@@ -130,11 +130,11 @@
         </DataGrid>
         <DockPanel Grid.Row="1" Grid.Column="2" Background="#F0F0F0" Margin="0 0 0 5">
             <Border BorderThickness="0 1 1 1" BorderBrush="#DDDDDD">
-                <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch" MinWidth="220" Margin="15 0">
+                <StackPanel Orientation="Vertical" HorizontalAlignment="Center" MinWidth="200" Margin="15 0">
                     <TextBlock Text="График" FontSize="14" FontWeight="SemiBold" Margin="0 5"/>
                     <StackPanel Orientation="Vertical" Margin="0 0 0 5">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <TextBox Name="StaffTBX" MinWidth="220" Style="{StaticResource TextBoxWithToolTipStyle}"  Tag="Сотрудник" ToolTip="Сотрудник" GotFocus="StaffTBX_GotFocus" LostFocus="StaffTBX_LostFocus" KeyDown="StaffTBX_KeyDown" Margin="5 10 5 0"/>
+                            <TextBox Name="StaffTBX" MinWidth="180" Style="{StaticResource TextBoxWithToolTipStyle}"  Tag="Сотрудник" ToolTip="Сотрудник" GotFocus="StaffTBX_GotFocus" LostFocus="StaffTBX_LostFocus" KeyDown="StaffTBX_KeyDown" Margin="5 10 5 0"/>
                             <Button x:Name="ClearBtn" Width="30" Height="30" HorizontalAlignment="Right" Margin="-35 0 5 0" Style="{StaticResource ClearButton}"  BorderBrush="Transparent" BorderThickness="0" Click="ClearBtn_Click" VerticalAlignment="Top">
                                 <Image Source="/Resources/icons/misc/cross_1.ico" MaxWidth="30" MaxHeight="30" ToolTip="Очистить" Opacity="0.5"/>
                             </Button>
@@ -143,9 +143,10 @@
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <TextBlock Text="Тип графика" Margin="5 0" VerticalAlignment="Center"/>
-                        <ComboBox Name="TemplateCB" Width="75" Padding="25 2.5 0 2.5" SelectionChanged="TemplateCB_SelectionChanged"/>
-                        <Button Name="ManageScheduleBtn" Width="25" Height="25" Padding="0" Margin="10 0 0 0" Click="ManageScheduleBtn_Click"/>
-                        <Button Name="TestBtn" Width="25" Height="25" Padding="0" Content="Test" FontSize="12" Margin="10 0 0 0" Click="TestBtn_Click"/>
+                        <ComboBox Name="TemplateCB" Width="75" Padding="25 2.5 0 2.5" SelectionChanged="TemplateCB_SelectionChanged" DropDownOpened="TemplateCB_DropDownOpened"/>
+                        <Button Name="ManageScheduleBtn" Width="25" Height="25" Padding="0" Margin="10 0 0 0" Click="ManageScheduleBtn_Click" Background="LightGray" BorderBrush="LightGray">
+                            <Image Source="/Resources/icons/misc/schedule.ico" MaxWidth="20" MaxHeight="20"/>
+                        </Button>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 5">
                         <StackPanel Orientation="Vertical" Margin="5 0 5 5">

@@ -4,23 +4,33 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PlanningScheduleApp"
+        xmlns:themes="clr-namespace:StyledWindow.WPF.Themes;assembly=StyledWindow.WPF"
+        themes:StyledWindow.LanguageButtonVisible="False"
+        themes:StyledWindow.ThemeButtonVisible="False"
+        themes:StyledWindow.ThemeToggleVisible="False"
+        themes:StyledWindow.TopmostButtonVisible="True"
         mc:Ignorable="d"
-        Title="Управление графиками" Height="450" Width="800">
+        Title="Управление графиками" Height="450" Width="800" WindowStyle="None" Style="{StaticResource StyledWindow}" Icon="Resources/icon.ico">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="0.1*"/>
             <RowDefinition Height="0.9*"/>
         </Grid.RowDefinitions>
-        <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="5 0">
-            <Button Name="ScheduleAdd" Width="40" Height="40" Content="+" FontSize="16" Padding="0" Click="ScheduleAdd_Click"/>
+        <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="5 0" VerticalAlignment="Bottom">
+            <Button Name="TemplateAdd" Width="40" Height="40" FontSize="16" Padding="0" Click="TemplateAdd_Click" Style="{StaticResource UpRoundedButtonStyle}" Margin="0 3 0 0" BorderBrush="Transparent">
+                <Image Source="Resources/icons/misc/add.ico" MaxHeight="30" MaxWidth="30"/>
+            </Button>
+            <Button Name="TemplateDelete" Width="40" Height="40" FontSize="16" Padding="0" Click="TemplateDelete_Click" Style="{StaticResource UpRoundedButtonStyle}" Margin="0 3 0 0" BorderBrush="Transparent">
+                <Image Source="Resources/icons/misc/remove.ico" MaxHeight="30" MaxWidth="30"/>
+            </Button>
         </StackPanel>
-        <DataGrid Name="SchedulesDG" AutoGenerateColumns="False" Grid.Row="2" IsReadOnly="True" CanUserAddRows="False" MouseDoubleClick="SchedulesDG_MouseDoubleClick" SelectionChanged="SchedulesDG_SelectionChanged">
+        <DataGrid Name="TemplatesDG" AutoGenerateColumns="False" Grid.Row="2" IsReadOnly="True" SelectionMode="Single" Style="{StaticResource DataGridOwn}" CanUserAddRows="False" MouseDoubleClick="TemplatesDG_MouseDoubleClick" SelectionChanged="TemplatesDG_SelectionChanged">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Название" Binding="{Binding TemplateName}"/>
-                <DataGridTemplateColumn Header="Тип">
+                <DataGridTextColumn Header="Название" Binding="{Binding TemplateName}" MinWidth="100" Width="*"/>
+                <DataGridTemplateColumn Header="Тип" MinWidth="130" MaxWidth="130">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock x:Name="textBlock" Text="{Binding isFlexible}" />
+                            <TextBlock x:Name="textBlock" Text="{Binding isFlexible}" HorizontalAlignment="Center"/>
                             <DataTemplate.Triggers>
                                 <DataTrigger Binding="{Binding isFlexible}" Value="True">
                                     <Setter TargetName="textBlock" Property="Text" Value="Плавающий" />
@@ -32,7 +42,7 @@
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
-                <DataGridTextColumn Header="Кол-во выходных" Binding="{Binding RestingDaysCount}"/>
+                <DataGridTextColumn Header="Кол-во выходных" Binding="{Binding RestingDaysCount}" MinWidth="135"/>
             </DataGrid.Columns>
         </DataGrid>
     </Grid>
