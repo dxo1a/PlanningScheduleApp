@@ -1,35 +1,35 @@
 ﻿using PlanningScheduleApp.Models;
 using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 using Xceed.Wpf.Toolkit;
 using MessageBox = System.Windows.MessageBox;
 
 namespace PlanningScheduleApp
 {
-    /// <summary>
-    /// Логика взаимодействия для ScheduleAddWindow.xaml
-    /// </summary>
     public partial class ScheduleAddWindow : Window
     {
-        public ObservableCollection<ScheduleTemplateModel> Days { get; set; }
+        public ObservableCollection<ScheduleTemplateModel> StaticDays { get; set; }
+        public ObservableCollection<ScheduleTemplateModel> FlexibleDays { get; set; }
+
+        public event EventHandler TemplateCreated;
 
         public ScheduleAddWindow()
         {
             InitializeComponent();
             InitializeDays();
+
+            FlexibleDays = new ObservableCollection<ScheduleTemplateModel>();
+
+            WorkingDaysCountCMB.ItemsSource = Enumerable.Range(1, 6);
+            WorkingDaysCountCMB.SelectedIndex = 0;
+            UpdateRestingDaysComboBox();
+
             DataContext = this;
         }
 
@@ -84,7 +84,7 @@ namespace PlanningScheduleApp
 
         private void InitializeDays()
         {
-            Days = new ObservableCollection<ScheduleTemplateModel>
+            StaticDays = new ObservableCollection<ScheduleTemplateModel>
             {
                 new ScheduleTemplateModel { Day = "Понедельник" },
                 new ScheduleTemplateModel { Day = "Вторник" },
@@ -108,19 +108,20 @@ namespace PlanningScheduleApp
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
-                int restingDaysCount = Days.Count(day => !day.isRestingDay);
+                int restingDaysCount = StaticDays.Count(day => day.isRestingDay);
+                int workingDaysCount = StaticDays.Count(day => !day.isRestingDay);
                 // Создание объекта Schedule_Template и вставка в базу данных
                 using (SqlCommand command = new SqlCommand("INSERT INTO Zarplats.dbo.Schedule_Template (TemplateName, isFlexible, RestingDaysCount, WorkingDaysCount) VALUES (@TemplateName, @isFlexible, @RestingDaysCount, @WorkingDaysCount); SELECT SCOPE_IDENTITY();", connection))
                 {
-                    command.Parameters.AddWithValue("@TemplateName", TemplateNameTBX.Text);
-                    command.Parameters.AddWithValue("@isFlexible", false); // Замените на ваше значение
-                    command.Parameters.AddWithValue("@RestingDaysCount", restingDaysCount); // Замените на ваше значение
-                    command.Parameters.AddWithValue("@WorkingDaysCount", Days.Count(day => day.isRestingDay));
+                    command.Parameters.AddWithValue("@TemplateName", $"{TemplateNameTBX.Text} {TemplateAdditionalNameTBX.Text}");
+                    command.Parameters.AddWithValue("@isFlexible", false);
+                    command.Parameters.AddWithValue("@RestingDaysCount", restingDaysCount);
+                    command.Parameters.AddWithValue("@WorkingDaysCount", workingDaysCount);
 
                     int templateId = Convert.ToInt32(command.ExecuteScalar());
 
                     // Создание объекта Schedule_StaticDays для каждого дня и вставка в базу данных
-                    foreach (var day in Days)
+                    foreach (var day in StaticDays)
                     {
                         using (SqlCommand staticDaysCommand = new SqlCommand("INSERT INTO Zarplats.dbo.Schedule_StaticDays (Day, WorkBegin, WorkEnd, LunchTime, Template_ID, isRestingDay) VALUES (@Day, @WorkBegin, @WorkEnd, @LunchTime, @Template_ID, @isRestingDay);", connection))
                         {
@@ -129,7 +130,7 @@ namespace PlanningScheduleApp
                             staticDaysCommand.Parameters.AddWithValue("@WorkEnd", day.WorkEnd ?? String.Empty);
                             staticDaysCommand.Parameters.AddWithValue("@LunchTime", day.LunchTime ?? 0);
                             staticDaysCommand.Parameters.AddWithValue("@Template_ID", templateId);
-                            staticDaysCommand.Parameters.AddWithValue("@isRestingDay", !day.isRestingDay);
+                            staticDaysCommand.Parameters.AddWithValue("@isRestingDay", day.isRestingDay);
 
                             staticDaysCommand.ExecuteNonQuery();
                         }
@@ -138,6 +139,49 @@ namespace PlanningScheduleApp
             }
 
             MessageBox.Show("График успешно добавлен в базу данных.");
+            TemplateCreated?.Invoke(this, EventArgs.Empty);
+        }
+
+        private void AddFlexibleTemplateBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(TemplateNameTBX.Text))
+            {
+                MessageBox.Show("Введите название графика.");
+                return;
+            }
+
+            string connectionString = "Persist Security Info=False;User ID=sa; Password=server_esa;Initial Catalog=dsl_sp;Server=sql";
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                connection.Open();
+                // Создание объекта Schedule_Template и вставка в базу данных
+                using (SqlCommand command = new SqlCommand("INSERT INTO Zarplats.dbo.Schedule_Template (TemplateName, isFlexible, RestingDaysCount, WorkingDaysCount) VALUES (@TemplateName, @isFlexible, @RestingDaysCount, @WorkingDaysCount)", connection))
+                {
+                    command.Parameters.AddWithValue("@TemplateName", $"{TemplateNameTBX.Text} {TemplateAdditionalNameTBX.Text}");
+                    command.Parameters.AddWithValue("@isFlexible", true);
+                    command.Parameters.AddWithValue("@RestingDaysCount", RestingDaysCountCMB.SelectedValue);
+                    command.Parameters.AddWithValue("@WorkingDaysCount", WorkingDaysCountCMB.SelectedValue);
+
+                    int templateId = Convert.ToInt32(command.ExecuteScalar());
+
+                    // Создание объекта Schedule_FlexibleDays для каждого дня и вставка в базу данных
+                    foreach (var day in FlexibleDays)
+                    {
+                        using (SqlCommand flexibleDaysCommand = new SqlCommand("INSERT INTO Zarplats.dbo.Schedule_FlexibleDays (WorkBegin, WorkEnd, LunchTime, Template_ID) VALUES (@WorkBegin, @WorkEnd, @LunchTime, @Template_ID);", connection))
+                        {
+                            flexibleDaysCommand.Parameters.AddWithValue("@WorkBegin", day.WorkBegin ?? String.Empty);
+                            flexibleDaysCommand.Parameters.AddWithValue("@WorkEnd", day.WorkEnd ?? String.Empty);
+                            flexibleDaysCommand.Parameters.AddWithValue("@LunchTime", day.LunchTime ?? 0);
+                            flexibleDaysCommand.Parameters.AddWithValue("@Template_ID", templateId);
+
+                            flexibleDaysCommand.ExecuteNonQuery();
+                        }
+                    }
+                }
+            }
+
+            MessageBox.Show("График успешно добавлен в базу данных.");
+            TemplateCreated?.Invoke(this, EventArgs.Empty);
         }
 
         private void MaskedTextBox_GotFocus(object sender, RoutedEventArgs e)
@@ -148,5 +192,105 @@ namespace PlanningScheduleApp
                 maskedTextBox.Dispatcher.BeginInvoke((Action)(() => { maskedTextBox.CaretIndex = 0; }));
             }
         }
+
+        private void WorkingDaysCountCMB_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ScheduleTB.SelectedIndex == 1)
+            {
+                TemplateAdditionalNameTBX.Text = $"({WorkingDaysCountCMB.SelectedValue}/{RestingDaysCountCMB.SelectedValue})";
+                UpdateRestingDaysComboBox();
+                UpdateFlexibleDaysCollection();
+            }
+        }
+
+        private void RestingDaysCountCMB_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (ScheduleTB.SelectedIndex == 1)
+            {
+                TemplateAdditionalNameTBX.Text = $"({WorkingDaysCountCMB.SelectedValue}/{RestingDaysCountCMB.SelectedValue})";
+                UpdateFlexibleDaysCollection();
+            }
+        }
+
+        public void UpdateFlexibleDaysCollection()
+        {
+            int workingDaysCount = WorkingDaysCountCMB.SelectedIndex + 1;
+
+            FlexibleDays.Clear();
+
+            for (int i = 0; i < workingDaysCount; i++)
+            {
+                FlexibleDays.Add(new ScheduleTemplateModel
+                {
+                    Day = $"День {i + 1}"
+                });
+            }
+
+            OnPropertyChanged(nameof(FlexibleDays));
+        }
+
+        private void UpdateRestingDaysComboBox()
+        {
+            int workingDaysCount = (int)WorkingDaysCountCMB.SelectedValue;
+            RestingDaysCountCMB.ItemsSource = Enumerable.Range(1, 7 - workingDaysCount);
+            RestingDaysCountCMB.SelectedIndex = 0;
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        private void isRestingDayCB_Checked(object sender, RoutedEventArgs e)
+        {
+            CheckBox checkBox = sender as CheckBox;
+
+            if (checkBox != null)
+            {
+                ScheduleTemplateModel day = checkBox.DataContext as ScheduleTemplateModel;
+
+                if (day != null)
+                {
+                    day.WorkBegin = string.Empty;
+                    day.WorkEnd = string.Empty;
+                    day.LunchTime = 0;
+                    day.isRestingDay = true;
+
+                    UpdateWorkingAndRestingDaysCount();
+                }
+            }
+        }
+
+        private void isRestingDayCB_Unchecked(object sender, RoutedEventArgs e)
+        {
+            CheckBox checkBox = sender as CheckBox;
+
+            if (checkBox != null)
+            {
+                ScheduleTemplateModel day = checkBox.DataContext as ScheduleTemplateModel;
+
+                if (day != null)
+                {
+                    day.WorkBegin = "08:00";
+                    day.WorkEnd = "17:00";
+                    day.LunchTime = 1;
+                    day.isRestingDay = false;
+
+                    UpdateWorkingAndRestingDaysCount();
+                }
+            }
+        }
+
+        private void UpdateWorkingAndRestingDaysCount()
+        {
+            int workingDaysCount = StaticDays.Count(day => !day.isRestingDay);
+            int restingDaysCount = StaticDays.Count(day => day.isRestingDay);
+
+            TemplateAdditionalNameTBX.Text = $"({workingDaysCount}/{restingDaysCount})";
+        }
+
+        
     }
 }

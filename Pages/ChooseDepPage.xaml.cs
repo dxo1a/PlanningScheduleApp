@@ -29,7 +29,7 @@ namespace PlanningScheduleApp.Pages
             string txt = SearchDepTBX.Text;
             if (txt.Length == 0)
                 deps = DepList;
-            deps = DepList.Where(u => u.Position.ToLower().Contains(txt.ToLower())).ToList();
+            deps = DepList.Where(u => u.Position.ToLower().Contains(txt.ToLower())).OrderBy(u => u.Position).ToList();
             DepLV.ItemsSource = deps;
         }
 

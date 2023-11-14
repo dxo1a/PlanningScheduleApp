@@ -6,8 +6,9 @@
         xmlns:local="clr-namespace:PlanningScheduleApp"
         xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
         xmlns:s="clr-namespace:System;assembly=mscorlib"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="Добавление графика" Height="500" Width="325">
+        Title="Добавление графика" MinHeight="520" Height="520" Width="325" MinWidth="325">
     <Window.Resources>
         <Style x:Key="BorderCustom" TargetType="Border">
             <Setter Property="BorderBrush" Value="#FFC1C1C1"/>
@@ -19,17 +20,94 @@
             <Setter Property="HorizontalAlignment" Value="Center"/>
             <Setter Property="Margin" Value="0 2.5"/>
         </Style>
+        <Style x:Key="CustomMTBX" TargetType="xctk:MaskedTextBox" BasedOn="{StaticResource TBXStyle}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding isRestingDay}" Value="True">
+                    <Setter Property="IsEnabled" Value="False"/>
+                    <Setter Property="materialDesign:TextFieldAssist.TextFieldCornerRadius" Value="0"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding isRestingDay}" Value="False">
+                    <Setter Property="IsEnabled" Value="True"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+        <Style x:Key="CustomTBX" TargetType="TextBox" BasedOn="{StaticResource TBXStyle}">
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding isRestingDay}" Value="True">
+                    <Setter Property="IsEnabled" Value="False"/>
+                    <Setter Property="materialDesign:TextFieldAssist.TextFieldCornerRadius" Value="0"/>
+                </DataTrigger>
+                <DataTrigger Binding="{Binding isRestingDay}" Value="False">
+                    <Setter Property="IsEnabled" Value="True"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="0.075*"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <TextBox Name="TemplateNameTBX" MaxWidth="250" Padding="5 7.5 5 0" Text="Название" Style="{StaticResource TBXStyle}" FontSize="15"/>
-        <TabControl Grid.Row="1">
+        <StackPanel Orientation="Horizontal" MinWidth="250" HorizontalAlignment="Center">
+            <TextBox Name="TemplateNameTBX" MinWidth="200" Padding="5 7.5 5 0" Style="{StaticResource TBXStyle}" FontSize="15" Margin="0 0 5 0"/>
+            <TextBox Name="TemplateAdditionalNameTBX" MinWidth="50" Padding="5 7.5 5 0" Style="{StaticResource TBXStyle}" FontSize="15" IsHitTestVisible="False"/>
+        </StackPanel>
+        <TabControl Grid.Row="1" Name="ScheduleTB">
             <TabItem Header="Фиксированный">
                 <StackPanel Orientation="Vertical" VerticalAlignment="Center">
-                    <ItemsControl Grid.Column="1" ItemsSource="{Binding Days}">
+                    <!--#region Заполнить--><!--
+                    <Border Style="{StaticResource BorderCustom}" Background="#FFEAEAEA"  MinWidth="300" BorderBrush="#FFD2D2D2">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Заполнить" VerticalAlignment="Center" FontSize="14" Margin="5 0 7.5 0"/>
+                            <TextBox Name="FillCountTBX" MinWidth="20" Padding="0 2 0 0" Style="{StaticResource TBXStyle}" Margin="0 0 5.5 0" TextAlignment="Center" Height="22" VerticalAlignment="Bottom" MaxLength="1"/>
+                            <xctk:MaskedTextBox Mask="00:00" MinWidth="45"  PromptChar=" " Margin="0 3 0 0" TextAlignment="Center" Padding="0 2 0 0" LostFocus="MTBX_LostFocus" PreviewTextInput="TBX_PreviewTextInput" PreviewKeyDown="TBX_PreviewKeyDown" GotFocus="MaskedTextBox_GotFocus">
+                                <xctk:MaskedTextBox.Style>
+                                    <Style TargetType="xctk:MaskedTextBox" BasedOn="{StaticResource TBXStyle}"/>
+                                </xctk:MaskedTextBox.Style>
+                            </xctk:MaskedTextBox>
+                            <TextBlock Text="-" VerticalAlignment="Center" Margin="5 0" FontSize="16" FontWeight="Bold"/>
+                            <xctk:MaskedTextBox Mask="00:00" MinWidth="45" PromptChar=" " Margin="0 3 0 0" TextAlignment="Center" Padding="0 2 0 0" LostFocus="MTBX_LostFocus" PreviewTextInput="TBX_PreviewTextInput" PreviewKeyDown="TBX_PreviewKeyDown" GotFocus="MaskedTextBox_GotFocus">
+                                <xctk:MaskedTextBox.Style>
+                                    <Style TargetType="xctk:MaskedTextBox" BasedOn="{StaticResource TBXStyle}"/>
+                                </xctk:MaskedTextBox.Style>
+                            </xctk:MaskedTextBox>
+                            <TextBox Style="{StaticResource TBXStyle}" Margin="5 3 5 0" MinWidth="45" TextAlignment="Center" Padding="0 2 0 0" PreviewTextInput="TBX_PreviewTextInput" PreviewKeyDown="TBX_PreviewKeyDown" MaxLength="4"/>
+                            <CheckBox/>
+                        </StackPanel>
+                    </Border>-->
+                    <!--#endregion-->
+                    <ItemsControl Grid.Column="1" ItemsSource="{Binding StaticDays}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Style="{StaticResource BorderCustom}" MinWidth="300">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Day}" VerticalAlignment="Center" FontSize="14" Margin="5 0 10 0" MinWidth="90"/>
+                                        <xctk:MaskedTextBox Style="{StaticResource CustomMTBX}" Mask="00:00" Text="{Binding WorkBegin}" MinWidth="45"  PromptChar=" " Margin="0 3 0 0" TextAlignment="Center" Padding="0 2 0 0" LostFocus="MTBX_LostFocus" PreviewTextInput="TBX_PreviewTextInput" PreviewKeyDown="TBX_PreviewKeyDown" GotFocus="MaskedTextBox_GotFocus"/>
+                                        <TextBlock Text="-" VerticalAlignment="Center" Margin="5 0" FontSize="16" FontWeight="Bold"/>
+                                        <xctk:MaskedTextBox Style="{StaticResource CustomMTBX}" Mask="00:00" Text="{Binding WorkEnd}" MinWidth="45" PromptChar=" " Margin="0 3 0 0" TextAlignment="Center" Padding="0 2 0 0" LostFocus="MTBX_LostFocus" PreviewTextInput="TBX_PreviewTextInput" PreviewKeyDown="TBX_PreviewKeyDown" GotFocus="MaskedTextBox_GotFocus"/>
+                                        <TextBox Text="{Binding LunchTime}" Style="{StaticResource CustomTBX}" Margin="5 3 5 0" MinWidth="45" TextAlignment="Center" Padding="0 2 0 0" PreviewTextInput="TBX_PreviewTextInput" PreviewKeyDown="TBX_PreviewKeyDown" MaxLength="4"/>
+                                        <CheckBox Name="isRestingDayCB" IsChecked="{Binding isRestingDay}" Checked="isRestingDayCB_Checked" Unchecked="isRestingDayCB_Unchecked"/>
+                                    </StackPanel>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <Button Name="AddFixedTemplateBtn" Width="85" Height="30" Padding="0" Content="Добавить" Margin="0 10 0 0" Click="AddFixedTemplateBtn_Click"/>
+                </StackPanel>
+            </TabItem>
+            <TabItem Header="Плавающий">
+                <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Margin="0 10 0 0">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <StackPanel Orientation="Vertical" Margin="5 0">
+                            <TextBlock Text="Кол-во рабочих дней"/>
+                            <ComboBox Name="WorkingDaysCountCMB" SelectionChanged="WorkingDaysCountCMB_SelectionChanged"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Vertical" Margin="5 0">
+                            <TextBlock Text="Кол-во выходных дней"/>
+                            <ComboBox Name="RestingDaysCountCMB" SelectionChanged="RestingDaysCountCMB_SelectionChanged"/>
+                        </StackPanel>
+                    </StackPanel>
+                    <ItemsControl Grid.Column="1" ItemsSource="{Binding FlexibleDays}" Margin="0 15 0 0">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
                                 <Border Style="{StaticResource BorderCustom}" MinWidth="300">
@@ -47,18 +125,14 @@
                                             </xctk:MaskedTextBox.Style>
                                         </xctk:MaskedTextBox>
                                         <TextBox Text="{Binding LunchTime}" Style="{StaticResource TBXStyle}" Margin="5 3 5 0" MinWidth="45" TextAlignment="Center" Padding="0 0 0 5" PreviewTextInput="TBX_PreviewTextInput" PreviewKeyDown="TBX_PreviewKeyDown" MaxLength="4"/>
-                                        <CheckBox IsChecked="{Binding isRestingDay}"/>
                                     </StackPanel>
                                 </Border>
-                                
                             </DataTemplate>
                         </ItemsControl.ItemTemplate>
                     </ItemsControl>
-                    <Button Name="AddFixedTemplateBtn" Width="85" Height="30" Padding="0" Content="Добавить" Margin="0 10 0 0" Click="AddFixedTemplateBtn_Click"/>
+                    <Button Name="AddFlexibleTemplateBtn" Width="85" Height="30" Padding="0" Content="Добавить" Margin="0 10 0 0" Click="AddFlexibleTemplateBtn_Click"/>
                 </StackPanel>
             </TabItem>
-            <TabItem Header="Плавающий"/>
         </TabControl>
-        
     </Grid>
 </Window>

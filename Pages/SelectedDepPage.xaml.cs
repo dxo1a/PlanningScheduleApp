@@ -45,7 +45,17 @@ namespace PlanningScheduleApp.Pages
         public void UpdateTemplatesList()
         {
             ScheduleTemplateList = Odb.db.Database.SqlQuery<ScheduleTemplateModel>("select distinct ID_Template, TemplateName, isFlexible, RestingDaysCount, WorkingDaysCount from Zarplats.dbo.Schedule_Template as a").ToList();
-            TemplateCB.ItemsSource = ScheduleTemplateList;
+            if (ScheduleTemplateList.Count <= 0)
+            {
+                TemplateCB.SelectedItem = null;
+                TemplateCB.IsEnabled = false;
+            }
+            else
+            {
+                TemplateCB.SelectedIndex = 0;
+                TemplateCB.IsEnabled = true;
+                TemplateCB.ItemsSource = ScheduleTemplateList;
+            }
         }
 
         private void StaffRemoveBtn_Click(object sender, RoutedEventArgs e) => DeleteRow();
@@ -205,7 +215,6 @@ namespace PlanningScheduleApp.Pages
         private void TemplateCB_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             SelectedTemplate = (ScheduleTemplateModel)TemplateCB.SelectedItem;
-            MessageBox.Show($"SelectedTemplate Info:\nID: {SelectedTemplate.ID_Template}\nName: {SelectedTemplate.TemplateName}\nRestingDaysCount: {SelectedTemplate.RestingDaysCount}\nisFlexible: {SelectedTemplate.isFlexible}");
         }
 
         private void AddScheduleBtn_Click(object sender, RoutedEventArgs e)
@@ -288,20 +297,6 @@ namespace PlanningScheduleApp.Pages
             UpdateTemplatesList();
         }
 
-        private void TestBtn_Click(object sender, RoutedEventArgs e)
-        {
-            List<ScheduleTemplateModel> Days = GetDaysInfo(SelectedTemplate.ID_Template);
-            List<ScheduleTemplateModel> RestingDays = new List<ScheduleTemplateModel>();
-            foreach (var day in Days)
-            {
-                if (day.isRestingDay == true)
-                {
-                    RestingDays.Add(day);
-                    MessageBox.Show($"Добавлен выходной день: {day.Day}");
-                }
-            }
-        }
-
         private void ClearBtn_Click(object sender, RoutedEventArgs e)
         {
             StaffTBX.Clear();
@@ -312,7 +307,19 @@ namespace PlanningScheduleApp.Pages
         private void ManageScheduleBtn_Click(object sender, RoutedEventArgs e)
         {
             ScheduleManageWindow scheduleManageWindow = new ScheduleManageWindow();
+            scheduleManageWindow.TemplateCreated += ScheduleManageWindow_TemplateCreated;
+            scheduleManageWindow.TemplateDeleted += ScheduleManageWindow_TemplateDeleted;
             scheduleManageWindow.ShowDialog();
+        }
+
+        private void ScheduleManageWindow_TemplateCreated(object sender, EventArgs e)
+        {
+            UpdateTemplatesList();
+        }
+
+        private void ScheduleManageWindow_TemplateDeleted(object sender, EventArgs e)
+        {
+            UpdateTemplatesList();
         }
 
         /*

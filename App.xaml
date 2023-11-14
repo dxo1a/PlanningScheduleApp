@@ -244,6 +244,7 @@
             </Style>
 
             <Style x:Key="TBXStyle" TargetType="TextBox" BasedOn="{StaticResource MaterialDesignTextBox}">
+                <Setter Property="MinHeight" Value="22"/>
                 <Setter Property="Padding" Value="10 5 35 0"/>
                 <Setter Property="BorderBrush" Value="Black"/>
                 <Setter Property="Background" Value="White"/>

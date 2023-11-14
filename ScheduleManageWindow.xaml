@@ -27,7 +27,7 @@
         <DataGrid Name="TemplatesDG" AutoGenerateColumns="False" Grid.Row="2" IsReadOnly="True" SelectionMode="Single" Style="{StaticResource DataGridOwn}" CanUserAddRows="False" MouseDoubleClick="TemplatesDG_MouseDoubleClick" SelectionChanged="TemplatesDG_SelectionChanged">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Название" Binding="{Binding TemplateName}" MinWidth="100" Width="*"/>
-                <DataGridTemplateColumn Header="Тип" MinWidth="130" MaxWidth="130">
+                <DataGridTemplateColumn Header="Тип" MinWidth="130" MaxWidth="135">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBlock x:Name="textBlock" Text="{Binding isFlexible}" HorizontalAlignment="Center"/>

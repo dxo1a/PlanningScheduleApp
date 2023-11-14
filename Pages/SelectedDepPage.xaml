@@ -141,9 +141,9 @@
                         </StackPanel>
                         <ListView Name="StaffLV" ScrollViewer.CanContentScroll="False" HorizontalAlignment="Center" MinWidth="220" Visibility="Collapsed" MaxHeight="90" FontSize="12" Margin="5 0" Style="{x:Null}" Background="LightGray" BorderThickness="1 0 1 1" SelectionChanged="StaffLV_SelectionChanged"/>
                     </StackPanel>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" MinWidth="200">
                         <TextBlock Text="Тип графика" Margin="5 0" VerticalAlignment="Center"/>
-                        <ComboBox Name="TemplateCB" Width="75" Padding="25 2.5 0 2.5" SelectionChanged="TemplateCB_SelectionChanged" DropDownOpened="TemplateCB_DropDownOpened"/>
+                        <ComboBox Name="TemplateCB" Width="100" Padding="0 2.5" SelectionChanged="TemplateCB_SelectionChanged" DropDownOpened="TemplateCB_DropDownOpened"/>
                         <Button Name="ManageScheduleBtn" Width="25" Height="25" Padding="0" Margin="10 0 0 0" Click="ManageScheduleBtn_Click" Background="LightGray" BorderBrush="LightGray">
                             <Image Source="/Resources/icons/misc/schedule.ico" MaxWidth="20" MaxHeight="20"/>
                         </Button>

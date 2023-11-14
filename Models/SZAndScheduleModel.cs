@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Windows.Documents;
 
 namespace PlanningScheduleApp.Models
@@ -90,7 +91,7 @@ namespace PlanningScheduleApp.Models
         }
     }
 
-    public class ScheduleTemplateModel
+    public class ScheduleTemplateModel : INotifyPropertyChanged
     {
         public int ID_Template { get; set; }
         public string TemplateName { get; set; }
@@ -98,17 +99,75 @@ namespace PlanningScheduleApp.Models
         public int RestingDaysCount { get; set; }
         public int WorkingDaysCount { get; set; }
 
-        public string WorkBegin { get; set; }
-        public string WorkEnd { get; set; }
-        public double? LunchTime { get; set; }
+        private string _workBegin { get; set; }
+        private string _workEnd { get; set; }
+        private double? _lunchTime { get; set; }
         public double? WorkingHours { get; set; }
 
         public string Day { get; set; }
-        public bool isRestingDay { get; set; }
+        private bool _isRestingDay { get; set; }
+
+        public int ID_Day { get; set; }
 
         public override string ToString()
         {
             return $"{TemplateName}";
+        }
+
+        public string WorkBegin
+        {
+            get { return _workBegin; }
+            set
+            {
+                if (_workBegin != value)
+                {
+                    _workBegin = value;
+                    OnPropertyChanged(nameof(WorkBegin));
+                }
+            }
+        }
+
+        public string WorkEnd
+        {
+            get { return _workEnd; }
+            set
+            {
+                if (_workEnd != value)
+                {
+                    _workEnd = value;
+                    OnPropertyChanged(nameof(WorkEnd));
+                }
+            }
+        }
+
+        public double? LunchTime
+        {
+            get { return _lunchTime; }
+            set
+            {
+                _lunchTime = value;
+                OnPropertyChanged(nameof(LunchTime));
+            }
+        }
+
+        public bool isRestingDay
+        {
+            get { return _isRestingDay; }
+            set
+            {
+                if (_isRestingDay != value)
+                {
+                    _isRestingDay = value;
+                    OnPropertyChanged(nameof(isRestingDay));
+                }
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 }
