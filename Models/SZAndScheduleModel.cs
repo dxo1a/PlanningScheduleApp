@@ -43,21 +43,21 @@ namespace PlanningScheduleApp.Models
     public class StaffModel
     {
         public int ID_Schedule { get; set; }
-        public int STAFF_ID { get; private set; }
+        public int STAFF_ID { get; set; }
         public string TABEL_ID { get; set; }
-        public string SHORT_FIO { get; private set; }
-        public string WorkBegin { get; private set; }
-        public string WorkEnd { get; private set; }
-        public string LunchTimeBegin { get; private set; }
-        public string LunchTimeEnd { get; private set; }
+        public string SHORT_FIO { get; set; }
+        public string WorkBegin { get; set; }
+        public string WorkEnd { get; set; }
+        public string LunchTimeBegin { get; set; }
+        public string LunchTimeEnd { get; set; }
         public DateTime DTA { get; set; }
         public double? WorkingHours { get; set; }
-        public string CauseAbsence { get; private set; }
-        public DateTime? DateBegin { get; private set; }
-        public DateTime? DateEnd { get; private set; }
-        public string CauseTimeOff { get; private set; }
-        public string TimeBegin { get; private set; }
-        public string TimeEnd { get; private set; }
+        public string CauseAbsence { get; set; }
+        public DateTime? DateBegin { get; set; }
+        public DateTime? DateEnd { get; set; }
+        public string CauseTimeOff { get; set; }
+        public string TimeBegin { get; set; }
+        public string TimeEnd { get; set; }
 
         public double? TotalHours { get; set; }
         public double? FreeHours { get; set; }
