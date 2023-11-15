@@ -184,7 +184,7 @@ namespace PlanningScheduleApp.Pages
         private void UpdateGrid()
         {
             SearchTBX.Clear();
-            StaffList = Odb.db.Database.SqlQuery<StaffModel>("SELECT DISTINCT a.ID_Schedule, a.STAFF_ID, LTRIM(e.TABEL_ID) as TABEL_ID, e.SHORT_FIO, a.WorkBegin, a.WorkEnd, a.DTA, a.LunchTimeBegin, a.LunchTimeEnd, a.WorkingHours, c.Cause as CauseAbsence, b.DateBegin, b.DateEnd, d.Cause as CauseTimeOff, d.TimeBegin, d.TimeEnd FROM [Zarplats].[dbo].[Staff_Schedule] as a left join Zarplats.dbo.Schedule_Absence as b on a.STAFF_ID = b.id_Staff and a.DTA between b.DateBegin and b.DateEnd left join Zarplats.dbo.AbsenceRef as c on b.AbsenceRef_ID = c.ID_AbsenceRef left join Zarplats.dbo.Schedule_TimeOff as d on a.STAFF_ID = d.id_Staff and a.DTA = d.DTA left join perco...staff as e on a.STAFF_ID = e.ID_STAFF left join Zarplats.dbo.StaffView as f on a.STAFF_ID = f.STAFF_ID where f.Position = @podrazd order by a.DTA", new SqlParameter("podrazd", SelectedDep.Position)).ToList();
+            StaffList = Odb.db.Database.SqlQuery<StaffModel>("SELECT DISTINCT a.ID_Schedule, a.STAFF_ID, LTRIM(e.TABEL_ID) as TABEL_ID, e.SHORT_FIO, a.WorkBegin, a.WorkEnd, a.DTA, a.LunchTimeBegin, a.LunchTimeEnd, a.WorkingHours, c.Cause as CauseAbsence, b.DateBegin, b.DateEnd, b.TimeBegin, b.TimeEnd FROM [Zarplats].[dbo].[Staff_Schedule] as a left join Zarplats.dbo.Schedule_Absence as b on a.STAFF_ID = b.id_Staff and a.DTA between b.DateBegin and b.DateEnd left join Zarplats.dbo.AbsenceRef as c on b.AbsenceRef_ID = c.ID_AbsenceRef left join perco...staff as e on a.STAFF_ID = e.ID_STAFF left join Zarplats.dbo.StaffView as f on a.STAFF_ID = f.STAFF_ID where f.Position = @podrazd order by a.DTA", new SqlParameter("podrazd", SelectedDep.Position)).ToList();
             StaffDG.ItemsSource = StaffList;
         }
 
@@ -242,8 +242,15 @@ namespace PlanningScheduleApp.Pages
 
                         var flexibleDay = flexibleDays[flexibleDaysIndex];
 
+                        DateTime workBegin = ConvertToDateTime(current, flexibleDay.WorkBegin);
+                        DateTime workEnd = ConvertToDateTime(current, flexibleDay.WorkEnd);
+                        DateTime lunchTimeBegin = ConvertToDateTime(current, flexibleDay.LunchTimeBegin);
+                        DateTime lunchTimeEnd = ConvertToDateTime(current, flexibleDay.LunchTimeEnd);
+
+                        double workingHours = CalculateWorkingHours(workBegin, workEnd, lunchTimeBegin, lunchTimeEnd, current);
+
                         Odb.db.Database.ExecuteSqlCommand("INSERT INTO Zarplats.dbo.Staff_Schedule(WorkBegin, WorkEnd, DTA, STAFF_ID, LunchTimeBegin, LunchTimeEnd, WorkingHours) VALUES (@workbegin, @workend, @dta, @staffid, @lunchtimebegin, @lunchtimeend, @workinghours)",
-                            new SqlParameter("workbegin", flexibleDay.WorkBegin), new SqlParameter("workend", flexibleDay.WorkEnd), new SqlParameter("dta", current.Date), new SqlParameter("staffid", SelectedStaff.STAFF_ID), new SqlParameter("lunchtimebegin", flexibleDay.LunchTimeBegin), new SqlParameter("lunchtimeend", flexibleDay.LunchTimeEnd), new SqlParameter("workinghours", 8));
+                            new SqlParameter("workbegin", flexibleDay.WorkBegin), new SqlParameter("workend", flexibleDay.WorkEnd), new SqlParameter("dta", current.Date), new SqlParameter("staffid", SelectedStaff.STAFF_ID), new SqlParameter("lunchtimebegin", flexibleDay.LunchTimeBegin), new SqlParameter("lunchtimeend", flexibleDay.LunchTimeEnd), new SqlParameter("workinghours", workingHours));
 
                         flexibleDaysIndex++;
                         current = current.AddDays(1);
@@ -266,8 +273,15 @@ namespace PlanningScheduleApp.Pages
                     {
                         if (currentDay != null && !currentDay.isRestingDay)
                         {
+                            DateTime workBegin = ConvertToDateTime(current, currentDay.WorkBegin);
+                            DateTime workEnd = ConvertToDateTime(current, currentDay.WorkEnd);
+                            DateTime lunchTimeBegin = ConvertToDateTime(current, currentDay.LunchTimeBegin);
+                            DateTime lunchTimeEnd = ConvertToDateTime(current, currentDay.LunchTimeEnd);
+
+                            double workingHours = CalculateWorkingHours(workBegin, workEnd, lunchTimeBegin, lunchTimeEnd, current);
+
                             Odb.db.Database.ExecuteSqlCommand("INSERT INTO Zarplats.dbo.Staff_Schedule(WorkBegin, WorkEnd, DTA, STAFF_ID, LunchTimeBegin, LunchTimeEnd, WorkingHours) VALUES (@workbegin, @workend, @dta, @staffid, @lunchtimebegin, @lunchtimeend, @workinghours)",
-                                new SqlParameter("workbegin", currentDay.WorkBegin), new SqlParameter("workend", currentDay.WorkEnd), new SqlParameter("dta", current.Date), new SqlParameter("staffid", SelectedStaff.STAFF_ID), new SqlParameter("lunchtimebegin", currentDay.LunchTimeBegin), new SqlParameter("lunchtimeend", currentDay.LunchTimeEnd), new SqlParameter("workinghours", 8));
+                                new SqlParameter("workbegin", currentDay.WorkBegin), new SqlParameter("workend", currentDay.WorkEnd), new SqlParameter("dta", current.Date), new SqlParameter("staffid", SelectedStaff.STAFF_ID), new SqlParameter("lunchtimebegin", currentDay.LunchTimeBegin), new SqlParameter("lunchtimeend", currentDay.LunchTimeEnd), new SqlParameter("workinghours", workingHours));
                         }
 
                         current = current.AddDays(1);
@@ -316,103 +330,55 @@ namespace PlanningScheduleApp.Pages
             UpdateTemplatesList();
         }
 
-        /*
-        private void ParseToDateTime()
+        public DateTime ConvertToDateTime(DateTime date, string time)
         {
-            string startTimeText = StartTimeMTBX.Text;
-            string finishTimeText = FinishTimeMTBX.Text;
-
-            DateTime startDate = ScheduleStartDP.SelectedDate ?? DateTime.Now.Date;
-            DateTime finishDate = ScheduleFinishDP.SelectedDate ?? DateTime.Now.Date;
-
-            // Преобразование в double для высчитывания рабочих часов
-            TimeSpan startTimeSpan = TimeSpan.Parse(startTimeText);
-            TimeSpan finishTimeSpan = TimeSpan.Parse(finishTimeText);
-            double startTotalHours = startTimeSpan.TotalHours;
-            double finishTotalHours = finishTimeSpan.TotalHours;
-
-            WorkingHours = finishTotalHours - startTotalHours;
-            if (double.TryParse(LunchTimeTBX.Text, out LunchTime))
+            DateTime dateTime;
+            if (DateTime.TryParseExact(time, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out dateTime))
             {
-                WorkingHours = WorkingHours - LunchTime;
+                return new DateTime(date.Year, date.Month, date.Day, dateTime.Hour, dateTime.Minute, dateTime.Second);
             }
-            
-
-            // Преобразование string в DateTime и объединение времени с датой
-            if (DateTime.TryParseExact(startTimeText, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedStartTime))
-            {
-                combinedStartDateTime = new DateTime(startDate.Year, startDate.Month, startDate.Day, parsedStartTime.Hour, parsedStartTime.Minute, 0);
-            }
-
-            if (DateTime.TryParseExact(finishTimeText, "HH:mm", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime parsedFinishTime))
-            {
-                combinedFinishDateTime = new DateTime(finishDate.Year, finishDate.Month, finishDate.Day, parsedFinishTime.Hour, parsedFinishTime.Minute, 0);
-            }
+            return DateTime.MinValue;
         }
 
-        private void AddSchedules()
+        private double CalculateWorkingHours(DateTime workBegin, DateTime workEnd, DateTime lunchTimeBegin, DateTime lunchTimeEnd, DateTime date)
         {
-            DateTime selectedStartDate = ScheduleStartDP.SelectedDate ?? DateTime.Now;
-            DateTime selectedFinishDate = ScheduleFinishDP.SelectedDate ?? DateTime.Now;
-            DateTime currentDay = selectedStartDate;
+            double totalWorkingHours = (workEnd - workBegin).TotalHours;
+            double lunchTime = (lunchTimeEnd - lunchTimeBegin).TotalHours;
+            double absenceHours = CalculateAbsenceHours(SelectedStaff.STAFF_ID, date, date);
 
-            #region
-            int count = Odb.db.Database.SqlQuery<int>("select count(*) from Zarplats.dbo.Staff_Schedule where DTA between @startDate and @finishDate and STAFF_ID = @staffid",
-                new SqlParameter("startDate", selectedStartDate), new SqlParameter("finishDate", selectedFinishDate), new SqlParameter("staffid", SelectedStaff.STAFF_ID)).FirstOrDefault();
-            if (count > 0)
+            return totalWorkingHours - lunchTime - absenceHours;
+        }
+
+        private double CalculateAbsenceHours(int staffId, DateTime dateBegin, DateTime dateEnd)
+        {
+            double absenceHours = 0;
+            string connectionString = "Persist Security Info=False;User ID=sa; Password=server_esa;Initial Catalog=dsl_sp;Server=sql";
+            using (SqlConnection connection = new SqlConnection(connectionString))
             {
-                MessageBoxResult result = MessageBox.Show("Записи на некоторые дни уже существуют. Заменить их?");
-                if (result == MessageBoxResult.OK)
-                {
-                    // Удалить существующие записи в заданном диапазоне дат
-                    Odb.db.Database.ExecuteSqlCommand("DELETE FROM Zarplats.dbo.Staff_Schedule WHERE DTA BETWEEN @startDate AND @finishDate AND STAFF_ID = @staffid",
-                        new SqlParameter("startDate", selectedStartDate), new SqlParameter("finishDate", selectedFinishDate), new SqlParameter("staffid", SelectedStaff.STAFF_ID));
-                }
-                else
-                {
-                    // Отменить добавление новых записей
-                    return;
-                }
-            }
-            #endregion
+                connection.Open();
 
-            if (TemplateCB.SelectedIndex == 1)
-            {
-                while (currentDay.DayOfWeek == DayOfWeek.Saturday || currentDay.DayOfWeek == DayOfWeek.Sunday)
+                string query = "SELECT TimeBegin, TimeEnd FROM Zarplats.dbo.Schedule_Absence WHERE id_Staff = @staffId AND DateBegin >= @dateBegin AND DateEnd <= @dateEnd";
+                using (SqlCommand command = new SqlCommand(query, connection))
                 {
-                    currentDay = currentDay.AddDays(1);
-                }
+                    command.Parameters.AddWithValue("@staffId", staffId);
+                    command.Parameters.AddWithValue("@dateBegin", dateBegin);
+                    command.Parameters.AddWithValue("@dateEnd", dateEnd);
 
-                while (currentDay <= selectedFinishDate)
-                {
-                    // Проверка, является ли текущий день рабочим днем (пн-пт)
-                    if (currentDay.DayOfWeek != DayOfWeek.Saturday && currentDay.DayOfWeek != DayOfWeek.Sunday) // если этот день не является isRestingDay (нужно заранее сформировать и получить список дней типа ScheduleTemplateModel там и будет isRestingDay
+                    using (SqlDataReader reader = command.ExecuteReader())
                     {
-                        DateTime workBegin = new DateTime(currentDay.Year, currentDay.Month, currentDay.Day, combinedStartDateTime.Hour, combinedStartDateTime.Minute, 0);
-                        DateTime workEnd = new DateTime(currentDay.Year, currentDay.Month, currentDay.Day, combinedFinishDateTime.Hour, combinedFinishDateTime.Minute, 0);
+                        while (reader.Read())
+                        {
+                            DateTime absenceTimeBegin = ConvertToDateTime(dateBegin, reader["TimeBegin"].ToString());
+                            DateTime absenceTimeEnd = ConvertToDateTime(dateEnd, reader["TimeEnd"].ToString());
 
-                        Odb.db.Database.ExecuteSqlCommand("INSERT INTO Zarplats.dbo.Staff_Schedule(WorkBegin, WorkEnd, DTA, STAFF_ID, LunchTime, WorkingHours) VALUES (@workbegin, @workend, @dta, @staffid, @lunchtime, @workinghours)",
-                            new SqlParameter("workbegin", workBegin), new SqlParameter("workend", workEnd), new SqlParameter("dta", currentDay.Date), new SqlParameter("staffid", SelectedStaff.STAFF_ID), new SqlParameter("lunchtime", LunchTime), new SqlParameter("workinghours", WorkingHours));
-                    }
-
-                    // Переход к следующему дню
-                    currentDay = currentDay.AddDays(1);
-                    while (currentDay.DayOfWeek == DayOfWeek.Saturday || currentDay.DayOfWeek == DayOfWeek.Sunday)
-                    {
-                        currentDay = currentDay.AddDays(1);
+                            absenceHours += (absenceTimeEnd - absenceTimeBegin).TotalHours;
+                        }
                     }
                 }
             }
-        }
 
-        private bool isRequiredFieldsNotEmpty()
-        {
-            if (StaffLV.SelectedItem != null && StartTimeMTBX.Value != null && FinishTimeMTBX.Value != null && ScheduleStartDP.SelectedDate != null && ScheduleFinishDP.SelectedDate != null && LunchTimeTBX.Text != String.Empty && TemplateCB.SelectedItem != null)
-                return true;
-            else
-                return false;
+            return absenceHours;
         }
-        */
     }
 
     public class filterCMB

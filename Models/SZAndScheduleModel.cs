@@ -98,12 +98,26 @@ namespace PlanningScheduleApp.Models
             }
         }
 
-        public string TimeOff
+        public string AbsenceTime
         {
             get
             {
-                if (TimeBegin != null && TimeEnd != null)
+                if (TimeBegin != null && TimeEnd != null && TimeBegin != string.Empty && TimeEnd != string.Empty)
                     return $"{TimeBegin} - {TimeEnd}";
+                else
+                    return string.Empty;
+            }
+        }
+
+        public string AbsenceDate
+        {
+            get
+            {
+                if (DateBegin != null && DateEnd != null)
+                    if (DateBegin == DateEnd)
+                        return $"{DateBegin:dd.MM.yyyy}";
+                    else
+                        return $"{DateBegin:dd.MM.yyyy} - {DateEnd:dd.MM.yyyy}";
                 else
                     return string.Empty;
             }

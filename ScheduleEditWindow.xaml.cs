@@ -221,8 +221,8 @@ namespace PlanningScheduleApp
                 using (SqlConnection connection = new SqlConnection(connectionString))
                 {
                     connection.Open();
-                    int restingDaysCount = StaticDays.Count(day => !day.isRestingDay);
-                    int workingDaysCount = StaticDays.Count(day => day.isRestingDay);
+                    int restingDaysCount = StaticDays.Count(day => day.isRestingDay);
+                    int workingDaysCount = StaticDays.Count(day => !day.isRestingDay);
                     using (SqlCommand updateTemplateCommand = new SqlCommand("UPDATE Zarplats.dbo.Schedule_Template SET TemplateName = @TemplateName, RestingDaysCount = @RestingDaysCount, WorkingDaysCount = @WorkingDaysCount WHERE ID_Template = @templateid", connection))
                     {
                         updateTemplateCommand.Parameters.AddWithValue("@templateid", SelectedTemplate.ID_Template);
@@ -234,11 +234,11 @@ namespace PlanningScheduleApp
                         {
                             using (SqlCommand staticDaysCommand = new SqlCommand("UPDATE Zarplats.dbo.Schedule_StaticDays SET WorkBegin = @WorkBegin, WorkEnd = @WorkEnd, LunchTimeBegin = @LunchTimeBegin, LunchTimeEnd = @LunchTimeEnd, isRestingDay = @isRestingDay WHERE Template_ID = @templateid and ID_Day = @idday", connection))
                             {
-                                staticDaysCommand.Parameters.AddWithValue("@WorkBegin", day.WorkEnd != null && day.WorkBegin.Any(char.IsDigit) ? day.WorkBegin : (object)DBNull.Value);
-                                staticDaysCommand.Parameters.AddWithValue("@WorkEnd", day.WorkEnd != null && day.WorkEnd.Any(char.IsDigit) ? day.WorkEnd : (object)DBNull.Value);
+                                staticDaysCommand.Parameters.AddWithValue("@WorkBegin", day.WorkEnd != null && day.WorkBegin.Any(char.IsDigit) ? day.WorkBegin : string.Empty);
+                                staticDaysCommand.Parameters.AddWithValue("@WorkEnd", day.WorkEnd != null && day.WorkEnd.Any(char.IsDigit) ? day.WorkEnd : string.Empty);
                                 staticDaysCommand.Parameters.AddWithValue("@LunchTimeBegin", day.LunchTimeBegin ?? string.Empty);
                                 staticDaysCommand.Parameters.AddWithValue("@LunchTimeEnd", day.LunchTimeEnd ?? string.Empty);
-                                staticDaysCommand.Parameters.AddWithValue("@isRestingDay", !day.isRestingDay);
+                                staticDaysCommand.Parameters.AddWithValue("@isRestingDay", day.isRestingDay);
                                 staticDaysCommand.Parameters.AddWithValue("@templateid", SelectedTemplate.ID_Template);
                                 staticDaysCommand.Parameters.AddWithValue("@idday", day.ID_Day);
 

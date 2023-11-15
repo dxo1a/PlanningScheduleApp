@@ -90,13 +90,13 @@
                 </Style>
             </DataGrid.ColumnHeaderStyle>
             <DataGrid.Columns>
-                <DataGridTextColumn Binding="{Binding STAFF_ID}" Header="Код сотрудника" Width="*" IsReadOnly="True" MinWidth="80"/>
-                <DataGridTextColumn Binding="{Binding TABEL_ID}" Header="Таб. номер" Width="*" IsReadOnly="True" MinWidth="55"/>
+                <DataGridTextColumn Binding="{Binding STAFF_ID}" Header="Код сотрудника" Width="*" IsReadOnly="True" MinWidth="80" MaxWidth="80"/>
+                <DataGridTextColumn Binding="{Binding TABEL_ID}" Header="Таб. номер" Width="*" IsReadOnly="True" MinWidth="55" MaxWidth="70"/>
                 <DataGridTextColumn Binding="{Binding SHORT_FIO}" Header="ФИО" Width="*" IsReadOnly="True" MinWidth="90"/>
-                <DataGridTextColumn Binding="{Binding WorkTime}" Header="Время работы" Width="*" IsReadOnly="True" MinWidth="100"/>
-                <DataGridTextColumn Binding="{Binding DTA, Converter={StaticResource DateWithDayConverter}}" Header="Дата" Width="*" IsReadOnly="True" MinWidth="170"/>
-                <DataGridTextColumn Binding="{Binding LunchTime}" Header="Обед" Width="*" IsReadOnly="True" MinWidth="100"/>
-                <DataGridTextColumn Binding="{Binding WorkingHours}" Header="Рабочие часы" Width="*" IsReadOnly="True" MinWidth="60"/>
+                <DataGridTextColumn Binding="{Binding WorkTime}" Header="Время работы" Width="*" IsReadOnly="True" MinWidth="100" MaxWidth="100"/>
+                <DataGridTextColumn Binding="{Binding DTA, Converter={StaticResource DateWithDayConverter}}" Header="Дата" Width="*" IsReadOnly="True" MinWidth="170" MaxWidth="170"/>
+                <DataGridTextColumn Binding="{Binding LunchTime}" Header="Обед" Width="*" IsReadOnly="True" MinWidth="100" MaxWidth="100"/>
+                <DataGridTextColumn Binding="{Binding WorkingHours, StringFormat=0.##}" Header="Рабочие часы" Width="*" IsReadOnly="True" MaxWidth="60" MinWidth="60"/>
                 <DataGridTextColumn Header="Отсутствия" MinWidth="90">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
@@ -109,21 +109,8 @@
                         </Style>
                     </DataGridTextColumn.ElementStyle>
                 </DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding DateBegin, StringFormat=dd.MM.yyyy}" Header="Начало" Width="*" IsReadOnly="True" MinWidth="85"/>
-                <DataGridTextColumn Binding="{Binding DateEnd, StringFormat=dd.MM.yyyy}" Header="Окончание" Width="*" IsReadOnly="True" MinWidth="85"/>
-                <DataGridTextColumn Header="Отпрашивания" MinWidth="100">
-                    <DataGridTextColumn.ElementStyle>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="Text" Value="{Binding CauseTimeOff}" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding CauseAbsence}" Value="">
-                                    <Setter Property="Text" Value="{x:Null}" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </DataGridTextColumn.ElementStyle>
-                </DataGridTextColumn>
-                <DataGridTextColumn Binding="{Binding TimeOff}" Header="Время" Width="*" IsReadOnly="True" MinWidth="100" MaxWidth="100"/>
+                <DataGridTextColumn Binding="{Binding AbsenceDate, StringFormat=dd.MM.yyyy}" Header="Дата" Width="*" IsReadOnly="True" MinWidth="90" MaxWidth="160"/>
+                <DataGridTextColumn Binding="{Binding AbsenceTime}" Header="Время" Width="*" IsReadOnly="True" MaxWidth="100" MinWidth="100"/>
             </DataGrid.Columns>
         </DataGrid>
         <DockPanel Grid.Row="1" Grid.Column="2" Background="#F0F0F0" Margin="0 0 0 5">
