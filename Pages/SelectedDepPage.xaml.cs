@@ -184,7 +184,7 @@ namespace PlanningScheduleApp.Pages
         private void UpdateGrid()
         {
             SearchTBX.Clear();
-            StaffList = Odb.db.Database.SqlQuery<StaffModel>("SELECT DISTINCT a.ID_Schedule, a.STAFF_ID, LTRIM(e.TABEL_ID) as TABEL_ID, e.SHORT_FIO, a.WorkBegin, a.WorkEnd, a.DTA, a.LunchTime, a.WorkingHours, c.Cause as CauseAbsence, b.DateBegin, b.DateEnd, d.Cause as CauseTimeOff, d.TimeBegin, d.TimeEnd FROM [Zarplats].[dbo].[Staff_Schedule] as a left join Zarplats.dbo.Schedule_Absence as b on a.STAFF_ID = b.id_Staff and a.DTA between b.DateBegin and b.DateEnd left join Zarplats.dbo.AbsenceRef as c on b.AbsenceRef_ID = c.ID_AbsenceRef left join Zarplats.dbo.Schedule_TimeOff as d on a.STAFF_ID = d.id_Staff and a.DTA = d.DTA left join perco...staff as e on a.STAFF_ID = e.ID_STAFF left join Zarplats.dbo.StaffView as f on a.STAFF_ID = f.STAFF_ID where f.Position = @podrazd order by a.DTA", new SqlParameter("podrazd", SelectedDep.Position)).ToList();
+            StaffList = Odb.db.Database.SqlQuery<StaffModel>("SELECT DISTINCT a.ID_Schedule, a.STAFF_ID, LTRIM(e.TABEL_ID) as TABEL_ID, e.SHORT_FIO, a.WorkBegin, a.WorkEnd, a.DTA, a.LunchTimeBegin, a.LunchTimeEnd, a.WorkingHours, c.Cause as CauseAbsence, b.DateBegin, b.DateEnd, d.Cause as CauseTimeOff, d.TimeBegin, d.TimeEnd FROM [Zarplats].[dbo].[Staff_Schedule] as a left join Zarplats.dbo.Schedule_Absence as b on a.STAFF_ID = b.id_Staff and a.DTA between b.DateBegin and b.DateEnd left join Zarplats.dbo.AbsenceRef as c on b.AbsenceRef_ID = c.ID_AbsenceRef left join Zarplats.dbo.Schedule_TimeOff as d on a.STAFF_ID = d.id_Staff and a.DTA = d.DTA left join perco...staff as e on a.STAFF_ID = e.ID_STAFF left join Zarplats.dbo.StaffView as f on a.STAFF_ID = f.STAFF_ID where f.Position = @podrazd order by a.DTA", new SqlParameter("podrazd", SelectedDep.Position)).ToList();
             StaffDG.ItemsSource = StaffList;
         }
 
@@ -242,8 +242,8 @@ namespace PlanningScheduleApp.Pages
 
                         var flexibleDay = flexibleDays[flexibleDaysIndex];
 
-                        Odb.db.Database.ExecuteSqlCommand("INSERT INTO Zarplats.dbo.Staff_Schedule(WorkBegin, WorkEnd, DTA, STAFF_ID, LunchTime, WorkingHours) VALUES (@workbegin, @workend, @dta, @staffid, @lunchtime, @workinghours)",
-                            new SqlParameter("workbegin", flexibleDay.WorkBegin), new SqlParameter("workend", flexibleDay.WorkEnd), new SqlParameter("dta", current.Date), new SqlParameter("staffid", SelectedStaff.STAFF_ID), new SqlParameter("lunchtime", flexibleDay.LunchTime), new SqlParameter("workinghours", 8));
+                        Odb.db.Database.ExecuteSqlCommand("INSERT INTO Zarplats.dbo.Staff_Schedule(WorkBegin, WorkEnd, DTA, STAFF_ID, LunchTimeBegin, LunchTimeEnd, WorkingHours) VALUES (@workbegin, @workend, @dta, @staffid, @lunchtimebegin, @lunchtimeend, @workinghours)",
+                            new SqlParameter("workbegin", flexibleDay.WorkBegin), new SqlParameter("workend", flexibleDay.WorkEnd), new SqlParameter("dta", current.Date), new SqlParameter("staffid", SelectedStaff.STAFF_ID), new SqlParameter("lunchtimebegin", flexibleDay.LunchTimeBegin), new SqlParameter("lunchtimeend", flexibleDay.LunchTimeEnd), new SqlParameter("workinghours", 8));
 
                         flexibleDaysIndex++;
                         current = current.AddDays(1);
@@ -266,8 +266,8 @@ namespace PlanningScheduleApp.Pages
                     {
                         if (currentDay != null && !currentDay.isRestingDay)
                         {
-                            Odb.db.Database.ExecuteSqlCommand("INSERT INTO Zarplats.dbo.Staff_Schedule(WorkBegin, WorkEnd, DTA, STAFF_ID, LunchTime, WorkingHours) VALUES (@workbegin, @workend, @dta, @staffid, @lunchtime, @workinghours)",
-                                new SqlParameter("workbegin", currentDay.WorkBegin), new SqlParameter("workend", currentDay.WorkEnd), new SqlParameter("dta", current.Date), new SqlParameter("staffid", SelectedStaff.STAFF_ID), new SqlParameter("lunchtime", currentDay.LunchTime), new SqlParameter("workinghours", 8));
+                            Odb.db.Database.ExecuteSqlCommand("INSERT INTO Zarplats.dbo.Staff_Schedule(WorkBegin, WorkEnd, DTA, STAFF_ID, LunchTimeBegin, LunchTimeEnd, WorkingHours) VALUES (@workbegin, @workend, @dta, @staffid, @lunchtimebegin, @lunchtimeend, @workinghours)",
+                                new SqlParameter("workbegin", currentDay.WorkBegin), new SqlParameter("workend", currentDay.WorkEnd), new SqlParameter("dta", current.Date), new SqlParameter("staffid", SelectedStaff.STAFF_ID), new SqlParameter("lunchtimebegin", currentDay.LunchTimeBegin), new SqlParameter("lunchtimeend", currentDay.LunchTimeEnd), new SqlParameter("workinghours", 8));
                         }
 
                         current = current.AddDays(1);

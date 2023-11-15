@@ -48,8 +48,9 @@ namespace PlanningScheduleApp.Models
         public string SHORT_FIO { get; private set; }
         public string WorkBegin { get; private set; }
         public string WorkEnd { get; private set; }
+        public string LunchTimeBegin { get; private set; }
+        public string LunchTimeEnd { get; private set; }
         public DateTime DTA { get; set; }
-        public double? LunchTime { get; private set; }
         public double? WorkingHours { get; set; }
         public string CauseAbsence { get; private set; }
         public DateTime? DateBegin { get; private set; }
@@ -80,6 +81,33 @@ namespace PlanningScheduleApp.Models
             else
                 return $"{SHORT_FIO}";
         }
+
+        public string LunchTime
+        {
+            get
+            {
+                return $"{LunchTimeBegin} - {LunchTimeEnd}";
+            }
+        }
+
+        public string WorkTime
+        {
+            get
+            {
+                return $"{WorkBegin} - {WorkEnd}";
+            }
+        }
+
+        public string TimeOff
+        {
+            get
+            {
+                if (TimeBegin != null && TimeEnd != null)
+                    return $"{TimeBegin} - {TimeEnd}";
+                else
+                    return string.Empty;
+            }
+        }
     }
 
     public class DepModel
@@ -101,7 +129,8 @@ namespace PlanningScheduleApp.Models
 
         private string _workBegin { get; set; }
         private string _workEnd { get; set; }
-        private double? _lunchTime { get; set; }
+        private string _lunchTimeBegin { get; set; }
+        private string _lunchTimeEnd { get; set; }
         public double? WorkingHours { get; set; }
 
         public string Day { get; set; }
@@ -140,13 +169,23 @@ namespace PlanningScheduleApp.Models
             }
         }
 
-        public double? LunchTime
+        public string LunchTimeBegin
         {
-            get { return _lunchTime; }
+            get { return _lunchTimeBegin; }
             set
             {
-                _lunchTime = value;
-                OnPropertyChanged(nameof(LunchTime));
+                _lunchTimeBegin = value;
+                OnPropertyChanged(nameof(LunchTimeBegin));
+            }
+        }
+
+        public string LunchTimeEnd
+        {
+            get { return _lunchTimeEnd; }
+            set
+            {
+                _lunchTimeEnd = value;
+                OnPropertyChanged(nameof(LunchTimeEnd));
             }
         }
 

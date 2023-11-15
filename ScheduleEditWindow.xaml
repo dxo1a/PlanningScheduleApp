@@ -8,7 +8,7 @@
         xmlns:s="clr-namespace:System;assembly=mscorlib"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="Редактировать график" MinHeight="500" Height="500" Width="325" MinWidth="325">
+        Title="Редактировать график" MinHeight="500" Height="500" Width="380" MinWidth="380">
     <Window.Resources>
         <Style x:Key="BorderCustom" TargetType="Border">
             <Setter Property="BorderBrush" Value="#FFC1C1C1"/>
@@ -58,13 +58,15 @@
                     <ItemsControl Grid.Column="1" Name="StaticDaysIC" ItemsSource="{Binding StaticDays}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Border Style="{StaticResource BorderCustom}" MinWidth="300">
+                                <Border Style="{StaticResource BorderCustom}" MinWidth="355">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="{Binding Day, Converter={StaticResource DayOfWeekConverter}}" VerticalAlignment="Center" FontSize="14" Margin="5 0 10 0" MinWidth="90"/>
-                                        <xctk:MaskedTextBox Style="{StaticResource CustomMTBX}" Mask="00:00" Name="WorkBeginMTBX" Text="{Binding WorkBegin}" MinWidth="45"  PromptChar=" " Margin="0 3 0 0" TextAlignment="Center" Padding="0 2 0 0" LostFocus="MTBX_LostFocus" PreviewTextInput="TBX_PreviewTextInput" PreviewKeyDown="TBX_PreviewKeyDown" GotFocus="MaskedTextBox_GotFocus"/>
+                                        <xctk:MaskedTextBox Style="{StaticResource CustomMTBX}" Mask="00:00" Text="{Binding WorkBegin}" MinWidth="45"  PromptChar=" " Margin="0 3 0 0" TextAlignment="Center" Padding="0 2 0 0" LostFocus="MTBX_LostFocus" PreviewTextInput="TBX_PreviewTextInput" PreviewKeyDown="TBX_PreviewKeyDown" GotFocus="MaskedTextBox_GotFocus"/>
                                         <TextBlock Text="-" VerticalAlignment="Center" Margin="5 0" FontSize="16" FontWeight="Bold"/>
-                                        <xctk:MaskedTextBox Style="{StaticResource CustomMTBX}" Mask="00:00" Name="WorkEndMTBX" Text="{Binding WorkEnd}" MinWidth="45" PromptChar=" " Margin="0 3 0 0" TextAlignment="Center" Padding="0 2 0 0" LostFocus="MTBX_LostFocus" PreviewTextInput="TBX_PreviewTextInput" PreviewKeyDown="TBX_PreviewKeyDown" GotFocus="MaskedTextBox_GotFocus"/>
-                                        <TextBox Style="{StaticResource CustomTBX}" Text="{Binding LunchTime}" Name="LunchTimeTBX" Margin="5 3 5 0" MinWidth="45" TextAlignment="Center" Padding="0 2 0 0" PreviewTextInput="TBX_PreviewTextInput" PreviewKeyDown="TBX_PreviewKeyDown" MaxLength="4"/>
+                                        <xctk:MaskedTextBox Style="{StaticResource CustomMTBX}" Mask="00:00" Text="{Binding WorkEnd}" MinWidth="45" PromptChar=" " Margin="0 3 0 0" TextAlignment="Center" Padding="0 2 0 0" LostFocus="MTBX_LostFocus" PreviewTextInput="TBX_PreviewTextInput" PreviewKeyDown="TBX_PreviewKeyDown" GotFocus="MaskedTextBox_GotFocus"/>
+                                        <xctk:MaskedTextBox Text="{Binding LunchTimeBegin}" Style="{StaticResource CustomTBX}" Mask="00:00" Margin="5 3 0 0" MinWidth="45" PromptChar=" " TextAlignment="Center" Padding="0 2 0 0" PreviewTextInput="TBX_PreviewTextInput" PreviewKeyDown="TBX_PreviewKeyDown" MaxLength="4"/>
+                                        <TextBlock Text="-" VerticalAlignment="Center" Margin="5 0" FontSize="16" FontWeight="Bold"/>
+                                        <xctk:MaskedTextBox Text="{Binding LunchTimeEnd}" Style="{StaticResource CustomTBX}" Mask="00:00" Margin="0 3 5 0" MinWidth="45" PromptChar=" " TextAlignment="Center" Padding="0 2 0 0" PreviewTextInput="TBX_PreviewTextInput" PreviewKeyDown="TBX_PreviewKeyDown" MaxLength="4"/>
                                         <CheckBox Name="isRestingDayCB" IsChecked="{Binding isRestingDay}" Checked="isRestingDayCB_Checked"/>
                                     </StackPanel>
                                 </Border>
@@ -89,7 +91,7 @@
                     <ItemsControl Grid.Column="1" Name="FlexibleDaysIC" ItemsSource="{Binding FlexibleDays}" Margin="0 15 0 0">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
-                                <Border Style="{StaticResource BorderCustom}" MinWidth="300">
+                                <Border Style="{StaticResource BorderCustom}" MinWidth="355">
                                     <StackPanel Orientation="Horizontal">
                                         <TextBlock Text="{Binding Day}" VerticalAlignment="Center" FontSize="14" Margin="5 0 10 0" MinWidth="90"/>
                                         <!--<TextBlock Text="{Binding ID_Day}" VerticalAlignment="Center" FontSize="14"/>-->
@@ -104,7 +106,9 @@
                                                 <Style TargetType="xctk:MaskedTextBox" BasedOn="{StaticResource TBXStyle}"/>
                                             </xctk:MaskedTextBox.Style>
                                         </xctk:MaskedTextBox>
-                                        <TextBox Text="{Binding LunchTime}" Style="{StaticResource TBXStyle}" Margin="5 3 5 0" MinWidth="45" TextAlignment="Center" Padding="0 0 0 5" PreviewTextInput="TBX_PreviewTextInput" PreviewKeyDown="TBX_PreviewKeyDown" MaxLength="4"/>
+                                        <xctk:MaskedTextBox Text="{Binding LunchTimeBegin}" Style="{StaticResource CustomTBX}" Mask="00:00" Margin="15 3 0 0" MinWidth="45" PromptChar=" " TextAlignment="Center" Padding="0 2 0 0" PreviewTextInput="TBX_PreviewTextInput" PreviewKeyDown="TBX_PreviewKeyDown" MaxLength="4"/>
+                                        <TextBlock Text="-" VerticalAlignment="Center" Margin="5 0" FontSize="16" FontWeight="Bold"/>
+                                        <xctk:MaskedTextBox Text="{Binding LunchTimeEnd}" Style="{StaticResource CustomTBX}" Mask="00:00" Margin="0 3 5 0" MinWidth="45" PromptChar=" " TextAlignment="Center" Padding="0 2 0 0" PreviewTextInput="TBX_PreviewTextInput" PreviewKeyDown="TBX_PreviewKeyDown" MaxLength="4"/>
                                     </StackPanel>
                                 </Border>
                             </DataTemplate>

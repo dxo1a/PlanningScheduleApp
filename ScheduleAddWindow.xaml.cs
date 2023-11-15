@@ -123,12 +123,13 @@ namespace PlanningScheduleApp
                     // Создание объекта Schedule_StaticDays для каждого дня и вставка в базу данных
                     foreach (var day in StaticDays)
                     {
-                        using (SqlCommand staticDaysCommand = new SqlCommand("INSERT INTO Zarplats.dbo.Schedule_StaticDays (Day, WorkBegin, WorkEnd, LunchTime, Template_ID, isRestingDay) VALUES (@Day, @WorkBegin, @WorkEnd, @LunchTime, @Template_ID, @isRestingDay);", connection))
+                        using (SqlCommand staticDaysCommand = new SqlCommand("INSERT INTO Zarplats.dbo.Schedule_StaticDays (Day, WorkBegin, WorkEnd, LunchTimeBegin, LunchTimeEnd, Template_ID, isRestingDay) VALUES (@Day, @WorkBegin, @WorkEnd, @LunchTimeBegin, @LunchTimeEnd, @Template_ID, @isRestingDay);", connection))
                         {
                             staticDaysCommand.Parameters.AddWithValue("@Day", day.Day);
-                            staticDaysCommand.Parameters.AddWithValue("@WorkBegin", day.WorkBegin ?? String.Empty);
-                            staticDaysCommand.Parameters.AddWithValue("@WorkEnd", day.WorkEnd ?? String.Empty);
-                            staticDaysCommand.Parameters.AddWithValue("@LunchTime", day.LunchTime ?? 0);
+                            staticDaysCommand.Parameters.AddWithValue("@WorkBegin", day.WorkBegin ?? string.Empty);
+                            staticDaysCommand.Parameters.AddWithValue("@WorkEnd", day.WorkEnd ?? string.Empty);
+                            staticDaysCommand.Parameters.AddWithValue("@LunchTimeBegin", day.LunchTimeBegin ?? string.Empty);
+                            staticDaysCommand.Parameters.AddWithValue("@LunchTimeEnd", day.LunchTimeEnd ?? string.Empty);
                             staticDaysCommand.Parameters.AddWithValue("@Template_ID", templateId);
                             staticDaysCommand.Parameters.AddWithValue("@isRestingDay", day.isRestingDay);
 
@@ -167,11 +168,12 @@ namespace PlanningScheduleApp
                     // Создание объекта Schedule_FlexibleDays для каждого дня и вставка в базу данных
                     foreach (var day in FlexibleDays)
                     {
-                        using (SqlCommand flexibleDaysCommand = new SqlCommand("INSERT INTO Zarplats.dbo.Schedule_FlexibleDays (WorkBegin, WorkEnd, LunchTime, Template_ID) VALUES (@WorkBegin, @WorkEnd, @LunchTime, @Template_ID);", connection))
+                        using (SqlCommand flexibleDaysCommand = new SqlCommand("INSERT INTO Zarplats.dbo.Schedule_FlexibleDays (WorkBegin, WorkEnd, LunchTimeBegin, LunchTimeEnd, Template_ID) VALUES (@WorkBegin, @WorkEnd, @LunchTimeBegin, @LunchTimeEnd, @Template_ID);", connection))
                         {
-                            flexibleDaysCommand.Parameters.AddWithValue("@WorkBegin", day.WorkBegin ?? String.Empty);
-                            flexibleDaysCommand.Parameters.AddWithValue("@WorkEnd", day.WorkEnd ?? String.Empty);
-                            flexibleDaysCommand.Parameters.AddWithValue("@LunchTime", day.LunchTime ?? 0);
+                            flexibleDaysCommand.Parameters.AddWithValue("@WorkBegin", day.WorkBegin ?? string.Empty);
+                            flexibleDaysCommand.Parameters.AddWithValue("@WorkEnd", day.WorkEnd ?? string.Empty);
+                            flexibleDaysCommand.Parameters.AddWithValue("@LunchTimeBegin", day.LunchTimeBegin ?? string.Empty);
+                            flexibleDaysCommand.Parameters.AddWithValue("@LunchTimeEnd", day.LunchTimeEnd ?? string.Empty);
                             flexibleDaysCommand.Parameters.AddWithValue("@Template_ID", templateId);
 
                             flexibleDaysCommand.ExecuteNonQuery();
@@ -255,7 +257,8 @@ namespace PlanningScheduleApp
                 {
                     day.WorkBegin = string.Empty;
                     day.WorkEnd = string.Empty;
-                    day.LunchTime = 0;
+                    day.LunchTimeBegin = string.Empty;
+                    day.LunchTimeEnd = string.Empty;
                     day.isRestingDay = true;
 
                     UpdateWorkingAndRestingDaysCount();
@@ -275,7 +278,8 @@ namespace PlanningScheduleApp
                 {
                     day.WorkBegin = "08:00";
                     day.WorkEnd = "17:00";
-                    day.LunchTime = 1;
+                    day.LunchTimeBegin = "12:00";
+                    day.LunchTimeEnd = "13:00";
                     day.isRestingDay = false;
 
                     UpdateWorkingAndRestingDaysCount();

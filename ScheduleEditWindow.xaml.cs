@@ -88,7 +88,7 @@ namespace PlanningScheduleApp
             {
                 this.MinHeight = 430; this.Height = this.MinHeight;
                 FlexibleScheduleTI.Visibility = Visibility.Collapsed;
-                List<ScheduleTemplateModel> staticDays = Odb.db.Database.SqlQuery<ScheduleTemplateModel>("select ID_Day, Day, WorkBegin, WorkEnd, LunchTime, isRestingDay from Zarplats.dbo.Schedule_StaticDays where Template_ID = @templateid", new SqlParameter("templateid", SelectedTemplate.ID_Template)).ToList();
+                List<ScheduleTemplateModel> staticDays = Odb.db.Database.SqlQuery<ScheduleTemplateModel>("select ID_Day, Day, WorkBegin, WorkEnd, LunchTimeBegin, LunchTimeEnd, isRestingDay from Zarplats.dbo.Schedule_StaticDays where Template_ID = @templateid", new SqlParameter("templateid", SelectedTemplate.ID_Template)).ToList();
                 StaticDays = new ObservableCollection<ScheduleTemplateModel>(staticDays);
                 StaticDaysIC.ItemsSource = StaticDays;
             }
@@ -96,14 +96,15 @@ namespace PlanningScheduleApp
             {
                 StaticScheduleTI.Visibility = Visibility.Collapsed;
                 ScheduleTC.SelectedIndex = 1;
-                List<ScheduleTemplateModel> flexibleDays = Odb.db.Database.SqlQuery<ScheduleTemplateModel>("select ID_Day, WorkBegin, WorkEnd, LunchTime from Zarplats.dbo.Schedule_FlexibleDays where Template_ID = @templateid", new SqlParameter("templateid", SelectedTemplate.ID_Template)).ToList();
+                List<ScheduleTemplateModel> flexibleDays = Odb.db.Database.SqlQuery<ScheduleTemplateModel>("select ID_Day, WorkBegin, WorkEnd, LunchTimeBegin, LunchTimeEnd from Zarplats.dbo.Schedule_FlexibleDays where Template_ID = @templateid", new SqlParameter("templateid", SelectedTemplate.ID_Template)).ToList();
                 FlexibleDays = new ObservableCollection<ScheduleTemplateModel>(flexibleDays.Select((day, index) => new ScheduleTemplateModel
                 {
                     ID_Day = day.ID_Day,
                     Day = $"День {index + 1}",
                     WorkBegin = day.WorkBegin,
                     WorkEnd = day.WorkEnd,
-                    LunchTime = day.LunchTime
+                    LunchTimeBegin = day.LunchTimeBegin,
+                    LunchTimeEnd = day.LunchTimeEnd
                 }));
                 FlexibleDaysIC.ItemsSource = FlexibleDays;
                 
@@ -231,11 +232,12 @@ namespace PlanningScheduleApp
 
                         foreach (var day in StaticDays)
                         {
-                            using (SqlCommand staticDaysCommand = new SqlCommand("UPDATE Zarplats.dbo.Schedule_StaticDays SET WorkBegin = @WorkBegin, WorkEnd = @WorkEnd, LunchTime = @LunchTime, isRestingDay = @isRestingDay WHERE Template_ID = @templateid and ID_Day = @idday", connection))
+                            using (SqlCommand staticDaysCommand = new SqlCommand("UPDATE Zarplats.dbo.Schedule_StaticDays SET WorkBegin = @WorkBegin, WorkEnd = @WorkEnd, LunchTimeBegin = @LunchTimeBegin, LunchTimeEnd = @LunchTimeEnd, isRestingDay = @isRestingDay WHERE Template_ID = @templateid and ID_Day = @idday", connection))
                             {
                                 staticDaysCommand.Parameters.AddWithValue("@WorkBegin", day.WorkEnd != null && day.WorkBegin.Any(char.IsDigit) ? day.WorkBegin : (object)DBNull.Value);
                                 staticDaysCommand.Parameters.AddWithValue("@WorkEnd", day.WorkEnd != null && day.WorkEnd.Any(char.IsDigit) ? day.WorkEnd : (object)DBNull.Value);
-                                staticDaysCommand.Parameters.AddWithValue("@LunchTime", day.LunchTime ?? 0);
+                                staticDaysCommand.Parameters.AddWithValue("@LunchTimeBegin", day.LunchTimeBegin ?? string.Empty);
+                                staticDaysCommand.Parameters.AddWithValue("@LunchTimeEnd", day.LunchTimeEnd ?? string.Empty);
                                 staticDaysCommand.Parameters.AddWithValue("@isRestingDay", !day.isRestingDay);
                                 staticDaysCommand.Parameters.AddWithValue("@templateid", SelectedTemplate.ID_Template);
                                 staticDaysCommand.Parameters.AddWithValue("@idday", day.ID_Day);
@@ -291,11 +293,12 @@ namespace PlanningScheduleApp
                     // Вставка новых записей в Schedule_FlexibleDays
                     foreach (var day in FlexibleDays)
                     {
-                        using (SqlCommand insertCommand = new SqlCommand("INSERT INTO Zarplats.dbo.Schedule_FlexibleDays (WorkBegin, WorkEnd, LunchTime, Template_ID) VALUES (@WorkBegin, @WorkEnd, @LunchTime, @Template_ID);", connection, transaction))
+                        using (SqlCommand insertCommand = new SqlCommand("INSERT INTO Zarplats.dbo.Schedule_FlexibleDays (WorkBegin, WorkEnd, LunchTimeBegin, LunchTimeEnd, Template_ID) VALUES (@WorkBegin, @WorkEnd, @LunchTimeBegin, @LunchTimeEnd, @Template_ID);", connection, transaction))
                         {
                             insertCommand.Parameters.AddWithValue("@WorkBegin", day.WorkBegin ?? String.Empty);
                             insertCommand.Parameters.AddWithValue("@WorkEnd", day.WorkEnd ?? String.Empty);
-                            insertCommand.Parameters.AddWithValue("@LunchTime", day.LunchTime ?? 0);
+                            insertCommand.Parameters.AddWithValue("@LunchTimeBegin", day.LunchTimeBegin ?? string.Empty);
+                            insertCommand.Parameters.AddWithValue("@LunchTimeEnd", day.LunchTimeEnd ?? string.Empty);
                             insertCommand.Parameters.AddWithValue("@Template_ID", SelectedTemplate.ID_Template);
 
                             insertCommand.ExecuteNonQuery();
@@ -326,7 +329,8 @@ namespace PlanningScheduleApp
                 {
                     day.WorkBegin = string.Empty;
                     day.WorkEnd = string.Empty;
-                    day.LunchTime = 0;
+                    day.LunchTimeBegin = string.Empty;
+                    day.LunchTimeEnd = string.Empty;
                     day.isRestingDay = true;
                 }
             }
