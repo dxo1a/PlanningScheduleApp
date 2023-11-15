@@ -16,16 +16,21 @@ namespace PlanningScheduleApp.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is DateTime date)
+            if (value is string day)
             {
-                CultureInfo russianCulture = new CultureInfo("ru-RU");
-                //string formattedDate = date.ToString("dd.MM.yyyy", russianCulture);
-                string dayOfWeek = russianCulture.DateTimeFormat.GetDayName(date.DayOfWeek);
-
-                return $"{dayOfWeek}";
+                switch (day)
+                {
+                    case "Monday": return "Понедельник";
+                    case "Tuesday": return "Вторник";
+                    case "Wednesday": return "Среда";
+                    case "Thursday": return "Четверг";
+                    case "Friday": return "Пятница";
+                    case "Saturday": return "Суббота";
+                    case "Sunday": return "Воскресенье";
+                    default: return day;
+                }
             }
-
-            return DependencyProperty.UnsetValue;
+            return value;
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

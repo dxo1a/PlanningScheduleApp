@@ -86,13 +86,13 @@ namespace PlanningScheduleApp
         {
             StaticDays = new ObservableCollection<ScheduleTemplateModel>
             {
-                new ScheduleTemplateModel { Day = "Понедельник" },
-                new ScheduleTemplateModel { Day = "Вторник" },
-                new ScheduleTemplateModel { Day = "Среда" },
-                new ScheduleTemplateModel { Day = "Четверг" },
-                new ScheduleTemplateModel { Day = "Пятница" },
-                new ScheduleTemplateModel { Day = "Суббота" },
-                new ScheduleTemplateModel { Day = "Воскресенье" }
+                new ScheduleTemplateModel { Day = "Monday" },
+                new ScheduleTemplateModel { Day = "Tuesday" },
+                new ScheduleTemplateModel { Day = "Wednesday" },
+                new ScheduleTemplateModel { Day = "Thursday" },
+                new ScheduleTemplateModel { Day = "Friday" },
+                new ScheduleTemplateModel { Day = "Saturday" },
+                new ScheduleTemplateModel { Day = "Sunday" }
             };
         }
 
@@ -155,7 +155,7 @@ namespace PlanningScheduleApp
             {
                 connection.Open();
                 // Создание объекта Schedule_Template и вставка в базу данных
-                using (SqlCommand command = new SqlCommand("INSERT INTO Zarplats.dbo.Schedule_Template (TemplateName, isFlexible, RestingDaysCount, WorkingDaysCount) VALUES (@TemplateName, @isFlexible, @RestingDaysCount, @WorkingDaysCount)", connection))
+                using (SqlCommand command = new SqlCommand("INSERT INTO Zarplats.dbo.Schedule_Template (TemplateName, isFlexible, RestingDaysCount, WorkingDaysCount) VALUES (@TemplateName, @isFlexible, @RestingDaysCount, @WorkingDaysCount); SELECT SCOPE_IDENTITY();", connection))
                 {
                     command.Parameters.AddWithValue("@TemplateName", $"{TemplateNameTBX.Text} {TemplateAdditionalNameTBX.Text}");
                     command.Parameters.AddWithValue("@isFlexible", true);

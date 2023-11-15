@@ -1,4 +1,5 @@
-﻿using PlanningScheduleApp.Models;
+﻿using MathCore.WPF.Converters;
+using PlanningScheduleApp.Models;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
@@ -223,7 +224,7 @@ namespace PlanningScheduleApp.Pages
             {
                 if (SelectedTemplate.isFlexible)
                 {
-                    List<ScheduleTemplateModel> flexibleDays = GetFlexibleDaysInfo(SelectedTemplate.ID_Template);
+                    List<ScheduleTemplateModel> flexibleDays = Odb.db.Database.SqlQuery<ScheduleTemplateModel>("select distinct * from Zarplats.dbo.Schedule_FlexibleDays where Template_ID = @templateid", new SqlParameter("templateid", SelectedTemplate.ID_Template)).ToList();
 
                     DateTime selectedStartDate = ScheduleStartDP.SelectedDate ?? DateTime.Now;
                     DateTime selectedFinishDate = ScheduleEndDP.SelectedDate ?? DateTime.Now;
@@ -276,13 +277,6 @@ namespace PlanningScheduleApp.Pages
                     UpdateGrid();
                 }
             }
-        }
-
-        public List<ScheduleTemplateModel> GetFlexibleDaysInfo(int templateid) // информация о каждом дне в статик таблице
-        {
-            List<ScheduleTemplateModel> staticDaysList = new List<ScheduleTemplateModel>();
-            staticDaysList = Odb.db.Database.SqlQuery<ScheduleTemplateModel>("select distinct * from Zarplats.dbo.Schedule_FlexibleDays where Template_ID = @templateid", new SqlParameter("templateid", templateid)).ToList();
-            return staticDaysList;
         }
 
         public List<ScheduleTemplateModel> GetDaysInfo(int templateid) // информация о каждом дне в статик таблице
