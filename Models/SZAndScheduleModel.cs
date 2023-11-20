@@ -52,10 +52,10 @@ namespace PlanningScheduleApp.Models
         public string LunchTimeEnd { get; set; }
         public DateTime DTA { get; set; }
         public double? WorkingHours { get; set; }
+        public int ID_Absence { get; set; }
         public string CauseAbsence { get; set; }
         public DateTime? DateBegin { get; set; }
         public DateTime? DateEnd { get; set; }
-        public string CauseTimeOff { get; set; }
         public string TimeBegin { get; set; }
         public string TimeEnd { get; set; }
 

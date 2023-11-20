@@ -119,8 +119,8 @@ namespace PlanningScheduleApp
                 string textBefore = SelectedTemplate.TemplateName.Substring(0, indexOfOpen);
                 string textAfter = SelectedTemplate.TemplateName.Substring(indexOfOpen);
 
-                TemplateNameTBX.Text = textBefore;
-                TemplateAdditionalNameTBX.Text = textAfter;
+                TemplateNameTBX.Text = textBefore.Trim();
+                TemplateAdditionalNameTBX.Text = textAfter.Trim();
             }
         }
 
@@ -223,28 +223,37 @@ namespace PlanningScheduleApp
                     connection.Open();
                     int restingDaysCount = StaticDays.Count(day => day.isRestingDay);
                     int workingDaysCount = StaticDays.Count(day => !day.isRestingDay);
-                    using (SqlCommand updateTemplateCommand = new SqlCommand("UPDATE Zarplats.dbo.Schedule_Template SET TemplateName = @TemplateName, RestingDaysCount = @RestingDaysCount, WorkingDaysCount = @WorkingDaysCount WHERE ID_Template = @templateid", connection))
+                    int checkExisting = Odb.db.Database.SqlQuery<int>("IF EXISTS (SELECT 1 FROM Zarplats.dbo.Schedule_Template WHERE TemplateName LIKE @TemplateName) SELECT 1 ELSE SELECT 0", new SqlParameter("TemplateName", $"%{TemplateNameTBX.Text}%")).SingleOrDefault();
+                    if (!Convert.ToBoolean(checkExisting))
                     {
-                        updateTemplateCommand.Parameters.AddWithValue("@templateid", SelectedTemplate.ID_Template);
-                        updateTemplateCommand.Parameters.AddWithValue("@TemplateName", TemplateNameTBX.Text + " " + TemplateAdditionalNameTBX.Text);
-                        updateTemplateCommand.Parameters.AddWithValue("@RestingDaysCount", restingDaysCount);
-                        updateTemplateCommand.Parameters.AddWithValue("@WorkingDaysCount", workingDaysCount);
-
-                        foreach (var day in StaticDays)
+                        using (SqlCommand updateTemplateCommand = new SqlCommand("UPDATE Zarplats.dbo.Schedule_Template SET TemplateName = @TemplateName, RestingDaysCount = @RestingDaysCount, WorkingDaysCount = @WorkingDaysCount WHERE ID_Template = @templateid", connection))
                         {
-                            using (SqlCommand staticDaysCommand = new SqlCommand("UPDATE Zarplats.dbo.Schedule_StaticDays SET WorkBegin = @WorkBegin, WorkEnd = @WorkEnd, LunchTimeBegin = @LunchTimeBegin, LunchTimeEnd = @LunchTimeEnd, isRestingDay = @isRestingDay WHERE Template_ID = @templateid and ID_Day = @idday", connection))
-                            {
-                                staticDaysCommand.Parameters.AddWithValue("@WorkBegin", day.WorkEnd != null && day.WorkBegin.Any(char.IsDigit) ? day.WorkBegin : string.Empty);
-                                staticDaysCommand.Parameters.AddWithValue("@WorkEnd", day.WorkEnd != null && day.WorkEnd.Any(char.IsDigit) ? day.WorkEnd : string.Empty);
-                                staticDaysCommand.Parameters.AddWithValue("@LunchTimeBegin", day.LunchTimeBegin ?? string.Empty);
-                                staticDaysCommand.Parameters.AddWithValue("@LunchTimeEnd", day.LunchTimeEnd ?? string.Empty);
-                                staticDaysCommand.Parameters.AddWithValue("@isRestingDay", day.isRestingDay);
-                                staticDaysCommand.Parameters.AddWithValue("@templateid", SelectedTemplate.ID_Template);
-                                staticDaysCommand.Parameters.AddWithValue("@idday", day.ID_Day);
+                            updateTemplateCommand.Parameters.AddWithValue("@templateid", SelectedTemplate.ID_Template);
+                            updateTemplateCommand.Parameters.AddWithValue("@TemplateName", TemplateNameTBX.Text + " " + TemplateAdditionalNameTBX.Text);
+                            updateTemplateCommand.Parameters.AddWithValue("@RestingDaysCount", restingDaysCount);
+                            updateTemplateCommand.Parameters.AddWithValue("@WorkingDaysCount", workingDaysCount);
 
-                                staticDaysCommand.ExecuteNonQuery();
+                            foreach (var day in StaticDays)
+                            {
+                                using (SqlCommand staticDaysCommand = new SqlCommand("UPDATE Zarplats.dbo.Schedule_StaticDays SET WorkBegin = @WorkBegin, WorkEnd = @WorkEnd, LunchTimeBegin = @LunchTimeBegin, LunchTimeEnd = @LunchTimeEnd, isRestingDay = @isRestingDay WHERE Template_ID = @templateid and ID_Day = @idday", connection))
+                                {
+                                    staticDaysCommand.Parameters.AddWithValue("@WorkBegin", day.WorkEnd != null && day.WorkBegin.Any(char.IsDigit) ? day.WorkBegin : string.Empty);
+                                    staticDaysCommand.Parameters.AddWithValue("@WorkEnd", day.WorkEnd != null && day.WorkEnd.Any(char.IsDigit) ? day.WorkEnd : string.Empty);
+                                    staticDaysCommand.Parameters.AddWithValue("@LunchTimeBegin", day.LunchTimeBegin ?? string.Empty);
+                                    staticDaysCommand.Parameters.AddWithValue("@LunchTimeEnd", day.LunchTimeEnd ?? string.Empty);
+                                    staticDaysCommand.Parameters.AddWithValue("@isRestingDay", day.isRestingDay);
+                                    staticDaysCommand.Parameters.AddWithValue("@templateid", SelectedTemplate.ID_Template);
+                                    staticDaysCommand.Parameters.AddWithValue("@idday", day.ID_Day);
+
+                                    staticDaysCommand.ExecuteNonQuery();
+                                }
                             }
                         }
+                    }
+                    else
+                    {
+                        MessageBox.Show("Шаблон с таким названием уже существует!");
+                        return;
                     }
                 }
                 MessageBox.Show("График обновлён.");
@@ -269,50 +278,58 @@ namespace PlanningScheduleApp
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
-                SqlTransaction transaction = connection.BeginTransaction();
-
-                try
+                int checkExisting = Odb.db.Database.SqlQuery<int>("IF EXISTS (SELECT 1 FROM Zarplats.dbo.Schedule_Template WHERE TemplateName LIKE @TemplateName AND ID_Template <> @templateid) SELECT 1 ELSE SELECT 0", new SqlParameter("TemplateName", $"%{TemplateNameTBX.Text}%"), new SqlParameter("templateid", SelectedTemplate.ID_Template)).SingleOrDefault();
+                if (!Convert.ToBoolean(checkExisting))
                 {
-                    using (SqlCommand deleteCommand = new SqlCommand("DELETE FROM Zarplats.dbo.Schedule_FlexibleDays WHERE Template_ID = @templateid", connection, transaction))
+                    SqlTransaction transaction = connection.BeginTransaction();
+                    try
                     {
-                        deleteCommand.Parameters.AddWithValue("@templateid", SelectedTemplate.ID_Template);
-                        deleteCommand.ExecuteNonQuery();
-                    }
-
-                    // Обновление существующей записи в Schedule_Template
-                    using (SqlCommand updateTemplateCommand = new SqlCommand("UPDATE Zarplats.dbo.Schedule_Template SET TemplateName = @TemplateName, RestingDaysCount = @RestingDaysCount, WorkingDaysCount = @WorkingDaysCount WHERE ID_Template = @templateid", connection, transaction))
-                    {
-                        updateTemplateCommand.Parameters.AddWithValue("@templateid", SelectedTemplate.ID_Template);
-                        updateTemplateCommand.Parameters.AddWithValue("@TemplateName", TemplateNameTBX.Text + " " + TemplateAdditionalNameTBX.Text);
-                        updateTemplateCommand.Parameters.AddWithValue("@RestingDaysCount", RestingDaysCountCMB.SelectedValue);
-                        updateTemplateCommand.Parameters.AddWithValue("@WorkingDaysCount", WorkingDaysCountCMB.SelectedValue);
-
-                        updateTemplateCommand.ExecuteNonQuery();
-                    }
-
-                    // Вставка новых записей в Schedule_FlexibleDays
-                    foreach (var day in FlexibleDays)
-                    {
-                        using (SqlCommand insertCommand = new SqlCommand("INSERT INTO Zarplats.dbo.Schedule_FlexibleDays (WorkBegin, WorkEnd, LunchTimeBegin, LunchTimeEnd, Template_ID) VALUES (@WorkBegin, @WorkEnd, @LunchTimeBegin, @LunchTimeEnd, @Template_ID);", connection, transaction))
+                        using (SqlCommand deleteCommand = new SqlCommand("DELETE FROM Zarplats.dbo.Schedule_FlexibleDays WHERE Template_ID = @templateid", connection, transaction))
                         {
-                            insertCommand.Parameters.AddWithValue("@WorkBegin", day.WorkBegin ?? String.Empty);
-                            insertCommand.Parameters.AddWithValue("@WorkEnd", day.WorkEnd ?? String.Empty);
-                            insertCommand.Parameters.AddWithValue("@LunchTimeBegin", day.LunchTimeBegin ?? string.Empty);
-                            insertCommand.Parameters.AddWithValue("@LunchTimeEnd", day.LunchTimeEnd ?? string.Empty);
-                            insertCommand.Parameters.AddWithValue("@Template_ID", SelectedTemplate.ID_Template);
-
-                            insertCommand.ExecuteNonQuery();
+                            deleteCommand.Parameters.AddWithValue("@templateid", SelectedTemplate.ID_Template);
+                            deleteCommand.ExecuteNonQuery();
                         }
-                    }
 
-                    transaction.Commit();
-                    MessageBox.Show("График обновлён.");
-                    TemplateCreated?.Invoke(this, EventArgs.Empty);
+                        // Обновление существующей записи в Schedule_Template
+                        using (SqlCommand updateTemplateCommand = new SqlCommand("UPDATE Zarplats.dbo.Schedule_Template SET TemplateName = @TemplateName, RestingDaysCount = @RestingDaysCount, WorkingDaysCount = @WorkingDaysCount WHERE ID_Template = @templateid", connection, transaction))
+                        {
+                            updateTemplateCommand.Parameters.AddWithValue("@templateid", SelectedTemplate.ID_Template);
+                            updateTemplateCommand.Parameters.AddWithValue("@TemplateName", TemplateNameTBX.Text + " " + TemplateAdditionalNameTBX.Text);
+                            updateTemplateCommand.Parameters.AddWithValue("@RestingDaysCount", RestingDaysCountCMB.SelectedValue);
+                            updateTemplateCommand.Parameters.AddWithValue("@WorkingDaysCount", WorkingDaysCountCMB.SelectedValue);
+
+                            updateTemplateCommand.ExecuteNonQuery();
+                        }
+
+                        // Вставка новых записей в Schedule_FlexibleDays
+                        foreach (var day in FlexibleDays)
+                        {
+                            using (SqlCommand insertCommand = new SqlCommand("INSERT INTO Zarplats.dbo.Schedule_FlexibleDays (WorkBegin, WorkEnd, LunchTimeBegin, LunchTimeEnd, Template_ID) VALUES (@WorkBegin, @WorkEnd, @LunchTimeBegin, @LunchTimeEnd, @Template_ID);", connection, transaction))
+                            {
+                                insertCommand.Parameters.AddWithValue("@WorkBegin", day.WorkBegin ?? String.Empty);
+                                insertCommand.Parameters.AddWithValue("@WorkEnd", day.WorkEnd ?? String.Empty);
+                                insertCommand.Parameters.AddWithValue("@LunchTimeBegin", day.LunchTimeBegin ?? string.Empty);
+                                insertCommand.Parameters.AddWithValue("@LunchTimeEnd", day.LunchTimeEnd ?? string.Empty);
+                                insertCommand.Parameters.AddWithValue("@Template_ID", SelectedTemplate.ID_Template);
+
+                                insertCommand.ExecuteNonQuery();
+                            }
+                        }
+
+                        transaction.Commit();
+                        MessageBox.Show("График обновлён.");
+                        TemplateCreated?.Invoke(this, EventArgs.Empty);
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        MessageBox.Show($"Ошибка при обновлении графика: {ex.Message}");
+                    }
                 }
-                catch (Exception ex)
+                else
                 {
-                    transaction.Rollback();
-                    MessageBox.Show($"Ошибка при обновлении графика: {ex.Message}");
+                    MessageBox.Show("Шаблон с таким названием уже существует!");
+                    return;
                 }
             }
         }

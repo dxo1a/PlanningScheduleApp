@@ -110,32 +110,41 @@ namespace PlanningScheduleApp
                 connection.Open();
                 int restingDaysCount = StaticDays.Count(day => day.isRestingDay);
                 int workingDaysCount = StaticDays.Count(day => !day.isRestingDay);
-                // Создание объекта Schedule_Template и вставка в базу данных
-                using (SqlCommand command = new SqlCommand("INSERT INTO Zarplats.dbo.Schedule_Template (TemplateName, isFlexible, RestingDaysCount, WorkingDaysCount) VALUES (@TemplateName, @isFlexible, @RestingDaysCount, @WorkingDaysCount); SELECT SCOPE_IDENTITY();", connection))
+                int checkExisting = Odb.db.Database.SqlQuery<int>("IF EXISTS (SELECT 1 FROM Zarplats.dbo.Schedule_Template WHERE TemplateName LIKE @TemplateName) SELECT 1 ELSE SELECT 0", new SqlParameter("TemplateName", $"%{TemplateNameTBX.Text}%")).SingleOrDefault();
+                if (!Convert.ToBoolean(checkExisting))
                 {
-                    command.Parameters.AddWithValue("@TemplateName", $"{TemplateNameTBX.Text} {TemplateAdditionalNameTBX.Text}");
-                    command.Parameters.AddWithValue("@isFlexible", false);
-                    command.Parameters.AddWithValue("@RestingDaysCount", restingDaysCount);
-                    command.Parameters.AddWithValue("@WorkingDaysCount", workingDaysCount);
-
-                    int templateId = Convert.ToInt32(command.ExecuteScalar());
-
-                    // Создание объекта Schedule_StaticDays для каждого дня и вставка в базу данных
-                    foreach (var day in StaticDays)
+                    // Создание объекта Schedule_Template и вставка в базу данных
+                    using (SqlCommand command = new SqlCommand("INSERT INTO Zarplats.dbo.Schedule_Template (TemplateName, isFlexible, RestingDaysCount, WorkingDaysCount) VALUES (@TemplateName, @isFlexible, @RestingDaysCount, @WorkingDaysCount); SELECT SCOPE_IDENTITY();", connection))
                     {
-                        using (SqlCommand staticDaysCommand = new SqlCommand("INSERT INTO Zarplats.dbo.Schedule_StaticDays (Day, WorkBegin, WorkEnd, LunchTimeBegin, LunchTimeEnd, Template_ID, isRestingDay) VALUES (@Day, @WorkBegin, @WorkEnd, @LunchTimeBegin, @LunchTimeEnd, @Template_ID, @isRestingDay);", connection))
-                        {
-                            staticDaysCommand.Parameters.AddWithValue("@Day", day.Day);
-                            staticDaysCommand.Parameters.AddWithValue("@WorkBegin", day.WorkBegin ?? string.Empty);
-                            staticDaysCommand.Parameters.AddWithValue("@WorkEnd", day.WorkEnd ?? string.Empty);
-                            staticDaysCommand.Parameters.AddWithValue("@LunchTimeBegin", day.LunchTimeBegin ?? string.Empty);
-                            staticDaysCommand.Parameters.AddWithValue("@LunchTimeEnd", day.LunchTimeEnd ?? string.Empty);
-                            staticDaysCommand.Parameters.AddWithValue("@Template_ID", templateId);
-                            staticDaysCommand.Parameters.AddWithValue("@isRestingDay", day.isRestingDay);
+                        command.Parameters.AddWithValue("@TemplateName", $"{TemplateNameTBX.Text} {TemplateAdditionalNameTBX.Text}");
+                        command.Parameters.AddWithValue("@isFlexible", false);
+                        command.Parameters.AddWithValue("@RestingDaysCount", restingDaysCount);
+                        command.Parameters.AddWithValue("@WorkingDaysCount", workingDaysCount);
 
-                            staticDaysCommand.ExecuteNonQuery();
+                        int templateId = Convert.ToInt32(command.ExecuteScalar());
+
+                        // Создание объекта Schedule_StaticDays для каждого дня и вставка в базу данных
+                        foreach (var day in StaticDays)
+                        {
+                            using (SqlCommand staticDaysCommand = new SqlCommand("INSERT INTO Zarplats.dbo.Schedule_StaticDays (Day, WorkBegin, WorkEnd, LunchTimeBegin, LunchTimeEnd, Template_ID, isRestingDay) VALUES (@Day, @WorkBegin, @WorkEnd, @LunchTimeBegin, @LunchTimeEnd, @Template_ID, @isRestingDay);", connection))
+                            {
+                                staticDaysCommand.Parameters.AddWithValue("@Day", day.Day);
+                                staticDaysCommand.Parameters.AddWithValue("@WorkBegin", day.WorkBegin ?? string.Empty);
+                                staticDaysCommand.Parameters.AddWithValue("@WorkEnd", day.WorkEnd ?? string.Empty);
+                                staticDaysCommand.Parameters.AddWithValue("@LunchTimeBegin", day.LunchTimeBegin ?? string.Empty);
+                                staticDaysCommand.Parameters.AddWithValue("@LunchTimeEnd", day.LunchTimeEnd ?? string.Empty);
+                                staticDaysCommand.Parameters.AddWithValue("@Template_ID", templateId);
+                                staticDaysCommand.Parameters.AddWithValue("@isRestingDay", day.isRestingDay);
+
+                                staticDaysCommand.ExecuteNonQuery();
+                            }
                         }
                     }
+                }
+                else
+                {
+                    MessageBox.Show("Шаблон с таким названием уже существует!");
+                    return;
                 }
             }
 
@@ -155,30 +164,39 @@ namespace PlanningScheduleApp
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 connection.Open();
-                // Создание объекта Schedule_Template и вставка в базу данных
-                using (SqlCommand command = new SqlCommand("INSERT INTO Zarplats.dbo.Schedule_Template (TemplateName, isFlexible, RestingDaysCount, WorkingDaysCount) VALUES (@TemplateName, @isFlexible, @RestingDaysCount, @WorkingDaysCount); SELECT SCOPE_IDENTITY();", connection))
+                int checkExisting = Odb.db.Database.SqlQuery<int>("IF EXISTS (SELECT 1 FROM Zarplats.dbo.Schedule_Template WHERE TemplateName LIKE @TemplateName) SELECT 1 ELSE SELECT 0", new SqlParameter("TemplateName", $"%{TemplateNameTBX.Text}%")).SingleOrDefault();
+                if (!Convert.ToBoolean(checkExisting))
                 {
-                    command.Parameters.AddWithValue("@TemplateName", $"{TemplateNameTBX.Text} {TemplateAdditionalNameTBX.Text}");
-                    command.Parameters.AddWithValue("@isFlexible", true);
-                    command.Parameters.AddWithValue("@RestingDaysCount", RestingDaysCountCMB.SelectedValue);
-                    command.Parameters.AddWithValue("@WorkingDaysCount", WorkingDaysCountCMB.SelectedValue);
-
-                    int templateId = Convert.ToInt32(command.ExecuteScalar());
-
-                    // Создание объекта Schedule_FlexibleDays для каждого дня и вставка в базу данных
-                    foreach (var day in FlexibleDays)
+                    // Создание объекта Schedule_Template и вставка в базу данных
+                    using (SqlCommand command = new SqlCommand("INSERT INTO Zarplats.dbo.Schedule_Template (TemplateName, isFlexible, RestingDaysCount, WorkingDaysCount) VALUES (@TemplateName, @isFlexible, @RestingDaysCount, @WorkingDaysCount); SELECT SCOPE_IDENTITY();", connection))
                     {
-                        using (SqlCommand flexibleDaysCommand = new SqlCommand("INSERT INTO Zarplats.dbo.Schedule_FlexibleDays (WorkBegin, WorkEnd, LunchTimeBegin, LunchTimeEnd, Template_ID) VALUES (@WorkBegin, @WorkEnd, @LunchTimeBegin, @LunchTimeEnd, @Template_ID);", connection))
-                        {
-                            flexibleDaysCommand.Parameters.AddWithValue("@WorkBegin", day.WorkBegin ?? string.Empty);
-                            flexibleDaysCommand.Parameters.AddWithValue("@WorkEnd", day.WorkEnd ?? string.Empty);
-                            flexibleDaysCommand.Parameters.AddWithValue("@LunchTimeBegin", day.LunchTimeBegin ?? string.Empty);
-                            flexibleDaysCommand.Parameters.AddWithValue("@LunchTimeEnd", day.LunchTimeEnd ?? string.Empty);
-                            flexibleDaysCommand.Parameters.AddWithValue("@Template_ID", templateId);
+                        command.Parameters.AddWithValue("@TemplateName", $"{TemplateNameTBX.Text} {TemplateAdditionalNameTBX.Text}");
+                        command.Parameters.AddWithValue("@isFlexible", true);
+                        command.Parameters.AddWithValue("@RestingDaysCount", RestingDaysCountCMB.SelectedValue);
+                        command.Parameters.AddWithValue("@WorkingDaysCount", WorkingDaysCountCMB.SelectedValue);
 
-                            flexibleDaysCommand.ExecuteNonQuery();
+                        int templateId = Convert.ToInt32(command.ExecuteScalar());
+
+                        // Создание объекта Schedule_FlexibleDays для каждого дня и вставка в базу данных
+                        foreach (var day in FlexibleDays)
+                        {
+                            using (SqlCommand flexibleDaysCommand = new SqlCommand("INSERT INTO Zarplats.dbo.Schedule_FlexibleDays (WorkBegin, WorkEnd, LunchTimeBegin, LunchTimeEnd, Template_ID) VALUES (@WorkBegin, @WorkEnd, @LunchTimeBegin, @LunchTimeEnd, @Template_ID);", connection))
+                            {
+                                flexibleDaysCommand.Parameters.AddWithValue("@WorkBegin", day.WorkBegin ?? string.Empty);
+                                flexibleDaysCommand.Parameters.AddWithValue("@WorkEnd", day.WorkEnd ?? string.Empty);
+                                flexibleDaysCommand.Parameters.AddWithValue("@LunchTimeBegin", day.LunchTimeBegin ?? string.Empty);
+                                flexibleDaysCommand.Parameters.AddWithValue("@LunchTimeEnd", day.LunchTimeEnd ?? string.Empty);
+                                flexibleDaysCommand.Parameters.AddWithValue("@Template_ID", templateId);
+
+                                flexibleDaysCommand.ExecuteNonQuery();
+                            }
                         }
                     }
+                }
+                else
+                {
+                    MessageBox.Show("Шаблон с таким названием уже существует!");
+                    return;
                 }
             }
 

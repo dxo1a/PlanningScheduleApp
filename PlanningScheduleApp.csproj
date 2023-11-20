@@ -162,6 +162,7 @@
     <Compile Include="LoadingWindow.xaml.cs">
       <DependentUpon>LoadingWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Models\AbsenceModel.cs" />
     <Compile Include="Models\AddScheduleViewModel.cs" />
     <Compile Include="Models\DateViewModel.cs" />
     <Compile Include="Models\ScheduleModel.cs" />
