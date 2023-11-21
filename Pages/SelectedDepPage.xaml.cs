@@ -44,17 +44,20 @@ namespace PlanningScheduleApp.Pages
             InitializeComponent();
             SelectedDep = selectedDep;
             FrameApp.SetCurrentMainFrame(FrameApp.FrameMain);
-            InitializeAsync();
+            Task.Run(() => InitializeAsync());
             AssignCMB();
             UpdateTemplatesList();
 
-            StaffListInPosition = Odb.db.Database.SqlQuery<StaffModel>("select distinct b.SHORT_FIO, b.TABEL_ID, b.ID_STAFF as STAFF_ID from perco...staff_ref as a left join perco...staff as b on a.STAFF_ID = b.ID_STAFF left join perco...subdiv_ref as c on a.SUBDIV_ID = c.ID_REF where c.DISPLAY_NAME = @padrazd", new SqlParameter("padrazd", SelectedDep.Position)).OrderBy(s => s.SHORT_FIO).ToList();
-            StaffLV.ItemsSource = StaffListInPosition;
-            CauseList = Odb.db.Database.SqlQuery<AbsenceModel>("select distinct * from Zarplats.dbo.AbsenceRef").ToList();
-            CauseLV.ItemsSource = CauseList;
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                StaffListInPosition = Odb.db.Database.SqlQuery<StaffModel>("select distinct b.SHORT_FIO, b.TABEL_ID, b.ID_STAFF as STAFF_ID from perco...staff_ref as a left join perco...staff as b on a.STAFF_ID = b.ID_STAFF left join perco...subdiv_ref as c on a.SUBDIV_ID = c.ID_REF where c.DISPLAY_NAME = @padrazd", new SqlParameter("padrazd", SelectedDep.Position)).OrderBy(s => s.SHORT_FIO).ToList();
+                StaffLV.ItemsSource = StaffListInPosition;
+                CauseList = Odb.db.Database.SqlQuery<AbsenceModel>("select distinct * from Zarplats.dbo.AbsenceRef").ToList();
+                CauseLV.ItemsSource = CauseList;
 
-            AbsenceStartDP.SelectedDate = DateTime.Now;
-            AbsenceFinishDP.SelectedDate = DateTime.Now;
+                AbsenceStartDP.SelectedDate = DateTime.Now;
+                AbsenceFinishDP.SelectedDate = DateTime.Now;
+            });
         }
 
         private async void InitializeAsync()
@@ -81,9 +84,12 @@ namespace PlanningScheduleApp.Pages
         int refreshCount = 0;
         public async Task UpdateGridAsync()
         {
-            SearchTBX.Clear();
-            StaffList.Clear();
-            StaffDG.ItemsSource = null;
+            await Application.Current.Dispatcher.InvokeAsync(() =>
+            {
+                SearchTBX.Clear();
+                StaffList.Clear();
+                StaffDG.ItemsSource = null;
+            });
 
             string connectionString = "Persist Security Info=False;User ID=sa; Password=server_esa;Initial Catalog=dsl_sp;Server=sql";
             using (SqlConnection connection = new SqlConnection(connectionString))
@@ -123,9 +129,11 @@ namespace PlanningScheduleApp.Pages
                             };
                             staffList.Add(staff);
                         }
-
-                        StaffList = staffList;
-                        StaffDG.ItemsSource = StaffList;
+                        await Application.Current.Dispatcher.InvokeAsync(() =>
+                        {
+                            StaffList = staffList;
+                            StaffDG.ItemsSource = StaffList;
+                        });
                     }
                 }
             }
@@ -133,7 +141,7 @@ namespace PlanningScheduleApp.Pages
             Console.WriteLine($"Таблица StaffDG обновлена {refreshCount} раз.");
         }
 
-        private void AddScheduleBtn_Click(object sender, RoutedEventArgs e)
+        private async void AddScheduleBtn_Click(object sender, RoutedEventArgs e)
         {
             if (CheckWhatToAdd() == "1100")
             {
@@ -146,7 +154,7 @@ namespace PlanningScheduleApp.Pages
             {
                 int checkExistingSchedule = Odb.db.Database.SqlQuery<int>("select count(*) from Zarplats.dbo.Staff_Schedule where DTA between @DateBegin and @DateEnd", new SqlParameter("DateBegin", AbsenceStartDP.SelectedDate), new SqlParameter("DateEnd", AbsenceFinishDP.SelectedDate)).SingleOrDefault();
                 if (checkExistingSchedule > 0)
-                    AddAbsence();
+                    await AddAbsence();
                 else
                     MessageBox.Show("Для указанного диапазона не найдено рабочих дней!");
             }
@@ -158,18 +166,18 @@ namespace PlanningScheduleApp.Pages
                     if (SelectedTemplate.isFlexible)
                     {
                         FillFlexibleSchedule();
-                        AddAbsence();
+                        await AddAbsence();
                     }
                     else if (!SelectedTemplate.isFlexible)
                     {
                         FillStaticSchedule();
-                        AddAbsence();
+                        await AddAbsence();
                     }
                 }
                 else
                 {
                     MessageBox.Show("График уже существует, добавляем только отсутствие.");
-                    AddAbsence();
+                    await AddAbsence();
                 }
             }
             else if (CheckWhatToAdd() == "##0#")
@@ -198,9 +206,9 @@ namespace PlanningScheduleApp.Pages
                 var result = MessageBox.Show("Удалить записи?", "Удаление", MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (result == MessageBoxResult.Yes)
                 {
-                    var result2 = MessageBox.Show("Удалить отсутствия?", "Удаление", MessageBoxButton.YesNo, MessageBoxImage.Question);
-                    if (result2 == MessageBoxResult.Yes)
-                        DeleteAbsence();
+                    //var result2 = MessageBox.Show("Удалить отсутствия?", "Удаление", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                    //if (result2 == MessageBoxResult.Yes)
+                    //    await DeleteAbsence();
 
                     foreach (StaffModel selectedRow in selectedItems)
                     {
@@ -226,8 +234,25 @@ namespace PlanningScheduleApp.Pages
 
         private async void DeleteAbsenceMI_Click(object sender, RoutedEventArgs e)
         {
-            DeleteAbsence();
-            await UpdateGridAsync();
+            List<StaffModel> selectedItems = StaffDG.SelectedItems.Cast<StaffModel>().ToList();
+            if (selectedItems.Count > 0)
+            {
+                var result = MessageBox.Show("Удалить отсутствия для выбранных записей?", "Удаление", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+                if (result == MessageBoxResult.Yes)
+                {
+                    foreach (StaffModel selectedRow in selectedItems)
+                    {
+                        await DeleteAbsence(selectedRow);
+                    }
+
+                    await UpdateGridAsync();
+                }
+            }
+            else
+            {
+                MessageBox.Show("Выберите записи для удаления.", "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
+            }
         }
 
         #region UI
@@ -489,7 +514,6 @@ namespace PlanningScheduleApp.Pages
 
             if (dep is DataGridRow row)
             {
-                StaffDG.SelectedItem = row;
                 StaffModel selectedStaff = (StaffModel)row.Item;
 
                 if (!HasAbsence(selectedStaff.STAFF_ID, selectedStaff.DTA))
@@ -561,7 +585,7 @@ namespace PlanningScheduleApp.Pages
                 {
                     connection.Open();
 
-                    // Проверка существования записи в графике
+                    // проверка существования записи в графике
                     using (SqlCommand checkCommand = new SqlCommand("SELECT COUNT(*) FROM Zarplats.dbo.Staff_Schedule WHERE STAFF_ID = @staffId AND DTA = @date", connection))
                     {
                         checkCommand.Parameters.AddWithValue("@staffId", SelectedStaff.STAFF_ID);
@@ -571,7 +595,7 @@ namespace PlanningScheduleApp.Pages
 
                         if (existingCount > 0)
                         {
-                            // Запись существует, обновление
+                            // запись существует, обновление
                             using (SqlCommand updateCommand = new SqlCommand("UPDATE Zarplats.dbo.Staff_Schedule SET WorkBegin = @workBegin, WorkEnd = @workEnd, LunchTimeBegin = @lunchTimeBegin, LunchTimeEnd = @lunchTimeEnd, WorkingHours = @workingHours WHERE STAFF_ID = @staffId AND DTA = @date", connection))
                             {
                                 updateCommand.Parameters.AddWithValue("@workBegin", flexibleDay.WorkBegin);
@@ -587,7 +611,7 @@ namespace PlanningScheduleApp.Pages
                         }
                         else
                         {
-                            // Записи нет, добавление новой записи
+                            // записи нет, добавление новой записи
                             using (SqlCommand insertCommand = new SqlCommand("INSERT INTO Zarplats.dbo.Staff_Schedule (WorkBegin, WorkEnd, DTA, STAFF_ID, LunchTimeBegin, LunchTimeEnd, WorkingHours) VALUES (@workBegin, @workEnd, @date, @staffId, @lunchTimeBegin, @lunchTimeEnd, @workingHours)", connection))
                             {
                                 insertCommand.Parameters.AddWithValue("@workBegin", flexibleDay.WorkBegin);
@@ -638,7 +662,7 @@ namespace PlanningScheduleApp.Pages
                     {
                         connection.Open();
 
-                        // Проверка существования записи в графике
+                        // проверка существования записи в графике
                         using (SqlCommand checkCommand = new SqlCommand("SELECT COUNT(*) FROM Zarplats.dbo.Staff_Schedule WHERE STAFF_ID = @staffId AND DTA = @date", connection))
                         {
                             checkCommand.Parameters.AddWithValue("@staffId", SelectedStaff.STAFF_ID);
@@ -648,7 +672,7 @@ namespace PlanningScheduleApp.Pages
 
                             if (existingCount > 0)
                             {
-                                // Запись существует, обновление
+                                // запись существует, обновление
                                 using (SqlCommand updateCommand = new SqlCommand("UPDATE Zarplats.dbo.Staff_Schedule SET WorkBegin = @workBegin, WorkEnd = @workEnd, LunchTimeBegin = @lunchTimeBegin, LunchTimeEnd = @lunchTimeEnd, WorkingHours = @workingHours WHERE STAFF_ID = @staffId AND DTA = @date", connection))
                                 {
                                     updateCommand.Parameters.AddWithValue("@workBegin", currentDay.WorkBegin);
@@ -664,7 +688,7 @@ namespace PlanningScheduleApp.Pages
                             }
                             else
                             {
-                                // Записи нет, добавление новой записи
+                                // записи нет, добавление новой записи
                                 using (SqlCommand insertCommand = new SqlCommand("INSERT INTO Zarplats.dbo.Staff_Schedule (WorkBegin, WorkEnd, DTA, STAFF_ID, LunchTimeBegin, LunchTimeEnd, WorkingHours) VALUES (@workBegin, @workEnd, @date, @staffId, @lunchTimeBegin, @lunchTimeEnd, @workingHours)", connection))
                                 {
                                     insertCommand.Parameters.AddWithValue("@workBegin", currentDay.WorkBegin);
@@ -708,7 +732,7 @@ namespace PlanningScheduleApp.Pages
         #endregion
 
         #region Работа с отсутствиями
-        private async void AddAbsence()
+        private async Task AddAbsence()
         {
             string timeBeginValue = AbsenceTimeBeginMTBX.Text.Any(char.IsDigit) ? AbsenceTimeBeginMTBX.Text : string.Empty;
             string timeEndValue = AbsenceTimeEndMTBX.Text.Any(char.IsDigit) ? AbsenceTimeEndMTBX.Text : string.Empty;
@@ -719,7 +743,11 @@ namespace PlanningScheduleApp.Pages
                 Odb.db.Database.ExecuteSqlCommand("INSERT INTO Zarplats.dbo.Schedule_Absence (AbsenceRef_ID, id_Staff, DateBegin, DateEnd, TimeBegin, TimeEnd) VALUES (@AbsenceRef_ID, @staffid, @DateBegin, @DateEnd, @TimeBegin, @TimeEnd)",
                     new SqlParameter("AbsenceRef_ID", SelectedCause.ID_AbsenceRef), new SqlParameter("staffid", SelectedStaff.STAFF_ID), new SqlParameter("DateBegin", AbsenceStartDP.SelectedDate), new SqlParameter("DateEnd", AbsenceFinishDP.SelectedDate), new SqlParameter("TimeBegin", timeBeginValue), new SqlParameter("TimeEnd", timeEndValue));
 
-                UpdateWorkingHours();
+                DateTime absenceStart = AbsenceStartDP.SelectedDate ?? DateTime.Now;
+                DateTime absenceEnd = AbsenceFinishDP.SelectedDate ?? DateTime.Now;
+
+                // обновление рабочих часов
+                await UpdateWorkingHours(new List<StaffModel> { SelectedStaff }, absenceStart, absenceEnd);
 
                 await UpdateGridAsync();
                 MessageBox.Show("Отсутствие добавлено!");
@@ -730,26 +758,33 @@ namespace PlanningScheduleApp.Pages
             }
         }
 
-        private void DeleteAbsence()
+        private async Task DeleteAbsence(StaffModel selectedRow)
         {
-            List<StaffModel> selectedItems = new List<StaffModel>();
-            selectedItems.AddRange(StaffDG.SelectedItems.Cast<StaffModel>());
+            // период отсутствия
+            DateTime absenceStart = selectedRow.DateBegin ?? DateTime.Now;
+            DateTime absenceEnd = selectedRow.DateEnd ?? DateTime.Now;
 
-            foreach (var selectedStaff in selectedItems)
-                Odb.db.Database.ExecuteSqlCommand("DELETE FROM Zarplats.dbo.Schedule_Absence WHERE ID_Absence = @ID_Absence AND DateBegin <= @currentDate AND DateEnd >= @currentDate", new SqlParameter("ID_Absence", selectedStaff.ID_Absence), new SqlParameter("currentDate", selectedStaff.DTA));
-            UpdateWorkingHours();
+            // удаление отсутствия
+            await Task.Run(() => { Odb.db.Database.ExecuteSqlCommand("DELETE FROM Zarplats.dbo.Schedule_Absence WHERE ID_Absence = @ID_Absence", new SqlParameter("ID_Absence", selectedRow.ID_Absence)); });
+
+            // обновление рабочих часов для всех дней, затронутых удаленным отсутствием
+            Console.WriteLine("Начали обновлять рабочие часы для периода");
+            await UpdateWorkingHours(StaffDG.SelectedItems.Cast<StaffModel>().ToList(), absenceStart, absenceEnd);
+            Console.WriteLine("Закончили обновлять рабочие часы для периода");
         }
+
+        
         #endregion
 
         #region Вычисления рабочих часов
-        private async Task UpdateWorkingHours()
+        private async Task UpdateWorkingHours(List<StaffModel> selectedStaffList, DateTime startDate, DateTime endDate)
         {
-            DateTime startDate = AbsenceStartDP.SelectedDate ?? DateTime.Now;
-            DateTime endDate = AbsenceFinishDP.SelectedDate ?? DateTime.Now;
+            Console.WriteLine("Получаем список затронутых строк");
+            List<StaffModel> affectedRows = await GetAffectedRowsAsync(SelectedDep.Position, startDate, endDate);
+            Console.WriteLine("Закончили получать список затронутых строк");
 
-            for (DateTime currentDate = startDate; currentDate <= endDate; currentDate = currentDate.AddDays(1))
+            foreach (StaffModel selectedStaff in selectedStaffList)
             {
-                List<StaffModel> affectedRows = await GetAffectedRowsAsync(SelectedDep.Position, currentDate);
                 foreach (StaffModel row in affectedRows)
                 {
                     if (FullDayCauseList.Contains(row.CauseAbsence))
@@ -758,32 +793,33 @@ namespace PlanningScheduleApp.Pages
                     }
                     else
                     {
-                        DateTime workBegin = ConvertToDateTime(currentDate, row.WorkBegin);
-                        DateTime workEnd = ConvertToDateTime(currentDate, row.WorkEnd);
-                        DateTime lunchTimeBegin = ConvertToDateTime(currentDate, row.LunchTimeBegin);
-                        DateTime lunchTimeEnd = ConvertToDateTime(currentDate, row.LunchTimeEnd);
+                        DateTime workBegin = ConvertToDateTime(row.DTA, row.WorkBegin);
+                        DateTime workEnd = ConvertToDateTime(row.DTA, row.WorkEnd);
+                        DateTime lunchTimeBegin = ConvertToDateTime(row.DTA, row.LunchTimeBegin);
+                        DateTime lunchTimeEnd = ConvertToDateTime(row.DTA, row.LunchTimeEnd);
 
-                        double totalAbsenceTime = await CalculateAbsenceHoursForEachDay(row.STAFF_ID, currentDate);
+                        double totalAbsenceTime = await CalculateAbsenceHoursForEachDay(row.STAFF_ID, row.DTA);
                         double? workingHours = CalculateWorkingHours(workBegin, workEnd, lunchTimeBegin, lunchTimeEnd, row.DTA) - totalAbsenceTime;
 
                         await Odb.db.Database.ExecuteSqlCommandAsync("update Zarplats.dbo.Staff_Schedule set WorkingHours = @workingHours where ID_Schedule = @id", new SqlParameter("workingHours", workingHours), new SqlParameter("id", row.ID_Schedule));
                     }
                 }
-            }
+            };
         }
 
-        private async Task<List<StaffModel>> GetAffectedRowsAsync(string position, DateTime currentDate)
+        private async Task<List<StaffModel>> GetAffectedRowsAsync(string position, DateTime absenceBegin, DateTime absenceEnd)
         {
             using (var connection = new SqlConnection(connectionString))
             {
                 await connection.OpenAsync();
 
-                var query = $"SELECT DISTINCT a.ID_Schedule, a.STAFF_ID, LTRIM(e.TABEL_ID) as TABEL_ID, e.SHORT_FIO, a.WorkBegin, a.WorkEnd, a.DTA, a.LunchTimeBegin, a.LunchTimeEnd, a.WorkingHours, b.ID_Absence, c.Cause as CauseAbsence, b.DateBegin, b.DateEnd, b.TimeBegin, b.TimeEnd FROM [Zarplats].[dbo].[Staff_Schedule] as a left join Zarplats.dbo.Schedule_Absence as b on a.STAFF_ID = b.id_Staff and a.DTA between b.DateBegin and b.DateEnd left join Zarplats.dbo.AbsenceRef as c on b.AbsenceRef_ID = c.ID_AbsenceRef left join perco...staff as e on a.STAFF_ID = e.ID_STAFF left join Zarplats.dbo.StaffView as f on a.STAFF_ID = f.STAFF_ID where f.Position = @podrazd and a.DTA = @date order by a.DTA";
+                var query = $"SELECT DISTINCT a.ID_Schedule, a.STAFF_ID, LTRIM(e.TABEL_ID) as TABEL_ID, e.SHORT_FIO, a.WorkBegin, a.WorkEnd, a.DTA, a.LunchTimeBegin, a.LunchTimeEnd, a.WorkingHours, b.ID_Absence, c.Cause as CauseAbsence, b.DateBegin, b.DateEnd, b.TimeBegin, b.TimeEnd FROM [Zarplats].[dbo].[Staff_Schedule] as a left join Zarplats.dbo.Schedule_Absence as b on a.STAFF_ID = b.id_Staff and a.DTA between b.DateBegin and b.DateEnd left join Zarplats.dbo.AbsenceRef as c on b.AbsenceRef_ID = c.ID_AbsenceRef left join perco...staff as e on a.STAFF_ID = e.ID_STAFF left join Zarplats.dbo.StaffView as f on a.STAFF_ID = f.STAFF_ID where f.Position = @podrazd and a.DTA between @absenceBegin and @absenceEnd order by a.DTA";
 
                 using (var command = new SqlCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@podrazd", SelectedDep.Position);
-                    command.Parameters.AddWithValue("@date", currentDate);
+                    command.Parameters.AddWithValue("@absenceBegin", absenceBegin);
+                    command.Parameters.AddWithValue("@absenceEnd", absenceEnd);
 
                     using (var reader = await command.ExecuteReaderAsync())
                     {
@@ -810,6 +846,7 @@ namespace PlanningScheduleApp.Pages
                                 TimeBegin = reader.IsDBNull(14) ? string.Empty : reader.GetString(14),
                                 TimeEnd = reader.IsDBNull(15) ? string.Empty : reader.GetString(15)
                             };
+                            affectedRows.Add(staff);
                         }
 
                         return affectedRows;

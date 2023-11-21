@@ -102,7 +102,7 @@
                 <DataGridTextColumn Binding="{Binding DTA, Converter={StaticResource DateWithDayConverter}}" Header="Дата" Width="*" IsReadOnly="True" MinWidth="170" MaxWidth="170"/>
                 <DataGridTextColumn Binding="{Binding LunchTime}" Header="Обед" Width="*" IsReadOnly="True" MinWidth="100" MaxWidth="100"/>
                 <DataGridTextColumn Binding="{Binding WorkingHours, StringFormat=0.##}" Header="Рабочие часы" Width="*" IsReadOnly="True" MaxWidth="60" MinWidth="60"/>
-                <DataGridTextColumn Header="Отсутствия" MinWidth="90">
+                <DataGridTextColumn Header="Отсутствия" MaxWidth="190" MinWidth="100">
                     <DataGridTextColumn.ElementStyle>
                         <Style TargetType="TextBlock">
                             <Setter Property="Text" Value="{Binding CauseAbsence}" />
