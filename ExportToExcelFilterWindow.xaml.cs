@@ -28,7 +28,7 @@ namespace PlanningScheduleApp
 
         private LoadingWindow loadingWindow;
 
-        double AcceptableFreeHoursFreeHours;
+        //double AcceptableFreeHoursFreeHours;
         double FreeHours;
 
         #region Переменные для Bitrix24

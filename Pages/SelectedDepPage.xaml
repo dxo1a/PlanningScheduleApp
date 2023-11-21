@@ -76,9 +76,9 @@
                 </StackPanel>
             </DockPanel>
         </StackPanel>
-        <DataGrid x:Name="StaffDG" SelectionMode="Extended" AutoGenerateColumns="False" CanUserAddRows="False" Grid.Row="1" Grid.Column="0" ColumnHeaderHeight="60" Margin="5 0 0 5" CanUserDeleteRows="False" Style="{StaticResource DataGridOwn}" SelectionChanged="StaffDG_SelectionChanged" PreviewKeyDown="StaffDG_PreviewKeyDown">
+        <DataGrid x:Name="StaffDG" SelectionMode="Extended" AutoGenerateColumns="False" CanUserAddRows="False" Grid.Row="1" Grid.Column="0" ColumnHeaderHeight="60" Margin="5 0 0 5" CanUserDeleteRows="False" Style="{StaticResource DataGridOwn}" SelectionChanged="StaffDG_SelectionChanged" PreviewKeyDown="StaffDG_PreviewKeyDown" PreviewMouseRightButtonDown="StaffDG_PreviewMouseRightButtonDown">
             <DataGrid.ContextMenu>
-                <ContextMenu FontSize="12" MaxWidth="150">
+                <ContextMenu FontSize="12" MaxWidth="150" Name="DGCM">
                     <MenuItem Header="Удалить отсутствие" Click="DeleteAbsenceMI_Click" Margin="-10 0 0 0"/>
                 </ContextMenu>
             </DataGrid.ContextMenu>
@@ -141,11 +141,11 @@
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 5">
                         <StackPanel Orientation="Vertical" Margin="5 0 5 5">
                             <TextBlock Text="Дата начала" Margin="5 0"/>
-                            <DatePicker Name="ScheduleStartDP" MinWidth="75"/>
+                            <DatePicker Name="ScheduleStartDP" MinWidth="75" LostFocus="DP_LostFocus" SelectedDateChanged="ScheduleStartDP_SelectedDateChanged"/>
                         </StackPanel>
                         <StackPanel Orientation="Vertical" Margin="5 0">
                             <TextBlock Text="Дата окончания" Margin="5 0"/>
-                            <DatePicker Name="ScheduleEndDP" MinWidth="75"/>
+                            <DatePicker Name="ScheduleEndDP" MinWidth="75" LostFocus="DP_LostFocus" IsEnabled="False"/>
                         </StackPanel>
                     </StackPanel>
 
@@ -154,28 +154,34 @@
                         <TextBlock Text="Отсутствие" FontSize="14" FontWeight="SemiBold"/>
                         <TextBlock Text="(не обязательно)" FontSize="10" Margin="3 3 0 0" Opacity="0.5"/>
                     </StackPanel>
-
-                    <TextBox Name="CauseTBX" MinWidth="240" Style="{StaticResource TextBoxWithToolTipStyle}" Tag="Причина отсутствия" ToolTip="Причина отсутствия" GotFocus="CauseTBX_GotFocus" LostFocus="CauseTBX_LostFocus" Margin="0 0 0 0"/>
-                    <ListView Name="CauseLV" ScrollViewer.CanContentScroll="False" HorizontalAlignment="Center" Visibility="Collapsed" MinWidth="240" MaxHeight="90" FontSize="12" Style="{x:Null}" Background="LightGray" BorderThickness="1 0 1 1" SelectionChanged="CauseLV_SelectionChanged"/>
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                            <TextBox Name="CauseTBX" MinWidth="240" Style="{StaticResource TextBoxWithToolTipStyle}" Tag="Причина отсутствия" ToolTip="Причина отсутствия" GotFocus="CauseTBX_GotFocus" LostFocus="CauseTBX_LostFocus" Margin="0" IsReadOnly="True"/> <!-- функционал поиска причин -->
+                            <Button x:Name="ClearAbsenceBtn" Width="30" Height="30" HorizontalAlignment="Right" Margin="-35 0 0 0" Style="{StaticResource ClearButton}"  BorderBrush="Transparent" BorderThickness="0" Click="ClearAbsenceBtn_Click" VerticalAlignment="Top">
+                                <Image Source="/Resources/icons/misc/cross_1.ico" MaxWidth="30" MaxHeight="30" ToolTip="Очистить" Opacity="0.5"/>
+                            </Button>
+                        </StackPanel>
+                        <ListView Name="CauseLV" ScrollViewer.CanContentScroll="False" HorizontalAlignment="Center" Visibility="Collapsed" MinWidth="240" MaxHeight="90" FontSize="12" Style="{x:Null}" Background="LightGray" BorderThickness="1 0 1 1" SelectionChanged="CauseLV_SelectionChanged"/>
+                    </StackPanel>
                     <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Margin="0 5">
                         <StackPanel Orientation="Horizontal" Margin="0 0 0 5">
                             <StackPanel Orientation="Vertical" Margin="0 0 5 0">
                                 <TextBlock Text="Дата начала" Margin="5 0"/>
-                                <DatePicker Name="AbsenceStartDP" MinWidth="150"/>
+                                <DatePicker Name="AbsenceStartDP" MinWidth="150" LostFocus="DP_LostFocus" SelectedDateChanged="AbsenceStartDP_SelectedDateChanged"/>
                             </StackPanel>
                             <StackPanel Orientation="Vertical">
                                 <TextBlock Text="Время"/>
-                                <xctk:MaskedTextBox Name="AbsenceTimeBeginMTBX" Style="{StaticResource TBXStyle}" Mask="00:00" PromptChar=" " MinWidth="45" Padding="12 0 12 0"/>
+                                <xctk:MaskedTextBox Name="AbsenceTimeBeginMTBX" Style="{StaticResource TBXStyle}" Mask="00:00" PromptChar=" " MinWidth="45" Padding="12 0 12 0" KeyDown="MTBX_KeyDown"/>
                             </StackPanel>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">
                             <StackPanel Orientation="Vertical" Margin="0 0 5 0">
                                 <TextBlock Text="Дата окончания" Margin="5 0"/>
-                                <DatePicker Name="AbsenceFinishDP" MinWidth="150"/>
+                                <DatePicker Name="AbsenceFinishDP" MinWidth="150" LostFocus="DP_LostFocus" IsEnabled="False"/>
                             </StackPanel>
-                            <StackPanel Orientation="Vertical">
+                            <StackPanel Orientation="Vertical" HorizontalAlignment="Stretch">
                                 <TextBlock Text="Время"/>
-                                <xctk:MaskedTextBox Name="AbsenceTimeEndMTBX" Style="{StaticResource TBXStyle}" Mask="00:00" PromptChar=" " MinWidth="45" Padding="12 0 12 0"/>
+                                <xctk:MaskedTextBox Name="AbsenceTimeEndMTBX" Style="{StaticResource TBXStyle}" Mask="00:00" PromptChar=" " MinWidth="45" Padding="12 0 12 0" KeyDown="MTBX_KeyDown"/>
                             </StackPanel>
                         </StackPanel>
                     </StackPanel>

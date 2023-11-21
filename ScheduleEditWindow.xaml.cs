@@ -352,5 +352,25 @@ namespace PlanningScheduleApp
                 }
             }
         }
+
+        private void MTBX_KeyDown(object sender, KeyEventArgs e)
+        {
+            MaskedTextBox maskedTextBox = sender as MaskedTextBox;
+
+            if (Keyboard.Modifiers == ModifierKeys.Control && e.Key == Key.C)
+            {
+                string textToCopy = maskedTextBox.Text;
+                for (int i = 0; i < 10; i++)
+                {
+                    try
+                    {
+                        Clipboard.SetText(textToCopy);
+                        return;
+                    }
+                    catch { }
+                    System.Threading.Thread.Sleep(10);
+                }
+            }
+        }
     }
 }

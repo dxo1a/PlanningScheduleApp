@@ -77,7 +77,7 @@ namespace PlanningScheduleApp
 
         private void UpdateGrid()
         {
-            scheduleTemplates = Odb.db.Database.SqlQuery<ScheduleTemplateModel>("select ID_Template, TemplateName, isFlexible, WorkingDaysCount, RestingDaysCount from Zarplats.dbo.Schedule_Template").ToList();
+            scheduleTemplates = Odb.db.Database.SqlQuery<ScheduleTemplateModel>("select ID_Template, TemplateName, isFlexible, WorkingDaysCount, RestingDaysCount from Zarplats.dbo.Schedule_Template").OrderBy(u => u.TemplateName).ToList();
             TemplatesDG.ItemsSource = scheduleTemplates;
         }
     }
