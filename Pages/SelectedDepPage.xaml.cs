@@ -1,13 +1,10 @@
-﻿using MathCore.WPF.Converters;
-using PlanningScheduleApp.Models;
+﻿using PlanningScheduleApp.Models;
 using System;
 using System.Collections.Generic;
 using System.Data.Entity.Core.Common.CommandTrees.ExpressionBuilder;
 using System.Data.SqlClient;
-using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -91,7 +88,6 @@ namespace PlanningScheduleApp.Pages
                 StaffDG.ItemsSource = null;
             });
 
-            string connectionString = "Persist Security Info=False;User ID=sa; Password=server_esa;Initial Catalog=dsl_sp;Server=sql";
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 await connection.OpenAsync();
@@ -136,6 +132,13 @@ namespace PlanningScheduleApp.Pages
                         });
                     }
                 }
+                connection.Close();
+            }
+            if (StaffList.Count > 0)
+            {
+                DateTime startDate = StaffList.Min(item => item.DTA);
+                DateTime endDate = StaffList.Max(item => item.DTA);
+                await UpdateWorkingHours(StaffList, startDate, endDate);
             }
             refreshCount++;
             Console.WriteLine($"Таблица StaffDG обновлена {refreshCount} раз.");
@@ -258,8 +261,10 @@ namespace PlanningScheduleApp.Pages
         #region UI
         private void ExcelBtn_Click(object sender, RoutedEventArgs e)
         {
-            ExportToExcelFilterWindow exportToExcelFilterWindow = new ExportToExcelFilterWindow();
-            exportToExcelFilterWindow.ShowDialog();
+            //ExportToExcelFilterWindow exportToExcelFilterWindow = new ExportToExcelFilterWindow();
+            //exportToExcelFilterWindow.ShowDialog();
+            DataGridTestWindow dataGridTestWindow = new DataGridTestWindow(SelectedDep);
+            dataGridTestWindow.ShowDialog();
         }
         private void StaffDG_PreviewKeyDown(object sender, KeyEventArgs e)
         {
@@ -502,7 +507,7 @@ namespace PlanningScheduleApp.Pages
                 }
             }
         }
-        
+
         private void StaffDG_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
         {
             // получение элемента под указателем мыши
@@ -528,6 +533,12 @@ namespace PlanningScheduleApp.Pages
                     DGCM.Visibility = Visibility.Visible;
                 }
             }
+        }
+
+        private void StaffDG_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            SmenZadaniaWindow smenZadaniaWindow = new SmenZadaniaWindow(SelectedStaffInDG);
+            smenZadaniaWindow.ShowDialog();
         }
 
         private bool HasAbsence(int staffId, DateTime date)
@@ -578,8 +589,18 @@ namespace PlanningScheduleApp.Pages
                 DateTime lunchTimeBegin = ConvertToDateTime(current, flexibleDay.LunchTimeBegin);
                 DateTime lunchTimeEnd = ConvertToDateTime(current, flexibleDay.LunchTimeEnd);
 
-                double totalAbsenceTime = await CalculateAbsenceHoursForEachDay(SelectedStaff.STAFF_ID, current);
-                double workingHours = CalculateWorkingHours(workBegin, workEnd, lunchTimeBegin, lunchTimeEnd, current) - totalAbsenceTime;
+                var absenceInfo = await CalculateAbsenceHoursForEachDay(SelectedStaff.STAFF_ID, current);
+                double totalAbsenceTime = absenceInfo.Item1;
+                DateTime absenceStart = absenceInfo.Item2;
+                DateTime absenceEnd = absenceInfo.Item3;
+
+                double intersectionTime = CalculateIntersectionTime(lunchTimeBegin, lunchTimeEnd, absenceStart, absenceEnd);
+                if (intersectionTime > 0)
+                {
+                    DateTime intersectionEnd = lunchTimeEnd > absenceEnd ? absenceEnd : lunchTimeEnd;
+                    intersectionTime = (intersectionEnd - lunchTimeBegin).TotalHours;
+                }
+                double workingHours = CalculateWorkingHours(workBegin, workEnd, lunchTimeBegin, lunchTimeEnd, current) - (intersectionTime > 0 ? intersectionTime : totalAbsenceTime);
 
                 using (SqlConnection connection = new SqlConnection(connectionString))
                 {
@@ -655,8 +676,18 @@ namespace PlanningScheduleApp.Pages
                     DateTime lunchTimeBegin = ConvertToDateTime(current, currentDay.LunchTimeBegin);
                     DateTime lunchTimeEnd = ConvertToDateTime(current, currentDay.LunchTimeEnd);
 
-                    double totalAbsenceTime = await CalculateAbsenceHoursForEachDay(SelectedStaff.STAFF_ID, current);
-                    double workingHours = CalculateWorkingHours(workBegin, workEnd, lunchTimeBegin, lunchTimeEnd, current) - totalAbsenceTime;
+                    var absenceInfo = await CalculateAbsenceHoursForEachDay(SelectedStaff.STAFF_ID, current);
+                    double totalAbsenceTime = absenceInfo.Item1;
+                    DateTime absenceStart = absenceInfo.Item2;
+                    DateTime absenceEnd = absenceInfo.Item3;
+
+                    double intersectionTime = CalculateIntersectionTime(lunchTimeBegin, lunchTimeEnd, absenceStart, absenceEnd);
+                    if (intersectionTime > 0)
+                    {
+                        DateTime intersectionEnd = lunchTimeEnd > absenceEnd ? absenceEnd : lunchTimeEnd;
+                        intersectionTime = (intersectionEnd - lunchTimeBegin).TotalHours;
+                    }
+                    double workingHours = CalculateWorkingHours(workBegin, workEnd, lunchTimeBegin, lunchTimeEnd, current) - (intersectionTime > 0 ? intersectionTime : totalAbsenceTime);
 
                     using (SqlConnection connection = new SqlConnection(connectionString))
                     {
@@ -773,14 +804,14 @@ namespace PlanningScheduleApp.Pages
             Console.WriteLine("Закончили обновлять рабочие часы для периода");
         }
 
-        
+
         #endregion
 
         #region Вычисления рабочих часов
         private async Task UpdateWorkingHours(List<StaffModel> selectedStaffList, DateTime startDate, DateTime endDate)
         {
             Console.WriteLine("Получаем список затронутых строк");
-            List<StaffModel> affectedRows = await GetAffectedRowsAsync(SelectedDep.Position, startDate, endDate);
+            List<StaffModel> affectedRows = await GetAffectedRowsAsync(startDate, endDate);
             Console.WriteLine("Закончили получать список затронутых строк");
 
             foreach (StaffModel selectedStaff in selectedStaffList)
@@ -798,8 +829,18 @@ namespace PlanningScheduleApp.Pages
                         DateTime lunchTimeBegin = ConvertToDateTime(row.DTA, row.LunchTimeBegin);
                         DateTime lunchTimeEnd = ConvertToDateTime(row.DTA, row.LunchTimeEnd);
 
-                        double totalAbsenceTime = await CalculateAbsenceHoursForEachDay(row.STAFF_ID, row.DTA);
-                        double? workingHours = CalculateWorkingHours(workBegin, workEnd, lunchTimeBegin, lunchTimeEnd, row.DTA) - totalAbsenceTime;
+                        var absenceInfo = await CalculateAbsenceHoursForEachDay(row.STAFF_ID, row.DTA);
+                        double totalAbsenceTime = absenceInfo.Item1;
+                        DateTime absenceStart = absenceInfo.Item2;
+                        DateTime absenceEnd = absenceInfo.Item3;
+
+                        double intersectionTime = CalculateIntersectionTime(lunchTimeBegin, lunchTimeEnd, absenceStart, absenceEnd);
+                        if (intersectionTime > 0)
+                        {
+                            DateTime intersectionEnd = lunchTimeEnd > absenceEnd ? absenceEnd : lunchTimeEnd;
+                            intersectionTime = (intersectionEnd - lunchTimeBegin).TotalHours;
+                        }
+                        double workingHours = CalculateWorkingHours(workBegin, workEnd, lunchTimeBegin, lunchTimeEnd, row.DTA) - (intersectionTime > 0 ? intersectionTime : totalAbsenceTime);
 
                         await Odb.db.Database.ExecuteSqlCommandAsync("update Zarplats.dbo.Staff_Schedule set WorkingHours = @workingHours where ID_Schedule = @id", new SqlParameter("workingHours", workingHours), new SqlParameter("id", row.ID_Schedule));
                     }
@@ -807,7 +848,7 @@ namespace PlanningScheduleApp.Pages
             };
         }
 
-        private async Task<List<StaffModel>> GetAffectedRowsAsync(string position, DateTime absenceBegin, DateTime absenceEnd)
+        private async Task<List<StaffModel>> GetAffectedRowsAsync(DateTime absenceBegin, DateTime absenceEnd)
         {
             using (var connection = new SqlConnection(connectionString))
             {
@@ -864,9 +905,29 @@ namespace PlanningScheduleApp.Pages
             return totalWorkingHours - lunchTime;
         }
 
-        private async Task<double> CalculateAbsenceHoursForEachDay(int staffId, DateTime currentDate)
+        private double CalculateIntersectionTime(DateTime workLunchStart, DateTime workLunchEnd, DateTime absenceStart, DateTime absenceEnd)
+        {
+            // Находим максимальное начальное время и минимальное конечное время, чтобы определить пересечение
+            DateTime intersectionStart = workLunchStart > absenceStart ? workLunchStart : absenceStart;
+            DateTime intersectionEnd = workLunchEnd < absenceEnd ? workLunchEnd : absenceEnd;
+
+            // Проверяем, есть ли пересечение
+            if (intersectionStart < intersectionEnd)
+            {
+                // Рассчитываем продолжительность пересечения
+                double intersectionHours = (intersectionEnd - intersectionStart).TotalHours;
+                return intersectionHours;
+            }
+
+            // Если пересечения нет, возвращаем 0
+            return 0;
+        }
+
+        private async Task<Tuple<double, DateTime, DateTime>> CalculateAbsenceHoursForEachDay(int staffId, DateTime currentDate)
         {
             double totalAbsenceTime = 0;
+            DateTime absenceStart = DateTime.MinValue;
+            DateTime absenceEnd = DateTime.MinValue;
 
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
@@ -883,16 +944,27 @@ namespace PlanningScheduleApp.Pages
                     {
                         while (await reader.ReadAsync())
                         {
-                            DateTime absenceTimeBegin = ConvertToDateTime(currentDate, reader["TimeBegin"].ToString());
-                            DateTime absenceTimeEnd = ConvertToDateTime(currentDate, reader["TimeEnd"].ToString());
+                            DateTime currentAbsenceTimeBegin = ConvertToDateTime(currentDate, reader["TimeBegin"].ToString());
+                            DateTime currentAbsenceTimeEnd = ConvertToDateTime(currentDate, reader["TimeEnd"].ToString());
 
-                            totalAbsenceTime += (absenceTimeEnd - absenceTimeBegin).TotalHours;
+                            // Обновление времени начала и окончания отсутствия
+                            if (absenceStart == DateTime.MinValue || currentAbsenceTimeBegin < absenceStart)
+                            {
+                                absenceStart = currentAbsenceTimeBegin;
+                            }
+
+                            if (absenceEnd == DateTime.MinValue || currentAbsenceTimeEnd > absenceEnd)
+                            {
+                                absenceEnd = currentAbsenceTimeEnd;
+                            }
+
+                            totalAbsenceTime += (currentAbsenceTimeEnd - currentAbsenceTimeBegin).TotalHours;
                         }
                     }
                 }
             }
 
-            return totalAbsenceTime;
+            return new Tuple<double, DateTime, DateTime>(totalAbsenceTime, absenceStart, absenceEnd);
         }
         #endregion
     }

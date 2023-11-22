@@ -76,7 +76,7 @@
                 </StackPanel>
             </DockPanel>
         </StackPanel>
-        <DataGrid x:Name="StaffDG" SelectionMode="Extended" AutoGenerateColumns="False" CanUserAddRows="False" Grid.Row="1" Grid.Column="0" ColumnHeaderHeight="60" Margin="5 0 0 5" CanUserDeleteRows="False" Style="{StaticResource DataGridOwn}" SelectionChanged="StaffDG_SelectionChanged" PreviewKeyDown="StaffDG_PreviewKeyDown" PreviewMouseRightButtonDown="StaffDG_PreviewMouseRightButtonDown">
+        <DataGrid x:Name="StaffDG" Visibility="Visible" SelectionMode="Extended" AutoGenerateColumns="False" CanUserAddRows="False" Grid.Row="1" Grid.Column="0" ColumnHeaderHeight="60" Margin="5 0 0 5" CanUserDeleteRows="False" Style="{StaticResource DataGridOwn}" SelectionChanged="StaffDG_SelectionChanged" PreviewKeyDown="StaffDG_PreviewKeyDown" PreviewMouseRightButtonDown="StaffDG_PreviewMouseRightButtonDown" MouseDoubleClick="StaffDG_MouseDoubleClick">
             <DataGrid.ContextMenu>
                 <ContextMenu FontSize="12" MaxWidth="150" Name="DGCM">
                     <MenuItem Header="Удалить отсутствие" Click="DeleteAbsenceMI_Click" Margin="-10 0 0 0"/>

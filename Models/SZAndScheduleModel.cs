@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows.Documents;
 
 namespace PlanningScheduleApp.Models
@@ -66,6 +67,17 @@ namespace PlanningScheduleApp.Models
         public string Subdivision { get; set; }
         public string Position { get; set; }
 
+        // Изменения в свойствах DTAStatus
+        public List<StatusInfo> DTAStatusList { get; set; } = new List<StatusInfo>();
+
+        public string WorkStatus
+        {
+            get
+            {
+                return DTAStatusList.Count > 0 ? DTAStatusList[3].Status : "-";
+            }
+        }
+
         public string StaffForSearch
         {
             get
@@ -122,6 +134,12 @@ namespace PlanningScheduleApp.Models
                     return string.Empty;
             }
         }
+    }
+
+    public class StatusInfo
+    {
+        public DateTime Date { get; set; }
+        public string Status { get; set; } = "Н"; // По умолчанию статус "Н"
     }
 
     public class DepModel

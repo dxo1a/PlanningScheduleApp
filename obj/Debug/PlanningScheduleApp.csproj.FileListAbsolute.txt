@@ -184,3 +184,7 @@ C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\PlanningScheduleApp.csproj.CopyComplete
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\PlanningScheduleApp.exe
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\PlanningScheduleApp.pdb
+C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\DataGridTestWindow.g.cs
+C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\DataGridTestWindow.baml
+C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\SmenZadaniaWindow.g.cs
+C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\SmenZadaniaWindow.baml

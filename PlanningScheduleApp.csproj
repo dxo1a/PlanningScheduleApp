@@ -155,7 +155,11 @@
     <Compile Include="Converters\DayOfWeekConverter.cs" />
     <Compile Include="Converters\IsStringNonemptyConverter.cs" />
     <Compile Include="Converters\MinutesConverter.cs" />
+    <Compile Include="Converters\MultiDayStatusConverter.cs" />
     <Compile Include="Converters\ZeroToEmptyConverter.cs" />
+    <Compile Include="DataGridTestWindow.xaml.cs">
+      <DependentUpon>DataGridTestWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ExportToExcelFilterWindow.xaml.cs">
       <DependentUpon>ExportToExcelFilterWindow.xaml</DependentUpon>
     </Compile>
@@ -166,6 +170,7 @@
     <Compile Include="Models\AddScheduleViewModel.cs" />
     <Compile Include="Models\DateViewModel.cs" />
     <Compile Include="Models\ScheduleModel.cs" />
+    <Compile Include="Models\SmenZadaniaModel.cs" />
     <Compile Include="Pages\DeprecatedStaffAddPage.xaml.cs">
       <DependentUpon>DeprecatedStaffAddPage.xaml</DependentUpon>
     </Compile>
@@ -186,6 +191,13 @@
     <Compile Include="DeprecatedStaffAddOrEditWindow.xaml.cs">
       <DependentUpon>DeprecatedStaffAddOrEditWindow.xaml</DependentUpon>
     </Compile>
+    <Compile Include="SmenZadaniaWindow.xaml.cs">
+      <DependentUpon>SmenZadaniaWindow.xaml</DependentUpon>
+    </Compile>
+    <Page Include="DataGridTestWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="ExportToExcelFilterWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -244,6 +256,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="DeprecatedStaffAddOrEditWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="SmenZadaniaWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

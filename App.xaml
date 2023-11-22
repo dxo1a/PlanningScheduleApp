@@ -20,6 +20,7 @@
             <converters:ZeroToEmptyStringConverter x:Key="ZeroToEmptyStringConverter"/>
             <converters:MinutesConverter x:Key="MinutesConverter" />
             <converters:IsStringNonemptyConverter x:Key="ToolTipVisibilityConveter" />
+            <converters:MultiDayStatusConverter x:Key="MultiDayStatusConverter" />
 
 
             <DropShadowEffect x:Key="ShadowEffect" BlurRadius="15" Direction="310" ShadowDepth="8" Color="Black" Opacity="0.8"/>
@@ -41,14 +42,14 @@
             </Style>
             
             <!--DataGrid用のスタイル-->
-            <Style TargetType="DataGridCell" x:Key="ReadyCell">
+            <!--<Style TargetType="DataGridCell" x:Key="ReadyCell">
                 <Setter Property="BorderThickness" Value="0"/>
                 <Style.Triggers>
                     <DataTrigger Binding="{Binding StatusBool}" Value="Готово">
                         <Setter Property="Background" Value="LightGreen"/>
                     </DataTrigger>
                 </Style.Triggers>
-            </Style>
+            </Style>-->
             <Style x:Key="DataGridOwn" TargetType="DataGrid">
                 <!-- Make the border and grid lines a little less imposing -->
                 <Setter Property="BorderBrush" Value="#DDDDDD" />
@@ -121,7 +122,6 @@
                                 <Setter.Value>
                                     <ControlTemplate TargetType="DataGridCell">
                                         <Border Padding="{TemplateBinding Padding}" 
-                                            BorderBrush="{TemplateBinding BorderBrush}"
                                             BorderThickness="{TemplateBinding BorderThickness}"
                                             Background="{TemplateBinding Background}">
                                             <ContentPresenter />

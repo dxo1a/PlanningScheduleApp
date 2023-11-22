@@ -221,6 +221,7 @@ namespace PlanningScheduleApp
                 using (SqlConnection connection = new SqlConnection(connectionString))
                 {
                     connection.Open();
+
                     int restingDaysCount = StaticDays.Count(day => day.isRestingDay);
                     int workingDaysCount = StaticDays.Count(day => !day.isRestingDay);
                     int checkExisting = Odb.db.Database.SqlQuery<int>("IF EXISTS (SELECT 1 FROM Zarplats.dbo.Schedule_Template WHERE TemplateName LIKE @TemplateName) SELECT 1 ELSE SELECT 0", new SqlParameter("TemplateName", $"%{TemplateNameTBX.Text}%")).SingleOrDefault();
@@ -249,15 +250,16 @@ namespace PlanningScheduleApp
                                 }
                             }
                         }
+                        MessageBox.Show("График обновлён.");
+                        TemplateCreated?.Invoke(this, EventArgs.Empty);
                     }
                     else
                     {
                         MessageBox.Show("Шаблон с таким названием уже существует!");
                         return;
                     }
+                    connection.Close();
                 }
-                MessageBox.Show("График обновлён.");
-                TemplateCreated?.Invoke(this, EventArgs.Empty);
             }
             catch (Exception ex)
             {
@@ -331,6 +333,7 @@ namespace PlanningScheduleApp
                     MessageBox.Show("Шаблон с таким названием уже существует!");
                     return;
                 }
+                connection.Close();
             }
         }
 

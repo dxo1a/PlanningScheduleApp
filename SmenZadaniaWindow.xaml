@@ -1,0 +1,35 @@
+﻿<Window x:Class="PlanningScheduleApp.SmenZadaniaWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:PlanningScheduleApp"
+        mc:Ignorable="d"
+        Title="SmenZadaniaWindow" Height="450" Width="800">
+    <Grid>
+        <DataGrid x:Name="SmenZadaniaDG" Visibility="Visible" SelectionMode="Extended" AutoGenerateColumns="False" CanUserAddRows="False" Grid.Row="1" Grid.Column="0" ColumnHeaderHeight="60" Margin="5 0 0 5" CanUserDeleteRows="False" Style="{StaticResource DataGridOwn}">
+            <DataGrid.ColumnHeaderStyle>
+                <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+                    <Setter Property="Padding" Value="5 0"/>
+                    <Setter Property="ContentTemplate">
+                        <Setter.Value>
+                            <DataTemplate>
+                                <TextBlock TextWrapping="WrapWithOverflow" TextAlignment="Center" Text="{Binding}"></TextBlock>
+                            </DataTemplate>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </DataGrid.ColumnHeaderStyle>
+            <DataGrid.Columns>
+                <DataGridTextColumn Binding="{Binding SHORT_FIO}" Header="ФИО" Width="*" IsReadOnly="True" MinWidth="90"/>
+                <DataGridTextColumn Binding="{Binding Product}" Header="Изделие" Width="*" IsReadOnly="True" MinWidth="100" MaxWidth="100"/>
+                <DataGridTextColumn Binding="{Binding PP}" Header="Договор" Width="*" IsReadOnly="True" MinWidth="170" MaxWidth="170"/>
+                <DataGridTextColumn Binding="{Binding NUM}" Header="ПрП" Width="*" IsReadOnly="True" MinWidth="100" MaxWidth="100"/>
+                <DataGridTextColumn Binding="{Binding Detail}" Header="Деталь" Width="*" IsReadOnly="True" MaxWidth="60" MinWidth="60"/>
+                <DataGridTextColumn Binding="{Binding Count}" Header="Кол-во" Width="*" IsReadOnly="True" MinWidth="90" MaxWidth="160"/>
+                <DataGridTextColumn Binding="{Binding Cost}" Header="Время (ед.)" Width="*" IsReadOnly="True" MinWidth="90" MaxWidth="160"/>
+                <DataGridTextColumn Binding="{Binding TotalCost}" Header="Время" Width="*" IsReadOnly="True" MaxWidth="100" MinWidth="100"/>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</Window>
