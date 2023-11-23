@@ -188,3 +188,5 @@ C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\DataGridTestWindow.baml
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\SmenZadaniaWindow.g.cs
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\SmenZadaniaWindow.baml
+C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\Pages\SelectedDepPageVer2.g.cs
+C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\Pages\SelectedDepPageVer2.baml

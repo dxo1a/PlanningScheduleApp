@@ -20,7 +20,6 @@
             <converters:ZeroToEmptyStringConverter x:Key="ZeroToEmptyStringConverter"/>
             <converters:MinutesConverter x:Key="MinutesConverter" />
             <converters:IsStringNonemptyConverter x:Key="ToolTipVisibilityConveter" />
-            <converters:MultiDayStatusConverter x:Key="MultiDayStatusConverter" />
 
 
             <DropShadowEffect x:Key="ShadowEffect" BlurRadius="15" Direction="310" ShadowDepth="8" Color="Black" Opacity="0.8"/>

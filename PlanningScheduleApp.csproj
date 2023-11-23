@@ -172,7 +172,6 @@
     <Compile Include="Converters\DayOfWeekConverter.cs" />
     <Compile Include="Converters\IsStringNonemptyConverter.cs" />
     <Compile Include="Converters\MinutesConverter.cs" />
-    <Compile Include="Converters\MultiDayStatusConverter.cs" />
     <Compile Include="Converters\ZeroToEmptyConverter.cs" />
     <Compile Include="DataGridTestWindow.xaml.cs">
       <DependentUpon>DataGridTestWindow.xaml</DependentUpon>
@@ -193,6 +192,9 @@
     </Compile>
     <Compile Include="Pages\DeprecatedStaffEditPage.xaml.cs">
       <DependentUpon>DeprecatedStaffEditPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\SelectedDepPageVer2.xaml.cs">
+      <DependentUpon>SelectedDepPageVer2.xaml</DependentUpon>
     </Compile>
     <Compile Include="ScheduleAddWindow.xaml.cs">
       <DependentUpon>ScheduleAddWindow.xaml</DependentUpon>
@@ -249,6 +251,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Pages\DeprecatedStaffEditPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\SelectedDepPageVer2.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

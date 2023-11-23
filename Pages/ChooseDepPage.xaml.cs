@@ -19,6 +19,8 @@ namespace PlanningScheduleApp.Pages
 
             DepList = Odb.db.Database.SqlQuery<DepModel>("SELECT DISTINCT Position FROM Zarplats.dbo.StaffView").ToList();
             DepLV.ItemsSource = DepList.OrderBy(u => u.Position);
+
+            SearchDepTBX.Focus();
         }
 
         private void SearchDepTBX_TextChanged(object sender, TextChangedEventArgs e) => search();
@@ -44,7 +46,7 @@ namespace PlanningScheduleApp.Pages
             {
                 SearchDepTBX.Text = $"{SelectedDep.Position}";
                 MainWindow mainWindow = Window.GetWindow(this) as MainWindow;
-                mainWindow.MainFrame.Navigate(new SelectedDepPage(SelectedDep));
+                mainWindow.MainFrame.Navigate(new SelectedDepPageVer2(SelectedDep));
             }
         }
 

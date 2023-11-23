@@ -67,6 +67,8 @@ namespace PlanningScheduleApp.Models
         public string Subdivision { get; set; }
         public string Position { get; set; }
 
+        public List<DateAndSchedule> DatesAndSchedules { get; set; }
+
         public string StaffForSearch
         {
             get
@@ -125,10 +127,15 @@ namespace PlanningScheduleApp.Models
         }
     }
 
-    public class StatusInfo
+    public class DateAndSchedule
     {
-        public DateTime Date { get; set; }
-        public string Status { get; set; } = "Н"; // По умолчанию статус "Н"
+        public DateTime DTA { get; set; }
+        public int ID_Schedule { get; set; }
+
+        public override string ToString()
+        {
+            return "Р";
+        }
     }
 
     public class DepModel

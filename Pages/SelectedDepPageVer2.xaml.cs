@@ -17,9 +17,9 @@ using Clipboard = System.Windows.Clipboard;
 using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 using MessageBox = System.Windows.MessageBox;
 
-namespace PlanningScheduleApp
+namespace PlanningScheduleApp.Pages
 {
-    public partial class DataGridTestWindow : Window
+    public partial class SelectedDepPageVer2 : System.Windows.Controls.Page
     {
         private BindingSource staffBindingSource = new BindingSource();
         private BindingList<StaffModel> StaffList = new BindingList<StaffModel>();
@@ -44,7 +44,7 @@ namespace PlanningScheduleApp
 
         public double WorkingHours, CalculatedLunchTime, LunchTime;
 
-        public DataGridTestWindow(DepModel selectedDep)
+        public SelectedDepPageVer2(DepModel selectedDep)
         {
             InitializeComponent();
 
@@ -86,22 +86,9 @@ namespace PlanningScheduleApp
                         new SqlParameter("podrazd", SelectedDep.Position)).ToList();
                 });
 
-                var groupedData = tempList
-                    .GroupBy(x => x.STAFF_ID)
-                    .Select(g => new StaffModel
-                    {
-                        STAFF_ID = g.Key,
-                        SHORT_FIO = g.First().SHORT_FIO,
-                        // Другие свойства, которые не зависят от даты
-
-                        // Сохраняем все даты и ID_Schedule в списке для каждого сотрудника
-                        DatesAndSchedules = g.Select(item => new DateAndSchedule
-                        {
-                            DTA = item.DTA,
-                            ID_Schedule = item.ID_Schedule
-                        }).ToList()
-                    })
-                    .ToList();
+                var groupedData = tempList.GroupBy(x => x.STAFF_ID)
+                                  .Select(g => g.First())
+                                  .ToList();
 
                 Dispatcher.Invoke(() =>
                 {
@@ -145,38 +132,26 @@ namespace PlanningScheduleApp
 
                     StaffDGV.DataSource = staffBindingSource;
 
-                    for (int day = 1; day <= daysInMonth; day++)
+                    StaffDGV.RowPrePaint += (s, e) =>
                     {
-                        DateTime currentDateForCell = new DateTime(currentDate.Year, currentDate.Month, day);
-
-                        for (int rowIndex = 0; rowIndex < StaffList.Count; rowIndex++)
+                        if (e.RowIndex >= 0 && e.RowIndex < StaffDGV.RowCount)
                         {
-                            StaffModel staff = StaffList[rowIndex];
+                            DataGridViewRow row = StaffDGV.Rows[e.RowIndex];
+                            StaffModel staff = (StaffModel)row.DataBoundItem;
 
-                            bool isRecordExists = CheckRecordExists(staff.STAFF_ID, currentDateForCell);
-
-                            DataGridViewCell cell = StaffDGV.Rows[rowIndex].Cells[day + 1];
-
-                            if (isRecordExists)
+                            if (staff != null)
                             {
-                                int? idSchedule = staff.DatesAndSchedules
-                                    .FirstOrDefault(ds => ds.DTA == currentDateForCell)?.ID_Schedule;
-                                DateTime? date = staff.DatesAndSchedules
-                                    .FirstOrDefault(ds => ds.DTA == currentDateForCell)?.DTA;
-
-                                // Сохраняем объект DateAndSchedule в ячейке
-                                cell.Value = new DateAndSchedule
+                                for (int day = 1; day <= daysInMonth; day++)
                                 {
-                                    ID_Schedule = idSchedule ?? 0,
-                                    DTA = date ?? DateTime.MinValue
-                                };
-                            }
-                            else
-                            {
-                                cell.Value = "Н";
+                                    int columnIndex = day + 1;
+                                    DateTime currentDateForCell = new DateTime(currentDate.Year, currentDate.Month, day);
+                                    bool isRecordExists = CheckRecordExists(staff.STAFF_ID, currentDateForCell);
+
+                                    row.Cells[columnIndex].Value = isRecordExists ? "Р" : "Н";
+                                }
                             }
                         }
-                    }
+                    };
 
                     StaffDGV.CellFormatting += (s, e) =>
                     {
@@ -229,35 +204,17 @@ namespace PlanningScheduleApp
             {
                 SelectedRow = (StaffModel)staffBindingSource.Current;
                 Console.WriteLine($"SelectedRow: {SelectedRow}");
-                if (SelectedRow != null)
-                    StaffRemoveBtn.IsEnabled = true;
-                else
-                    StaffRemoveBtn.IsEnabled = false;
             }
         }
 
         int doubleClickCounter = 0;
-        private void StaffDGV_CellDoubleClick(object sender, DataGridViewCellEventArgs e)
+        private void StaffDGV_DoubleClick(object sender, EventArgs e)
         {
-            if (e.RowIndex >= 0 && e.ColumnIndex > 1) // Проверяем, что клик был по ячейке с данными
+            if (SelectedRow != null)
             {
-                DataGridViewCell cell = StaffDGV.Rows[e.RowIndex].Cells[e.ColumnIndex];
-
-                if (cell.Value is DateAndSchedule dateAndSchedule)
-                {
-                    if (dateAndSchedule.ID_Schedule != null && dateAndSchedule.DTA != null)
-                    {
-                        MessageBox.Show($"SelectedRow Info:\n{SelectedRow.STAFF_ID}, {dateAndSchedule.DTA.Date}, {dateAndSchedule.ID_Schedule}");
-                    }
-                    else
-                    {
-                        MessageBox.Show($"SelectedRow Info:\n{SelectedRow.STAFF_ID}, No information available");
-                    }
-                }
-                else
-                {
-                    MessageBox.Show($"SelectedRow Info:\n{SelectedRow.STAFF_ID}, No information available");
-                }
+                doubleClickCounter++;
+                Console.WriteLine($"StaffDGV DoubleClicked {doubleClickCounter} times!");
+                MessageBox.Show($"SelectedRow Info:\n{SelectedRow.STAFF_ID}, {SelectedRow.DTA}");
             }
         }
 
@@ -320,51 +277,35 @@ namespace PlanningScheduleApp
 
         public async void DeleteRow()
         {
-            if (StaffDGV.SelectedCells.Count > 0)
+            List<StaffModel> selectedItems = StaffDGV.SelectedRows.Cast<StaffModel>().ToList();
+            if (selectedItems.Count > 1)
             {
-                var result = MessageBox.Show("Удалить выбранные записи?", "Удаление", MessageBoxButton.YesNo, MessageBoxImage.Question);
-
+                var result = MessageBox.Show("Удалить записи?", "Удаление", MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (result == MessageBoxResult.Yes)
                 {
-                    foreach (DataGridViewCell selectedCell in StaffDGV.SelectedCells)
+                    //var result2 = MessageBox.Show("Удалить отсутствия?", "Удаление", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                    //if (result2 == MessageBoxResult.Yes)
+                    //    await DeleteAbsence();
+
+                    foreach (StaffModel selectedRow in selectedItems)
                     {
-                        int rowIndex = selectedCell.RowIndex;
-                        int columnIndex = selectedCell.ColumnIndex;
-
-                        if (rowIndex >= 0 && rowIndex < StaffDGV.Rows.Count && columnIndex > 1)
-                        {
-                            var selectedModel = (StaffModel)StaffDGV.Rows[rowIndex].DataBoundItem;
-
-                            // Получаем дату из колонки
-                            DateTime currentDateForCell = new DateTime(DateTime.Now.Year, DateTime.Now.Month, columnIndex - 1);
-
-                            // Получаем idScheduleToDelete по дате в ячейке
-                            int? idScheduleToDelete = selectedModel.DatesAndSchedules
-                                .FirstOrDefault(ds => ds.DTA == currentDateForCell)?.ID_Schedule;
-
-                            if (idScheduleToDelete.HasValue && idScheduleToDelete.Value != 0)
-                            {
-                                Console.WriteLine($"Row ID_Schedule in Deleting: {idScheduleToDelete}");
-
-                                Odb.db.Database.ExecuteSqlCommand("DELETE FROM Zarplats.dbo.Staff_Schedule WHERE ID_Schedule = @idschedule", new SqlParameter("idschedule", idScheduleToDelete));
-
-                                // Обновляем объект DateAndSchedule после удаления
-                                var dateAndScheduleToDelete = selectedModel.DatesAndSchedules.FirstOrDefault(ds => ds.ID_Schedule == idScheduleToDelete);
-                                if (dateAndScheduleToDelete != null)
-                                {
-                                    dateAndScheduleToDelete.ID_Schedule = 0; // или другое значение, которое не будет использоваться
-                                    dateAndScheduleToDelete.DTA = DateTime.MinValue;
-                                }
-                            }
-                        }
+                        Odb.db.Database.ExecuteSqlCommand("DELETE FROM Zarplats.dbo.Staff_Schedule WHERE ID_Schedule = @idschedule", new SqlParameter("idschedule", selectedRow.ID_Schedule));
                     }
-
-                    await UpdateDGV();
                 }
+                await UpdateDGV();
+            }
+            else if (selectedItems.Count == 1)
+            {
+                var result = MessageBox.Show("Удалить запись?", "Удаление", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (result == MessageBoxResult.Yes)
+                {
+                    Odb.db.Database.ExecuteSqlCommand("DELETE FROM Zarplats.dbo.Staff_Schedule WHERE ID_Schedule = @idschedule", new SqlParameter("idschedule", SelectedStaffInDG.ID_Schedule));
+                }
+                await UpdateDGV();
             }
             else
             {
-                MessageBox.Show("Выберите строки для удаления.", "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Выберите записи для удаления.", "Предупреждение", MessageBoxButton.OK, MessageBoxImage.Warning);
             }
         }
 
@@ -627,6 +568,33 @@ namespace PlanningScheduleApp
                 }
             }
         }
+
+        //private void StaffDG_PreviewMouseRightButtonDown(object sender, MouseButtonEventArgs e)
+        //{
+        //    // получение элемента под указателем мыши
+        //    DependencyObject dep = (DependencyObject)e.OriginalSource;
+        //    while ((dep != null) && !(dep is DataGridRow))
+        //    {
+        //        dep = VisualTreeHelper.GetParent(dep);
+        //    }
+
+        //    if (dep is DataGridRow row)
+        //    {
+        //        StaffModel selectedStaff = (StaffModel)row.Item;
+
+        //        if (!HasAbsence(selectedStaff.STAFF_ID, selectedStaff.DTA))
+        //        {
+        //            e.Handled = true;
+        //            DGCM.IsOpen = false;
+        //            DGCM.Visibility = Visibility.Collapsed;
+        //        }
+        //        else
+        //        {
+        //            DGCM.IsOpen = true;
+        //            DGCM.Visibility = Visibility.Visible;
+        //        }
+        //    }
+        //}
 
         private void StaffDG_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
