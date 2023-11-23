@@ -1,108 +1,150 @@
 ﻿using PlanningScheduleApp.Models;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
+using System.Windows.Forms;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
+using MessageBox = System.Windows.MessageBox;
 
 namespace PlanningScheduleApp
 {
     public partial class DataGridTestWindow : Window
     {
-        public string connectionString = "Persist Security Info=False;User ID=sa; Password=server_esa;Initial Catalog=dsl_sp;Server=sql";
-        List<StaffModel> StaffList = new List<StaffModel>();
-        DepModel SelectedDep = new DepModel();
-        StaffModel SelectedStaff { get; set; }
+        private BindingSource staffBindingSource = new BindingSource();
+        private BindingList<StaffModel> StaffList = new BindingList<StaffModel>();
+        private DepModel SelectedDep { get; set; }
+
+        private StaffModel SelectedRow { get; set; }
+
+        List<string> columnsToShow = new List<string> { "STAFF_ID", "TABEL_ID", "SHORT_FIO", "WorkTime", "LunchTime", "DTA", "WorkingHours", };
 
         public DataGridTestWindow(DepModel selectedDep)
         {
             InitializeComponent();
+
+            SetDoubleBuffered(StaffDGV, true);
+
             SelectedDep = selectedDep;
-
-            StaffList = Odb.db.Database.SqlQuery<StaffModel>("SELECT DISTINCT a.ID_Schedule, a.STAFF_ID, LTRIM(e.TABEL_ID) as TABEL_ID, e.SHORT_FIO, a.WorkBegin, a.WorkEnd, a.DTA, a.LunchTimeBegin, a.LunchTimeEnd, a.WorkingHours, b.ID_Absence, c.Cause as CauseAbsence, b.DateBegin, b.DateEnd, b.TimeBegin, b.TimeEnd FROM [Zarplats].[dbo].[Staff_Schedule] as a left join Zarplats.dbo.Schedule_Absence as b on a.STAFF_ID = b.id_Staff and a.DTA between b.DateBegin and b.DateEnd left join Zarplats.dbo.AbsenceRef as c on b.AbsenceRef_ID = c.ID_AbsenceRef left join perco...staff as e on a.STAFF_ID = e.ID_STAFF left join Zarplats.dbo.StaffView as f on a.STAFF_ID = f.STAFF_ID where f.Position = @podrazd order by a.DTA", new SqlParameter("podrazd", SelectedDep.Position)).ToList();
-            GenerateColumns();
-            FillDTAStatus();
-            StaffDGTest.ItemsSource = StaffList;
+            Task.Run(() => UpdateDGV());
+            StaffDGV.SelectionChanged += StaffDGV_SelectionChanged;
         }
 
-        DateTime selectedMonth = new DateTime(2023, 11, 1);
-
-        private void GenerateColumns()
+        private async void UpdateDGV()
         {
-            List<DateTime> datesInMonth = GetDatesForMonth(selectedMonth);
-
-            for (int i = 0; i < datesInMonth.Count; i++)
+            try
             {
-                DataGridTemplateColumn column = new DataGridTemplateColumn
+                List<StaffModel> tempList = await Task.Run(() =>
                 {
-                    Header = datesInMonth[i].Day.ToString(),
-                    Width = DataGridLength.Auto,
-                    CellTemplate = FindResource("DayColumnTemplate") as DataTemplate,
-                };
+                    return Odb.db.Database.SqlQuery<StaffModel>("SELECT DISTINCT a.ID_Schedule, a.STAFF_ID, LTRIM(e.TABEL_ID) as TABEL_ID, e.SHORT_FIO, a.WorkBegin, a.WorkEnd, a.DTA, a.LunchTimeBegin, a.LunchTimeEnd, a.WorkingHours, b.ID_Absence, c.Cause as CauseAbsence, b.DateBegin, b.DateEnd, b.TimeBegin, b.TimeEnd FROM [Zarplats].[dbo].[Staff_Schedule] as a left join Zarplats.dbo.Schedule_Absence as b on a.STAFF_ID = b.id_Staff and a.DTA between b.DateBegin and b.DateEnd left join Zarplats.dbo.AbsenceRef as c on b.AbsenceRef_ID = c.ID_AbsenceRef left join perco...staff as e on a.STAFF_ID = e.ID_STAFF left join Zarplats.dbo.StaffView as f on a.STAFF_ID = f.STAFF_ID where f.Position = @podrazd order by a.DTA",
+                        new SqlParameter("podrazd", SelectedDep.Position)).ToList();
+                });
 
-                StaffDGTest.Columns.Add(column);
-            }
-        }
+                var groupedData = tempList.GroupBy(x => x.STAFF_ID)
+                                  .Select(g => g.First())
+                                  .ToList();
 
-        private List<DateTime> GetDatesForMonth(DateTime month)
-        {
-            List<DateTime> datesInMonth = new List<DateTime>();
-
-            DateTime firstDayOfMonth = new DateTime(month.Year, month.Month, 1);
-            DateTime lastDayOfMonth = firstDayOfMonth.AddMonths(1).AddDays(-1);
-
-            for (DateTime date = firstDayOfMonth; date <= lastDayOfMonth; date = date.AddDays(1))
-            {
-                datesInMonth.Add(date);
-            }
-
-            return datesInMonth;
-        }
-
-        public void FillDTAStatus()
-        {
-            var datesInMonth = GetDatesForMonth(selectedMonth);
-
-            foreach (var staff in StaffList)
-            {
-                staff.DTAStatusList = new List<StatusInfo>();
-
-                for (int i = 0; i < datesInMonth.Count; i++)
+                Dispatcher.Invoke(() =>
                 {
-                    bool hasRecord = CheckRecordInDatabase(staff.STAFF_ID, datesInMonth[i]);
-                    Console.WriteLine($"---\nhasRecord for {staff.STAFF_ID} {datesInMonth[i].Date}: {hasRecord}");
+                    StaffList.Clear();
+                    foreach (var staff in groupedData)
+                    {
+                        StaffList.Add(staff);
+                    }
 
-                    StatusInfo status = new StatusInfo { Date = datesInMonth[i], Status = hasRecord ? "Р" : "Н" };
+                    staffBindingSource.DataSource = StaffList;
 
-                    staff.DTAStatusList.Add(status);
-                }
+                    DateTime currentDate = DateTime.Now;
+                    int daysInMonth = DateTime.DaysInMonth(currentDate.Year, currentDate.Month);
+
+                    StaffDGV.Columns.Clear();
+
+                    DataGridViewTextBoxColumn staffIdColumn = new DataGridViewTextBoxColumn();
+                    staffIdColumn.HeaderText = "ID";
+                    staffIdColumn.DataPropertyName = "STAFF_ID";
+                    StaffDGV.Columns.Add(staffIdColumn);
+
+                    DataGridViewTextBoxColumn staffFIOColumn = new DataGridViewTextBoxColumn();
+                    staffFIOColumn.HeaderText = "ФИО";
+                    staffFIOColumn.DataPropertyName = "SHORT_FIO";
+                    StaffDGV.Columns.Add(staffFIOColumn);
+
+                    for (int day = 1; day <= daysInMonth; day++)
+                    {
+                        DataGridViewTextBoxColumn dateColumn = new DataGridViewTextBoxColumn();
+                        dateColumn.HeaderText = day.ToString();
+                        dateColumn.DataPropertyName = $"Day_{day}";
+                        StaffDGV.Columns.Add(dateColumn);
+                    }
+
+                    StaffDGV.DataSource = staffBindingSource;
+
+                    StaffDGV.RowPrePaint += (s, e) =>
+                    {
+                        if (e.RowIndex >= 0 && e.RowIndex < StaffDGV.RowCount)
+                        {
+                            DataGridViewRow row = StaffDGV.Rows[e.RowIndex];
+                            StaffModel staff = (StaffModel)row.DataBoundItem;
+
+                            if (staff != null)
+                            {
+                                for (int day = 1; day <= daysInMonth; day++)
+                                {
+                                    int columnIndex = day + 1;
+                                    DateTime currentDateForCell = new DateTime(currentDate.Year, currentDate.Month, day);
+                                    bool isRecordExists = CheckRecordExists(staff.STAFF_ID, currentDateForCell);
+
+                                    row.Cells[columnIndex].Value = isRecordExists ? "Р" : "Н";
+                                }
+                            }
+                        }
+                    };
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error fetching data: " + ex.Message);
             }
         }
 
-        private bool CheckRecordInDatabase(int staffId, DateTime date)
+        private bool CheckRecordExists(int staffId, DateTime date)
         {
-            string query = "SELECT COUNT(*) FROM Zarplats.dbo.Staff_Schedule WHERE STAFF_ID = @staffId AND DTA = @date";
-
-            int recordCount = Odb.db.Database.SqlQuery<int>(query,
-                new SqlParameter("staffId", staffId),
-                new SqlParameter("date", date)).FirstOrDefault();
-
-            return recordCount > 0;
+            int checkExisting = Odb.db.Database.SqlQuery<int>("select count(*) from Zarplats.dbo.Staff_Schedule where STAFF_ID = @staffId and DTA = @dta", new SqlParameter("staffId", staffId), new SqlParameter("dta", date)).FirstOrDefault();
+            if (checkExisting > 0)
+                return true;
+            else
+                return false;
         }
 
-        private void StaffDGTest_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        private void SetDoubleBuffered(System.Windows.Forms.Control c, bool value)
         {
-            SelectedStaff = (StaffModel)StaffDGTest.SelectedItem;
-            MessageBox.Show($"SelectedStaff Info: \nFIO: {SelectedStaff.SHORT_FIO}\nDTAWork: {SelectedStaff.DTA}\nWorkStatus: {SelectedStaff.WorkStatus}");
+            var property = typeof(System.Windows.Forms.Control).GetProperty("DoubleBuffered", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            property.SetValue(c, value, null);
+        }
+
+        private void StaffDGV_SelectionChanged(object sender, EventArgs e)
+        {
+            if (StaffDGV.CurrentRow != null)
+            {
+                SelectedRow = (StaffModel)staffBindingSource.Current;
+                Console.WriteLine($"SelectedRow: {SelectedRow}");
+            }
+        }
+
+        int doubleClickCounter = 0;
+        private void StaffDGV_DoubleClick(object sender, EventArgs e)
+        {
+            if (SelectedRow != null)
+            {
+                doubleClickCounter++;
+                Console.WriteLine($"StaffDGV DoubleClicked {doubleClickCounter} times!");
+                MessageBox.Show($"SelectedRow Info:\n{SelectedRow.STAFF_ID}, {SelectedRow.DTA}");
+            }
         }
     }
 }

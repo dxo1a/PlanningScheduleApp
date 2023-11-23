@@ -67,17 +67,6 @@ namespace PlanningScheduleApp.Models
         public string Subdivision { get; set; }
         public string Position { get; set; }
 
-        // Изменения в свойствах DTAStatus
-        public List<StatusInfo> DTAStatusList { get; set; } = new List<StatusInfo>();
-
-        public string WorkStatus
-        {
-            get
-            {
-                return DTAStatusList.Count > 0 ? DTAStatusList[3].Status : "-";
-            }
-        }
-
         public string StaffForSearch
         {
             get

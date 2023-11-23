@@ -26,8 +26,6 @@ namespace PlanningScheduleApp.Pages
 
         List<AbsenceModel> CauseList = new List<AbsenceModel>();
 
-        List<string> FullDayCauseList = new List<string> { "Больничный", "Отгул", "Прогул", "Отпуск" };
-
         DepModel SelectedDep { get; set; }
         StaffModel SelectedStaffInDG { get; set; }
         StaffModel SelectedStaff { get; set; }
@@ -59,7 +57,9 @@ namespace PlanningScheduleApp.Pages
 
         private async void InitializeAsync()
         {
+            await Application.Current.Dispatcher.InvokeAsync(() => { App.DisableAllWindows(); });
             await UpdateGridAsync();
+            await Application.Current.Dispatcher.InvokeAsync(() => { App.EnableAllWindows(); });
         }
 
         public void UpdateTemplatesList()
@@ -81,67 +81,74 @@ namespace PlanningScheduleApp.Pages
         int refreshCount = 0;
         public async Task UpdateGridAsync()
         {
-            await Application.Current.Dispatcher.InvokeAsync(() =>
+            try
             {
-                SearchTBX.Clear();
-                StaffList.Clear();
-                StaffDG.ItemsSource = null;
-            });
-
-            using (SqlConnection connection = new SqlConnection(connectionString))
-            {
-                await connection.OpenAsync();
-
-                using (SqlCommand command = new SqlCommand("SELECT DISTINCT a.ID_Schedule, a.STAFF_ID, LTRIM(e.TABEL_ID) as TABEL_ID, e.SHORT_FIO, a.WorkBegin, a.WorkEnd, a.DTA, a.LunchTimeBegin, a.LunchTimeEnd, a.WorkingHours, b.ID_Absence, c.Cause as CauseAbsence, b.DateBegin, b.DateEnd, b.TimeBegin, b.TimeEnd FROM [Zarplats].[dbo].[Staff_Schedule] as a left join Zarplats.dbo.Schedule_Absence as b on a.STAFF_ID = b.id_Staff and a.DTA between b.DateBegin and b.DateEnd left join Zarplats.dbo.AbsenceRef as c on b.AbsenceRef_ID = c.ID_AbsenceRef left join perco...staff as e on a.STAFF_ID = e.ID_STAFF left join Zarplats.dbo.StaffView as f on a.STAFF_ID = f.STAFF_ID where f.Position = @podrazd order by a.DTA", connection))
+                await Application.Current.Dispatcher.InvokeAsync(() =>
                 {
-                    command.Parameters.AddWithValue("@podrazd", SelectedDep.Position);
+                    SearchTBX.Clear();
+                    StaffList.Clear();
+                    StaffDG.ItemsSource = new List<StaffModel>();
+                });
 
-                    using (SqlDataReader reader = await command.ExecuteReaderAsync())
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    await connection.OpenAsync();
+
+                    using (SqlCommand command = new SqlCommand("SELECT DISTINCT a.ID_Schedule, a.STAFF_ID, LTRIM(e.TABEL_ID) as TABEL_ID, e.SHORT_FIO, a.WorkBegin, a.WorkEnd, a.DTA, a.LunchTimeBegin, a.LunchTimeEnd, a.WorkingHours, b.ID_Absence, c.Cause as CauseAbsence, b.DateBegin, b.DateEnd, b.TimeBegin, b.TimeEnd FROM [Zarplats].[dbo].[Staff_Schedule] as a left join Zarplats.dbo.Schedule_Absence as b on a.STAFF_ID = b.id_Staff and a.DTA between b.DateBegin and b.DateEnd left join Zarplats.dbo.AbsenceRef as c on b.AbsenceRef_ID = c.ID_AbsenceRef left join perco...staff as e on a.STAFF_ID = e.ID_STAFF left join Zarplats.dbo.StaffView as f on a.STAFF_ID = f.STAFF_ID where f.Position = @podrazd order by a.DTA", connection))
                     {
-                        /* Проверка типа переменной в бд и в сущности
-                         * Console.WriteLine($"Type of column 9: {reader.GetFieldType(9)}");
-                        Console.WriteLine($"Type of WorkingHours property: {typeof(StaffModel).GetProperty("WorkingHours").PropertyType}");*/
-                        List<StaffModel> staffList = new List<StaffModel>();
-                        while (await reader.ReadAsync())
+                        command.Parameters.AddWithValue("@podrazd", SelectedDep.Position);
+
+                        using (SqlDataReader reader = await command.ExecuteReaderAsync())
                         {
-                            StaffModel staff = new StaffModel
+                            /* Проверка типа переменной в бд и в сущности
+                             * Console.WriteLine($"Type of column 9: {reader.GetFieldType(9)}");
+                            Console.WriteLine($"Type of WorkingHours property: {typeof(StaffModel).GetProperty("WorkingHours").PropertyType}");*/
+                            List<StaffModel> staffList = new List<StaffModel>();
+                            while (await reader.ReadAsync())
                             {
-                                ID_Schedule = reader.GetInt32(0),
-                                STAFF_ID = reader.GetInt32(1),
-                                TABEL_ID = reader.GetString(2),
-                                SHORT_FIO = reader.GetString(3),
-                                WorkBegin = reader.GetString(4),
-                                WorkEnd = reader.GetString(5),
-                                DTA = reader.GetDateTime(6),
-                                LunchTimeBegin = reader.GetString(7),
-                                LunchTimeEnd = reader.GetString(8),
-                                WorkingHours = reader.GetDouble(9),
-                                ID_Absence = reader.IsDBNull(10) ? 0 : reader.GetInt32(10),
-                                CauseAbsence = reader.IsDBNull(11) ? string.Empty : reader.GetString(11),
-                                DateBegin = reader.IsDBNull(12) ? (DateTime?)null : reader.GetDateTime(12),
-                                DateEnd = reader.IsDBNull(13) ? (DateTime?)null : reader.GetDateTime(13),
-                                TimeBegin = reader.IsDBNull(14) ? string.Empty : reader.GetString(14),
-                                TimeEnd = reader.IsDBNull(15) ? string.Empty : reader.GetString(15)
-                            };
-                            staffList.Add(staff);
+                                StaffModel staff = new StaffModel
+                                {
+                                    ID_Schedule = reader.GetInt32(0),
+                                    STAFF_ID = reader.GetInt32(1),
+                                    TABEL_ID = reader.GetString(2),
+                                    SHORT_FIO = reader.GetString(3),
+                                    WorkBegin = reader.GetString(4),
+                                    WorkEnd = reader.GetString(5),
+                                    DTA = reader.GetDateTime(6),
+                                    LunchTimeBegin = reader.GetString(7),
+                                    LunchTimeEnd = reader.GetString(8),
+                                    WorkingHours = reader.GetDouble(9),
+                                    ID_Absence = reader.IsDBNull(10) ? 0 : reader.GetInt32(10),
+                                    CauseAbsence = reader.IsDBNull(11) ? string.Empty : reader.GetString(11),
+                                    DateBegin = reader.IsDBNull(12) ? (DateTime?)null : reader.GetDateTime(12),
+                                    DateEnd = reader.IsDBNull(13) ? (DateTime?)null : reader.GetDateTime(13),
+                                    TimeBegin = reader.IsDBNull(14) ? string.Empty : reader.GetString(14),
+                                    TimeEnd = reader.IsDBNull(15) ? string.Empty : reader.GetString(15)
+                                };
+                                staffList.Add(staff);
+                            }
+                            await Application.Current.Dispatcher.InvokeAsync(() =>
+                            {
+                                StaffList = staffList;
+                                StaffDG.ItemsSource = StaffList;
+                            });
                         }
-                        await Application.Current.Dispatcher.InvokeAsync(() =>
-                        {
-                            StaffList = staffList;
-                            StaffDG.ItemsSource = StaffList;
-                        });
                     }
+                    connection.Close();
                 }
-                connection.Close();
+                if (StaffList.Count > 0)
+                {
+                    DateTime startDate = StaffList.Min(item => item.DTA);
+                    DateTime endDate = StaffList.Max(item => item.DTA);
+                    await UpdateWorkingHours(StaffList, startDate, endDate);
+                }
+                refreshCount++;
+                Console.WriteLine($"Таблица StaffDG обновлена {refreshCount} раз.");
             }
-            if (StaffList.Count > 0)
+            catch (Exception ex)
             {
-                DateTime startDate = StaffList.Min(item => item.DTA);
-                DateTime endDate = StaffList.Max(item => item.DTA);
-                await UpdateWorkingHours(StaffList, startDate, endDate);
+                MessageBox.Show($"Ошибка во время обновления таблицы: {ex.Message}");
             }
-            refreshCount++;
-            Console.WriteLine($"Таблица StaffDG обновлена {refreshCount} раз.");
         }
 
         private async void AddScheduleBtn_Click(object sender, RoutedEventArgs e)
@@ -340,13 +347,9 @@ namespace PlanningScheduleApp.Pages
         {
             SelectedStaffInDG = (StaffModel)StaffDG.SelectedItem;
             if (SelectedStaffInDG != null)
-            {
                 StaffRemoveBtn.IsEnabled = true;
-            }
             else
-            {
                 StaffRemoveBtn.IsEnabled = false;
-            }
         }
 
         private async void StaffRefreshBtn_Click(object sender, RoutedEventArgs e) => await UpdateGridAsync();
@@ -779,9 +782,9 @@ namespace PlanningScheduleApp.Pages
 
                 // обновление рабочих часов
                 await UpdateWorkingHours(new List<StaffModel> { SelectedStaff }, absenceStart, absenceEnd);
+                MessageBox.Show("Отсутствие добавлено!");
 
                 await UpdateGridAsync();
-                MessageBox.Show("Отсутствие добавлено!");
             }
             else
             {
@@ -818,32 +821,25 @@ namespace PlanningScheduleApp.Pages
             {
                 foreach (StaffModel row in affectedRows)
                 {
-                    if (FullDayCauseList.Contains(row.CauseAbsence))
+                    DateTime workBegin = ConvertToDateTime(row.DTA, row.WorkBegin);
+                    DateTime workEnd = ConvertToDateTime(row.DTA, row.WorkEnd);
+                    DateTime lunchTimeBegin = ConvertToDateTime(row.DTA, row.LunchTimeBegin);
+                    DateTime lunchTimeEnd = ConvertToDateTime(row.DTA, row.LunchTimeEnd);
+
+                    var absenceInfo = await CalculateAbsenceHoursForEachDay(row.STAFF_ID, row.DTA);
+                    double totalAbsenceTime = absenceInfo.Item1;
+                    DateTime absenceStart = absenceInfo.Item2;
+                    DateTime absenceEnd = absenceInfo.Item3;
+
+                    double intersectionTime = CalculateIntersectionTime(lunchTimeBegin, lunchTimeEnd, absenceStart, absenceEnd);
+                    if (intersectionTime > 0)
                     {
-                        await Odb.db.Database.ExecuteSqlCommandAsync("update Zarplats.dbo.Staff_Schedule set WorkingHours = 0 where ID_Schedule = @id", new SqlParameter("id", row.ID_Schedule));
+                        DateTime intersectionEnd = lunchTimeEnd > absenceEnd ? absenceEnd : lunchTimeEnd;
+                        intersectionTime = (intersectionEnd - lunchTimeBegin).TotalHours;
                     }
-                    else
-                    {
-                        DateTime workBegin = ConvertToDateTime(row.DTA, row.WorkBegin);
-                        DateTime workEnd = ConvertToDateTime(row.DTA, row.WorkEnd);
-                        DateTime lunchTimeBegin = ConvertToDateTime(row.DTA, row.LunchTimeBegin);
-                        DateTime lunchTimeEnd = ConvertToDateTime(row.DTA, row.LunchTimeEnd);
+                    double workingHours = CalculateWorkingHours(workBegin, workEnd, lunchTimeBegin, lunchTimeEnd, row.DTA) - (intersectionTime > 0 ? intersectionTime : totalAbsenceTime);
 
-                        var absenceInfo = await CalculateAbsenceHoursForEachDay(row.STAFF_ID, row.DTA);
-                        double totalAbsenceTime = absenceInfo.Item1;
-                        DateTime absenceStart = absenceInfo.Item2;
-                        DateTime absenceEnd = absenceInfo.Item3;
-
-                        double intersectionTime = CalculateIntersectionTime(lunchTimeBegin, lunchTimeEnd, absenceStart, absenceEnd);
-                        if (intersectionTime > 0)
-                        {
-                            DateTime intersectionEnd = lunchTimeEnd > absenceEnd ? absenceEnd : lunchTimeEnd;
-                            intersectionTime = (intersectionEnd - lunchTimeBegin).TotalHours;
-                        }
-                        double workingHours = CalculateWorkingHours(workBegin, workEnd, lunchTimeBegin, lunchTimeEnd, row.DTA) - (intersectionTime > 0 ? intersectionTime : totalAbsenceTime);
-
-                        await Odb.db.Database.ExecuteSqlCommandAsync("update Zarplats.dbo.Staff_Schedule set WorkingHours = @workingHours where ID_Schedule = @id", new SqlParameter("workingHours", workingHours), new SqlParameter("id", row.ID_Schedule));
-                    }
+                    await Odb.db.Database.ExecuteSqlCommandAsync("update Zarplats.dbo.Staff_Schedule set WorkingHours = @workingHours where ID_Schedule = @id", new SqlParameter("workingHours", workingHours), new SqlParameter("id", row.ID_Schedule));
                 }
             };
         }

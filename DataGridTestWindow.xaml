@@ -3,38 +3,21 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:PlanningScheduleApp"
-        xmlns:models="clr-namespace:PlanningScheduleApp.Models"
-        xmlns:converters="clr-namespace:PlanningScheduleApp.Converters"
+        xmlns:wf="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms"  
         mc:Ignorable="d"
-        Title="DataGridTestWindow" Height="450" Width="800">
-    <Window.Resources>
-        <DataTemplate x:Key="DayColumnTemplate">
-            <TextBlock>
-                <TextBlock.Text>
-                    <MultiBinding Converter="{StaticResource MultiDayStatusConverter}">
-                        <Binding Path="DTA" />
-                        <Binding Path="DTAStatusList" />
-                    </MultiBinding>
-                </TextBlock.Text>
-            </TextBlock>
-        </DataTemplate>
-    </Window.Resources>
-    <Grid>
-        <DataGrid x:Name="StaffDGTest" AutoGenerateColumns="False" MouseDoubleClick="StaffDGTest_MouseDoubleClick">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Сотрудники" Binding="{Binding SHORT_FIO}"/>
-                <DataGridTemplateColumn Header="Статус работы" Width="*">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding WorkStatus}" />
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-
-                <!-- Добавление столбцов для каждого дня в месяце -->
-                <DataGridTemplateColumn Header="Дни" Width="*" CellTemplate="{StaticResource DayColumnTemplate}" />
-            </DataGrid.Columns>
-        </DataGrid>
+        Title="DataGridTestWindow" Height="650" Width="1200">
+    <Grid Name="grid1">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="0.10*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="20"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="0.24*"/>
+        </Grid.ColumnDefinitions>
+        <WindowsFormsHost Grid.Row="1" Grid.Column="0">
+            <wf:DataGridView x:Name="StaffDGV" RowHeadersVisible="False" ReadOnly="True" SelectionMode="FullRowSelect" AllowUserToResizeRows="False" AutoSizeColumnsMode="Fill" DoubleClick="StaffDGV_DoubleClick" SelectionChanged="StaffDGV_SelectionChanged" AutoGenerateColumns="False"/>
+        </WindowsFormsHost>
     </Grid>
 </Window>
