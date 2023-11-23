@@ -328,17 +328,19 @@ namespace PlanningScheduleApp
                 {
                     foreach (DataGridViewCell selectedCell in StaffDGV.SelectedCells)
                     {
+                        // получаем индекс строки и индекс колонки (для пересечения)
                         int rowIndex = selectedCell.RowIndex;
                         int columnIndex = selectedCell.ColumnIndex;
 
                         if (rowIndex >= 0 && rowIndex < StaffDGV.Rows.Count && columnIndex > 1)
                         {
+                            // получаем экземпляр модели
                             var selectedModel = (StaffModel)StaffDGV.Rows[rowIndex].DataBoundItem;
 
-                            // Получаем дату из колонки
+                            // получаем дату из колонки
                             DateTime currentDateForCell = new DateTime(DateTime.Now.Year, DateTime.Now.Month, columnIndex - 1);
 
-                            // Получаем idScheduleToDelete по дате в ячейке
+                            // получаем idScheduleToDelete по дате в ячейке
                             int? idScheduleToDelete = selectedModel.DatesAndSchedules
                                 .FirstOrDefault(ds => ds.DTA == currentDateForCell)?.ID_Schedule;
 
@@ -348,7 +350,7 @@ namespace PlanningScheduleApp
 
                                 Odb.db.Database.ExecuteSqlCommand("DELETE FROM Zarplats.dbo.Staff_Schedule WHERE ID_Schedule = @idschedule", new SqlParameter("idschedule", idScheduleToDelete));
 
-                                // Обновляем объект DateAndSchedule после удаления
+                                // обновляем объект DateAndSchedule после удаления (надо ли?)
                                 var dateAndScheduleToDelete = selectedModel.DatesAndSchedules.FirstOrDefault(ds => ds.ID_Schedule == idScheduleToDelete);
                                 if (dateAndScheduleToDelete != null)
                                 {
