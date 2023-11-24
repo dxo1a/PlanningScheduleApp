@@ -5,14 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PlanningScheduleApp"
         mc:Ignorable="d"
-        Title="График сотрудников" Height="650" Width="1450" WindowStyle="None" Icon="Resources/icon.ico"
-        xmlns:themes="clr-namespace:StyledWindow.WPF.Themes;assembly=StyledWindow.WPF"
-        xmlns:components="clr-namespace:StyledWindow.WPF.Components;assembly=StyledWindow.WPF"
-        Style="{StaticResource StyledWindow}"
-        themes:StyledWindow.LanguageButtonVisible="False"
-        themes:StyledWindow.ThemeButtonVisible="False"
-        themes:StyledWindow.ThemeToggleVisible="False"
-        themes:StyledWindow.TopmostButtonVisible="True">
+        Title="График сотрудников" Height="650" Width="1450" Icon="Resources/icon.ico">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="20"/>
@@ -24,7 +17,7 @@
             <RowDefinition Height="*"/>
             <RowDefinition Height="5"/>
         </Grid.RowDefinitions>
-        <Frame Name="TopFrame" NavigationUIVisibility="Hidden" Grid.Column="1" Grid.Row="0" Panel.ZIndex="2" Grid.RowSpan="2" VerticalAlignment="Top"/>
-        <Frame Name="MainFrame" NavigationUIVisibility="Hidden" Grid.Column="1" Grid.Row="1"/>
+        <Frame Name="TopFrame" NavigationUIVisibility="Hidden" Grid.Column="1" Grid.Row="0" Panel.ZIndex="3" Grid.RowSpan="2" VerticalAlignment="Top"/>
+        <Frame Name="MainFrame" NavigationUIVisibility="Hidden" Grid.Column="1" Grid.Row="1" Panel.ZIndex="1"/>
     </Grid>
 </Window>

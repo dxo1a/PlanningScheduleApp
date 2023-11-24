@@ -1,4 +1,5 @@
 ﻿using PlanningScheduleApp.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -10,6 +11,8 @@ namespace PlanningScheduleApp.Pages
     {
         List<DepModel> DepList = new List<DepModel>();
         List<SZAndScheduleModel> StaffPositionsList = new List<SZAndScheduleModel>();
+
+        public event EventHandler<bool> DepVisibilityChanged;
 
         DepModel SelectedDep { get; set; }
 
@@ -35,9 +38,18 @@ namespace PlanningScheduleApp.Pages
             DepLV.ItemsSource = deps;
         }
 
-        private void SearchDepTBX_LostFocus(object sender, RoutedEventArgs e) => DepLV.Visibility = Visibility.Collapsed;
+        private void SearchDepTBX_LostFocus(object sender, RoutedEventArgs e)
+        {
+            DepLV.Visibility = Visibility.Collapsed;
+            DepVisibilityChanged?.Invoke(this, false);
+        }
+        
 
-        private void SearchDepTBX_GotFocus(object sender, RoutedEventArgs e) => DepLV.Visibility = Visibility.Visible;
+        private void SearchDepTBX_GotFocus(object sender, RoutedEventArgs e)
+        {
+             DepLV.Visibility = Visibility.Visible;
+            DepVisibilityChanged?.Invoke(this, true);
+        }
 
         private void DepLV_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {

@@ -1,5 +1,6 @@
 ﻿using PlanningScheduleApp.Pages;
 using System.Windows;
+using System.Windows.Controls;
 
 namespace PlanningScheduleApp
 {
@@ -13,7 +14,7 @@ namespace PlanningScheduleApp
             FrameApp.SetCurrentMainFrame(MainFrame);
             FrameApp.SetCurrentTopFrame(TopFrame);
 
-            FrameApp.FrameTop.Navigate(new ChooseDepPage());
+            FrameApp.NavigateToPageTop(new ChooseDepPage());
         }
     }
 }

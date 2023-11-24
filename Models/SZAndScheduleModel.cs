@@ -131,10 +131,17 @@ namespace PlanningScheduleApp.Models
     {
         public DateTime DTA { get; set; }
         public int ID_Schedule { get; set; }
+        public int ID_Absence { get; set; }
+        public string cellText { get; set; }
 
         public override string ToString()
         {
-            return "Р";
+            if (cellText == "Р")
+                return "Р";
+            else if (cellText == "Н")
+                return "Н";
+            else
+                return "U";
         }
     }
 

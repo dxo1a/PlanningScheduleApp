@@ -38,7 +38,6 @@ namespace PlanningScheduleApp.Pages
         {
             InitializeComponent();
             SelectedDep = selectedDep;
-            FrameApp.SetCurrentMainFrame(FrameApp.FrameMain);
             Task.Run(() => InitializeAsync());
             AssignCMB();
             UpdateTemplatesList();
@@ -268,10 +267,8 @@ namespace PlanningScheduleApp.Pages
         #region UI
         private void ExcelBtn_Click(object sender, RoutedEventArgs e)
         {
-            //ExportToExcelFilterWindow exportToExcelFilterWindow = new ExportToExcelFilterWindow();
-            //exportToExcelFilterWindow.ShowDialog();
-            DataGridTestWindow dataGridTestWindow = new DataGridTestWindow(SelectedDep);
-            dataGridTestWindow.ShowDialog();
+            ExportToExcelFilterWindow exportToExcelFilterWindow = new ExportToExcelFilterWindow();
+            exportToExcelFilterWindow.ShowDialog();
         }
         private void StaffDG_PreviewKeyDown(object sender, KeyEventArgs e)
         {

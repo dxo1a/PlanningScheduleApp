@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Controls;
 
 namespace PlanningScheduleApp
@@ -11,16 +7,14 @@ namespace PlanningScheduleApp
     {
         public static Frame FrameMain { get; set; }
         public static Frame FrameTop { get; set; }
-
         public static void SetCurrentMainFrame(Frame frame) => FrameMain = frame;
-
         public static void SetCurrentTopFrame(Frame frame) => FrameTop = frame;
 
         public static void NavigateToPageMain(Page page)
         {
             if (FrameMain != null)
                 FrameMain.Navigate(page);
-                //FrameObj.Content = page;
+            //FrameObjSec.Content = page;
             else
                 throw new InvalidOperationException("Текущий Frame не был установлен. Установите его с помощью SetCurrentFrame.");
         }
@@ -29,7 +23,7 @@ namespace PlanningScheduleApp
         {
             if (FrameTop != null)
                 FrameTop.Navigate(page);
-                //FrameObjSec.Content = page;
+            //FrameObjSec.Content = page;
             else
                 throw new InvalidOperationException("Текущий Frame не был установлен. Установите его с помощью SetCurrentFrame.");
         }
