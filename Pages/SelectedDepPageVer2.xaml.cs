@@ -157,6 +157,8 @@ namespace PlanningScheduleApp.Pages
                 #region Создание DataGridView
                 DateTime currentDate = fromDate;
                 int daysInMonth = DateTime.DaysInMonth(currentDate.Year, currentDate.Month);
+                
+                
 
                 StaffDGV.Columns.Clear();
 
@@ -198,6 +200,7 @@ namespace PlanningScheduleApp.Pages
                     {
                         int columnIndex = e.ColumnIndex;
                         int day = columnIndex - 1;
+                        DataGridViewCell cell = StaffDGV.Rows[e.RowIndex].Cells[e.ColumnIndex];
 
                         if (day > 0)
                         {
@@ -211,9 +214,24 @@ namespace PlanningScheduleApp.Pages
                                 bool hasAbsence = HasAbsence(staff.STAFF_ID, currentDateForCell);
 
                                 if (hasAbsence && isRecordExists)
+                                {
                                     e.CellStyle.BackColor = System.Drawing.Color.Orange;
+                                    cell.Style.SelectionBackColor = System.Drawing.Color.Orange;
+                                    cell.Style.SelectionForeColor = System.Drawing.Color.Black;
+                                }
+                                else if (isRecordExists)
+                                {
+                                    e.CellStyle.BackColor = System.Drawing.Color.LightGreen;
+                                    cell.Style.SelectionBackColor = System.Drawing.Color.LightGreen;
+                                    cell.Style.SelectionForeColor = System.Drawing.Color.Black;
+                                }
                                 else
-                                    e.CellStyle.BackColor = isRecordExists ? System.Drawing.Color.LightGreen : System.Drawing.Color.LightBlue;
+                                {
+                                    e.CellStyle.BackColor = System.Drawing.Color.LightBlue;
+                                    cell.Style.SelectionBackColor = System.Drawing.Color.LightBlue;
+                                    cell.Style.SelectionForeColor = System.Drawing.Color.Black;
+                                }
+
                             }
                         }
                     }
@@ -266,6 +284,7 @@ namespace PlanningScheduleApp.Pages
                     if (e.KeyData == Keys.Delete)
                         DeleteRow();
                 };
+
                 #endregion
             });
         }
@@ -309,6 +328,25 @@ namespace PlanningScheduleApp.Pages
             staffBindingSource.DataSource = StaffList;
 
             FillDGVCells();
+        }
+
+        private void StaffDGV_CellPainting(object sender, DataGridViewCellPaintingEventArgs e)
+        {
+            if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
+            {
+                if (StaffDGV.Rows[e.RowIndex].Cells[e.ColumnIndex].Selected == true)
+                {
+                    e.Paint(e.CellBounds, DataGridViewPaintParts.All & ~DataGridViewPaintParts.Border);
+                    using (Pen p = new Pen(Color.Black, 2))
+                    {
+                        Rectangle rect = e.CellBounds;
+                        rect.Width -= 1;
+                        rect.Height -= 1;
+                        e.Graphics.DrawRectangle(p, rect);
+                    }
+                    e.Handled = true;
+                }
+            }
         }
 
         // заполнение ячеек данными
