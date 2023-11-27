@@ -155,7 +155,7 @@
         </StackPanel>
         <Border  Grid.Row="1"  Grid.Column="0" BorderBrush="Gray" BorderThickness="0" MinHeight="490" Margin="0 0 0 5" x:Name="DGVBorder">
             <WindowsFormsHost x:Name="windowsFormsHost">
-                <wf:DataGridView x:Name="StaffDGV" RowHeadersVisible="False" ReadOnly="True" AllowUserToResizeRows="False" AllowUserToAddRows="False" AutoSizeColumnsMode="Fill" CellDoubleClick="StaffDGV_CellDoubleClick"  SelectionChanged="StaffDGV_SelectionChanged" AutoGenerateColumns="False" BackgroundColor="White" Dock="Fill" CellPainting="StaffDGV_CellPainting"/>
+                <wf:DataGridView x:Name="StaffDGV" RowHeadersVisible="False" ReadOnly="True" AllowUserToResizeRows="False" AllowUserToAddRows="False" AutoSizeColumnsMode="Fill" CellDoubleClick="StaffDGV_CellDoubleClick"  SelectionChanged="StaffDGV_SelectionChanged" AutoGenerateColumns="False" BackgroundColor="White" Dock="Fill"/>
             </WindowsFormsHost>
         </Border>
     </Grid>
