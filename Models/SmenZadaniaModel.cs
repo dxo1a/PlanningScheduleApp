@@ -35,7 +35,7 @@ namespace PlanningScheduleApp.Models
             get { return Cost * Count; }
         }
 
-        public string ScheduleFull
+        public string SZFull
         {
             get
             {

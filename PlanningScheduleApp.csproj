@@ -92,6 +92,9 @@
     <Reference Include="Newtonsoft.Json, Version=13.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>packages\Newtonsoft.Json.13.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
     </Reference>
+    <Reference Include="Prism, Version=8.1.97.5141, Culture=neutral, PublicKeyToken=40ee6c3a2184dc59, processorArchitecture=MSIL">
+      <HintPath>packages\Prism.Core.8.1.97\lib\net47\Prism.dll</HintPath>
+    </Reference>
     <Reference Include="RestSharp, Version=110.2.0.0, Culture=neutral, PublicKeyToken=598062e77f915f75, processorArchitecture=MSIL">
       <HintPath>packages\RestSharp.110.2.0\lib\net471\RestSharp.dll</HintPath>
     </Reference>
@@ -173,6 +176,9 @@
     <Compile Include="Converters\IsStringNonemptyConverter.cs" />
     <Compile Include="Converters\MinutesConverter.cs" />
     <Compile Include="Converters\ZeroToEmptyConverter.cs" />
+    <Compile Include="DialogueCustomWindow.xaml.cs">
+      <DependentUpon>DialogueCustomWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="ExportToExcelFilterWindow.xaml.cs">
       <DependentUpon>ExportToExcelFilterWindow.xaml</DependentUpon>
     </Compile>
@@ -204,6 +210,10 @@
     <Compile Include="SmenZadaniaWindow.xaml.cs">
       <DependentUpon>SmenZadaniaWindow.xaml</DependentUpon>
     </Compile>
+    <Page Include="DialogueCustomWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="ExportToExcelFilterWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

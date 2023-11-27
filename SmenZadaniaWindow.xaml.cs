@@ -1,36 +1,29 @@
 ﻿using PlanningScheduleApp.Models;
+using PlanningScheduleApp.Pages;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Data.SqlClient;
 using System.Linq;
-using System.Runtime.InteropServices.ComTypes;
-using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace PlanningScheduleApp
 {
     public partial class SmenZadaniaWindow : Window
     {
         private List<SmenZadaniaModel> SmenZadaniaList = new List<SmenZadaniaModel>();
+        private List<SmenZadaniaModel> SmenZadaniaListNonAsync = new List<SmenZadaniaModel>();
 
-        private StaffModel SelectedStaff { get; set; }
+        private int StaffID;
+        private DateTime Date;
 
-        public SmenZadaniaWindow(StaffModel selectedStaff)
+        public SmenZadaniaWindow(int staffid, DateTime date)
         {
             InitializeComponent();
+            StaffID = staffid;
+            Date = date;
+            AssignCMB();
             Task.Run(async () => await LoadSmenZadaniaForStuffAsync());
-
-            SelectedStaff = selectedStaff;
-            
         }
 
         private async Task LoadSmenZadaniaForStuffAsync()
@@ -62,8 +55,8 @@ namespace PlanningScheduleApp
                     WHERE b.STAFF_ID = @staffid and a.DTA = @dta
                 ", connection))
                 {
-                    command.Parameters.AddWithValue("staffid", SelectedStaff.STAFF_ID);
-                    command.Parameters.AddWithValue("dta", SelectedStaff.DTA);
+                    command.Parameters.AddWithValue("staffid", StaffID);
+                    command.Parameters.AddWithValue("dta", Date);
 
                     using (SqlDataReader reader = await command.ExecuteReaderAsync())
                     {
@@ -92,7 +85,58 @@ namespace PlanningScheduleApp
                 }
             }
 
-            SmenZadaniaDG.ItemsSource = SmenZadaniaList;
+            Dispatcher.Invoke(() =>
+            {
+                LoadingSZTB.Visibility = Visibility.Collapsed;
+                SmenZadaniaDG.ItemsSource = SmenZadaniaList;
+                SmenZadaniaDG.Visibility = Visibility.Visible;
+            });
         }
+
+        private void SearchTBX_TextChanged(object sender, System.Windows.Controls.TextChangedEventArgs e) => SearchInDG();
+
+        private void SearchInDG()
+        {
+            List<SmenZadaniaModel> staff = new List<SmenZadaniaModel>();
+            string txt = SearchTBX.Text;
+            if (txt.Length == 0)
+                staff = SmenZadaniaList;
+
+            switch (filterCMB.SelectedIndex)
+            {
+                case 0:
+                    staff = SmenZadaniaList.Where(u => u.SHORT_FIO.ToString().ToLower().Contains(txt.ToLower())).ToList();
+                    break;
+                case 1:
+                    staff = SmenZadaniaList.Where(u => u.Product.ToString().ToLower().Contains(txt.ToLower())).ToList();
+                    break;
+                case 2:
+                    staff = SmenZadaniaList.Where(u => u.PP.ToString().ToLower().Contains(txt.ToLower())).ToList();
+                    break;
+                case 3:
+                    staff = SmenZadaniaList.Where(u => u.Detail.ToString().ToLower().Contains(txt.ToLower())).ToList();
+                    break;
+                default:
+                    staff = SmenZadaniaList.Where(u => u.SZFull.ToLower().Contains(txt.ToLower())).ToList();
+                    break;
+
+            };
+            SmenZadaniaDG.ItemsSource = staff;
+        }
+
+        private void filterCMB_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e) => SearchTBX.Clear();
+
+        public void AssignCMB()
+        {
+            filterCMB.ItemsSource = new filterCMB[]
+            {
+                new filterCMB { id = 0, filterName = "ФИО" },
+                new filterCMB { id = 1, filterName = "изделию" },
+                new filterCMB { id = 2, filterName = "договору" },
+                new filterCMB { id = 3, filterName = "детали" }
+            };
+            filterCMB.SelectedIndex = 0;
+        }
+
     }
 }

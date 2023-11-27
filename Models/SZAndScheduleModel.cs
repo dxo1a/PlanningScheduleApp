@@ -108,7 +108,7 @@ namespace PlanningScheduleApp.Models
                 if (TimeBegin != null && TimeEnd != null && TimeBegin != string.Empty && TimeEnd != string.Empty)
                     return $"{TimeBegin} - {TimeEnd}";
                 else
-                    return string.Empty;
+                    return null;
             }
         }
 
@@ -243,5 +243,12 @@ namespace PlanningScheduleApp.Models
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+    }
+
+    public class filterCMB
+    {
+        public int id { get; set; }
+        public string filterName { get; set; } = "";
+        public override string ToString() => $"{filterName}";
     }
 }

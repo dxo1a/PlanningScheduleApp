@@ -6,7 +6,7 @@
       xmlns:wf="clr-namespace:System.Windows.Forms;assembly=System.Windows.Forms" xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
       mc:Ignorable="d" 
       d:DesignHeight="650" d:DesignWidth="1200"
-      Title="SelectedDepPageVer2"> 
+      Title="SelectedDepPageVer2">
     <Page.Resources>
         <Style x:Key="TextBoxWithToolTipStyle" TargetType="TextBox" BasedOn="{StaticResource TBXStyle}">
             <Setter Property="Template">
@@ -129,7 +129,7 @@
                             </StackPanel>
                             <StackPanel Orientation="Vertical">
                                 <TextBlock Text="Время"/>
-                                <xctk:MaskedTextBox Name="AbsenceTimeBeginMTBX" Style="{StaticResource TBXStyle}" Mask="00:00" PromptChar=" " MinWidth="45" Padding="12 0 12 0" KeyDown="MTBX_KeyDown"/>
+                                <xctk:MaskedTextBox Name="AbsenceTimeBeginMTBX" Style="{StaticResource TBXStyle}" Mask="00:00" PromptChar=" " MinWidth="45" Padding="12 0 12 0" KeyDown="MTBX_KeyDown" MouseDoubleClick="AbsenceMTBX_MouseDoubleClick"/>
                             </StackPanel>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal">

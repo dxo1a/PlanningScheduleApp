@@ -46,12 +46,12 @@ namespace PlanningScheduleApp
                     absenceDynamicStroke = $"Сотрудник: {selectedRow.SHORT_FIO}" + Environment.NewLine +
                                     $"Дата отсутствия: {date.Date}" + Environment.NewLine +
                                     $"Время отсутствия: {Absence.TimeBegin} - {Absence.TimeEnd}" + Environment.NewLine +
-                                    $"Причина: {Absence.CauseAbsence} ({Absence.DateBegin.GetValueOrDefault().ToString("dd.MM.yyyy")} - {Absence.DateEnd.GetValueOrDefault().ToString("dd.MM.yyyy")})";
+                                    $"Причина: {Absence.CauseAbsence} ({Absence.AbsenceDate})";
                 else
                     absenceDynamicStroke = $"Сотрудник: {selectedRow.SHORT_FIO}" + Environment.NewLine +
                                     $"Дата отсутствия: {date.Date}" + Environment.NewLine +
                                     $"Время отсутствия: весь день" + Environment.NewLine +
-                                    $"Причина: {Absence.CauseAbsence} ({Absence.DateBegin.GetValueOrDefault().ToString("dd.MM.yyyy")} - {Absence.DateEnd.GetValueOrDefault().ToString("dd.MM.yyyy")})";
+                                    $"Причина: {Absence.CauseAbsence} ({Absence.AbsenceDate})";
 
                 AbsenceInfoTBX.Text = absenceDynamicStroke;
             }
@@ -72,12 +72,12 @@ namespace PlanningScheduleApp
                     absenceDynamicStroke = $"Сотрудник: {selectedRow.SHORT_FIO}" + Environment.NewLine +
                                     $"Дата отсутствия: {date.Date}" + Environment.NewLine +
                                     $"Время отсутствия: {Absence.TimeBegin} - {Absence.TimeEnd}" + Environment.NewLine +
-                                    $"Причина: {Absence.CauseAbsence} ({Absence.DateBegin.GetValueOrDefault().ToString("dd.MM.yyyy")} - {Absence.DateEnd.GetValueOrDefault().ToString("dd.MM.yyyy")})";
+                                    $"Причина: {Absence.CauseAbsence} ({Absence.AbsenceDate})";
                 else
                     absenceDynamicStroke = $"Сотрудник: {selectedRow.SHORT_FIO}" + Environment.NewLine +
                                     $"Дата отсутствия: {date.Date}" + Environment.NewLine +
                                     $"Время отсутствия: весь день" + Environment.NewLine +
-                                    $"Причина: {Absence.CauseAbsence} ({Absence.DateBegin.GetValueOrDefault().ToString("dd.MM.yyyy")} - {Absence.DateEnd.GetValueOrDefault().ToString("dd.MM.yyyy")})";
+                                    $"Причина: {Absence.CauseAbsence} ({Absence.AbsenceDate})";
                 scheduleDynamicStroke = $"Сотрудник: {selectedRow.SHORT_FIO}" + Environment.NewLine +
                                 $"Дата: {ScheduleInfo.DTA.ToShortDateString()}" + Environment.NewLine +
                                 $"Время работы: {ScheduleInfo.WorkTime}" + Environment.NewLine +
@@ -96,12 +96,12 @@ namespace PlanningScheduleApp
                     absenceDynamicStroke = $"Сотрудник: {selectedRow.SHORT_FIO}" + Environment.NewLine +
                                     $"Дата отсутствия: {date.Date}" + Environment.NewLine +
                                     $"Время отсутствия: {Absence.TimeBegin} - {Absence.TimeEnd}" + Environment.NewLine +
-                                    $"Причина: {Absence.CauseAbsence} ({Absence.DateBegin.GetValueOrDefault().ToString("dd.MM.yyyy")} - {Absence.DateEnd.GetValueOrDefault().ToString("dd.MM.yyyy")})";
+                                    $"Причина: {Absence.CauseAbsence} ({Absence.AbsenceDate})";
                 else
                     absenceDynamicStroke = $"Сотрудник: {selectedRow.SHORT_FIO}" + Environment.NewLine +
                                     $"Дата отсутствия: {date.Date}" + Environment.NewLine +
                                     $"Время отсутствия: весь день" + Environment.NewLine +
-                                    $"Причина: {Absence.CauseAbsence} ({Absence.DateBegin.GetValueOrDefault().ToString("dd.MM.yyyy")} - {Absence.DateEnd.GetValueOrDefault().ToString("dd.MM.yyyy")})";
+                                    $"Причина: {Absence.CauseAbsence} ({Absence.AbsenceDate})";
 
                 AbsenceInfoTBX.Text = absenceDynamicStroke;
             }

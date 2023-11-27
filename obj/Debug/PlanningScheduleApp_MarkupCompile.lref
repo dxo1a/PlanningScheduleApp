@@ -1,6 +1,8 @@
 ﻿
 FC:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\App.xaml;;
+FC:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\DialogueCustomWindow.xaml;;
 FC:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\ExportToExcelFilterWindow.xaml;;
+FC:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\InfoCustomWindow.xaml;;
 FC:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\LoadingWindow.xaml;;
 FC:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\MainWindow.xaml;;
 FC:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\Pages\ChooseDepPage.xaml;;
@@ -9,5 +11,4 @@ FC:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\Schedule
 FC:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\ScheduleEditWindow.xaml;;
 FC:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\ScheduleManageWindow.xaml;;
 FC:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\SmenZadaniaWindow.xaml;;
-FC:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\InfoCustomWindow.xaml;;
 

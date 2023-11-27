@@ -184,3 +184,8 @@ C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\Pages\SelectedDepPageVer2.baml
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\InfoCustomWindow.g.cs
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\InfoCustomWindow.baml
+C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\DialogueCustomWindow.g.cs
+C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\bin\Debug\Prism.dll
+C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\bin\Debug\Prism.pdb
+C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\bin\Debug\Prism.xml
+C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\DialogueCustomWindow.baml

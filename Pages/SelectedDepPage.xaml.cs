@@ -537,7 +537,7 @@ namespace PlanningScheduleApp.Pages
 
         private void StaffDG_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            SmenZadaniaWindow smenZadaniaWindow = new SmenZadaniaWindow(SelectedStaffInDG);
+            SmenZadaniaWindow smenZadaniaWindow = new SmenZadaniaWindow(SelectedStaffInDG.STAFF_ID, SelectedStaffInDG.DTA.Date);
             smenZadaniaWindow.ShowDialog();
         }
 
@@ -960,12 +960,5 @@ namespace PlanningScheduleApp.Pages
             return new Tuple<double, DateTime, DateTime>(totalAbsenceTime, absenceStart, absenceEnd);
         }
         #endregion
-    }
-
-    public class filterCMB
-    {
-        public int id { get; set; }
-        public string filterName { get; set; } = "";
-        public override string ToString() => $"{filterName}";
     }
 }
