@@ -133,6 +133,7 @@ namespace PlanningScheduleApp.Models
         public int ID_Schedule { get; set; }
         public int ID_Absence { get; set; }
         public string cellText { get; set; }
+        public double? WorkingHours { get; set; }
 
         public override string ToString()
         {
