@@ -134,6 +134,15 @@ namespace PlanningScheduleApp.Models
         public int ID_Absence { get; set; }
         public string cellText { get; set; }
         public double? WorkingHours { get; set; }
+        public string TimeBegin { get; set; }
+        public string TimeEnd { get; set; }
+        public DateTime? DateBegin { get; set; }
+        public DateTime? DateEnd { get; set; }
+        public string WorkBegin { get; set; }
+        public string WorkEnd { get; set; }
+        public string LunchTimeBegin { get; set; }
+        public string LunchTimeEnd { get; set; }
+        
 
         public override string ToString()
         {
