@@ -59,7 +59,7 @@ namespace PlanningScheduleApp.Pages
         {
             InitializeComponent();
 
-            SetDoubleBuffered(StaffDGV, true);
+            //SetDoubleBuffered(StaffDGV, true);
 
             SelectedDep = selectedDep;
 
@@ -68,7 +68,7 @@ namespace PlanningScheduleApp.Pages
 
             Application.Current.Dispatcher.Invoke(() =>
             {
-                StaffListInPosition = Odb.db.Database.SqlQuery<StaffModel>("select distinct b.SHORT_FIO, b.TABEL_ID, b.ID_STAFF as STAFF_ID from perco...staff_ref as a left join perco...staff as b on a.STAFF_ID = b.ID_STAFF left join perco...subdiv_ref as c on a.SUBDIV_ID = c.ID_REF where c.DISPLAY_NAME = @padrazd", new SqlParameter("padrazd", SelectedDep.Position)).OrderBy(s => s.SHORT_FIO).ToList();
+                StaffListInPosition = Odb.db.Database.SqlQuery<StaffModel>("select distinct b.SHORT_FIO, b.TABEL_ID, b.ID_STAFF as STAFF_ID from perco...staff_ref as a left join perco...staff as b on a.STAFF_ID = b.ID_STAFF left join perco...subdiv_ref as c on a.SUBDIV_ID = c.ID_REF where c.DISPLAY_NAME = @padrazd and b.VALID = 1", new SqlParameter("padrazd", SelectedDep.Position)).OrderBy(s => s.SHORT_FIO).ToList();
                 StaffLV.ItemsSource = StaffListInPosition;
                 CauseList = Odb.db.Database.SqlQuery<AbsenceModel>("select distinct * from Zarplats.dbo.AbsenceRef").ToList();
                 CauseLV.ItemsSource = CauseList;
@@ -111,163 +111,170 @@ namespace PlanningScheduleApp.Pages
 
         private async Task UpdateDGV()
         {
-            Dispatcher.Invoke(() =>
+            try
             {
-                DateTime selectedMonth = DateTime.ParseExact(MonthCMB.SelectedItem.ToString(), "MMMM yyyy", CultureInfo.CurrentCulture);
-                fromDate = selectedMonth;
-            });
-
-            #region Подготовка списков
-            tempList = await Task.Run(() =>
-            {
-                return Odb.db.Database.SqlQuery<StaffModel>("SELECT DISTINCT a.ID_Schedule, a.STAFF_ID, LTRIM(e.TABEL_ID) as TABEL_ID, e.SHORT_FIO, a.WorkBegin, a.WorkEnd, a.DTA, a.LunchTimeBegin, a.LunchTimeEnd, a.WorkingHours, b.ID_Absence, c.Cause as CauseAbsence, b.DateBegin, b.DateEnd, b.TimeBegin, b.TimeEnd, f.Subdivision FROM [Zarplats].[dbo].[Staff_Schedule] as a left join Zarplats.dbo.Schedule_Absence as b on a.STAFF_ID = b.id_Staff and a.DTA between b.DateBegin and b.DateEnd left join Zarplats.dbo.AbsenceRef as c on b.AbsenceRef_ID = c.ID_AbsenceRef left join perco...staff as e on a.STAFF_ID = e.ID_STAFF left join Zarplats.dbo.StaffView as f on a.STAFF_ID = f.STAFF_ID where f.Position = @podrazd order by a.DTA",
-                    new SqlParameter("podrazd", SelectedDep.Position)).ToList();
-            });
-
-            List<StaffModel> groupedData = tempList
-                .GroupBy(x => x.STAFF_ID)
-                .Select(g => new StaffModel
+                Dispatcher.Invoke(() =>
                 {
-                    STAFF_ID = g.Key,
-                    SHORT_FIO = g.First().SHORT_FIO,
-                    TABEL_ID = g.First().TABEL_ID,
-                    Subdivision = g.First().Subdivision,
-                    // Другие свойства, которые не зависят от даты
+                    DateTime selectedMonth = DateTime.ParseExact(MonthCMB.SelectedItem.ToString(), "MMMM yyyy", CultureInfo.CurrentCulture);
+                    fromDate = selectedMonth;
+                });
 
-                    // Сохраняем все даты и ID_Schedule в списке для каждого сотрудника
-                    DatesAndSchedules = g.Select(item => new DateAndSchedule
+                #region Подготовка списков
+                tempList = await Task.Run(() =>
+                {
+                    return Odb.db.Database.SqlQuery<StaffModel>("SELECT DISTINCT a.ID_Schedule, a.STAFF_ID, LTRIM(e.TABEL_ID) as TABEL_ID, e.SHORT_FIO, a.WorkBegin, a.WorkEnd, a.DTA, a.LunchTimeBegin, a.LunchTimeEnd, a.WorkingHours, b.ID_Absence, c.Cause as CauseAbsence, b.DateBegin, b.DateEnd, b.TimeBegin, b.TimeEnd, f.Subdivision FROM [Zarplats].[dbo].[Staff_Schedule] as a left join Zarplats.dbo.Schedule_Absence as b on a.STAFF_ID = b.id_Staff and a.DTA between b.DateBegin and b.DateEnd left join Zarplats.dbo.AbsenceRef as c on b.AbsenceRef_ID = c.ID_AbsenceRef left join perco...staff as e on a.STAFF_ID = e.ID_STAFF left join Zarplats.dbo.StaffView as f on a.STAFF_ID = f.STAFF_ID where f.Position = @podrazd order by a.DTA",
+                        new SqlParameter("podrazd", SelectedDep.Position)).ToList();
+                });
+
+                List<StaffModel> groupedData = tempList
+                    .GroupBy(x => x.STAFF_ID)
+                    .Select(g => new StaffModel
                     {
-                        DTA = item.DTA,
-                        ID_Schedule = item.ID_Schedule,
-                        WorkingHours = item.WorkingHours
-                    }).ToList()
-                })
-                .Where(staff => staff.DatesAndSchedules.Any(ds => ds.DTA.Month == fromDate.Month))
-                .ToList();
-            #endregion
+                        STAFF_ID = g.Key,
+                        SHORT_FIO = g.First().SHORT_FIO,
+                        TABEL_ID = g.First().TABEL_ID,
+                        Subdivision = g.First().Subdivision,
+                        // Другие свойства, которые не зависят от даты
 
-            Dispatcher.Invoke(() =>
-            {
-                StaffList.Clear();
-                foreach (var staff in groupedData)
-                {
-                    StaffList.Add(staff);
-                }
-
-                #region Создание DataGridView
-                DateTime currentDate = fromDate;
-                int daysInMonth = DateTime.DaysInMonth(currentDate.Year, currentDate.Month);
-
-                StaffDGV.Columns.Clear();
-
-                DataGridViewTextBoxColumn staffIdColumn = new DataGridViewTextBoxColumn();
-                staffIdColumn.HeaderText = "ID";
-                staffIdColumn.DataPropertyName = "STAFF_ID";
-                staffIdColumn.MinimumWidth = 50;
-                StaffDGV.Columns.Add(staffIdColumn);
-
-                DataGridViewTextBoxColumn staffFIOColumn = new DataGridViewTextBoxColumn();
-                staffFIOColumn.HeaderText = "ФИО";
-                staffFIOColumn.DataPropertyName = "SHORT_FIO";
-                staffFIOColumn.MinimumWidth = 110;
-                StaffDGV.Columns.Add(staffFIOColumn);
-
-                for (int day = 1; day <= daysInMonth; day++)
-                {
-                    DateTime currentDateForColumn = new DateTime(currentDate.Year, currentDate.Month, day);
-                    string columnHeader = currentDateForColumn.ToString("dd.MM.yyyy");
-
-                    DataGridViewTextBoxColumn dateColumn = new DataGridViewTextBoxColumn();
-                    dateColumn.HeaderText = columnHeader;
-                    dateColumn.DataPropertyName = $"Day_{day}";
-                    dateColumn.MinimumWidth = 70;
-                    dateColumn.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
-                    StaffDGV.Columns.Add(dateColumn);
-                }
+                        // Сохраняем все даты и ID_Schedule в списке для каждого сотрудника
+                        DatesAndSchedules = g.Select(item => new DateAndSchedule
+                        {
+                            DTA = item.DTA,
+                            ID_Schedule = item.ID_Schedule,
+                            WorkingHours = item.WorkingHours
+                        }).ToList()
+                    })
+                    .Where(staff => staff.DatesAndSchedules.Any(ds => ds.DTA.Month == fromDate.Month))
+                    .ToList();
                 #endregion
 
-                staffBindingSource.DataSource = StaffList;
-                StaffDGV.DataSource = staffBindingSource;
-
-                FillDGVCells();
-
-                #region Форматирование и обработчики
-                StaffDGV.CellFormatting += (s, e) =>
+                Dispatcher.Invoke(() =>
                 {
-                    if (e.RowIndex >= 0 && e.RowIndex < StaffDGV.RowCount)
+                    StaffList.Clear();
+                    foreach (var staff in groupedData)
                     {
-                        int columnIndex = e.ColumnIndex;
-                        int day = columnIndex - 1;
+                        StaffList.Add(staff);
+                    }
 
-                        if (day > 0)
+                    #region Создание DataGridView
+                    DateTime currentDate = fromDate;
+                    int daysInMonth = DateTime.DaysInMonth(currentDate.Year, currentDate.Month);
+
+                    StaffDGV.Columns.Clear();
+
+                    DataGridViewTextBoxColumn staffTabelColumn = new DataGridViewTextBoxColumn();
+                    staffTabelColumn.HeaderText = "Таб. номер";
+                    staffTabelColumn.DataPropertyName = "TABEL_ID";
+                    staffTabelColumn.MinimumWidth = 100;
+                    StaffDGV.Columns.Add(staffTabelColumn);
+
+                    DataGridViewTextBoxColumn staffFIOColumn = new DataGridViewTextBoxColumn();
+                    staffFIOColumn.HeaderText = "ФИО";
+                    staffFIOColumn.DataPropertyName = "SHORT_FIO";
+                    staffFIOColumn.MinimumWidth = 110;
+                    StaffDGV.Columns.Add(staffFIOColumn);
+
+                    for (int day = 1; day <= daysInMonth; day++)
+                    {
+                        DateTime currentDateForColumn = new DateTime(currentDate.Year, currentDate.Month, day);
+                        string columnHeader = currentDateForColumn.ToString("dd.MM.yyyy");
+
+                        DataGridViewTextBoxColumn dateColumn = new DataGridViewTextBoxColumn();
+                        dateColumn.HeaderText = columnHeader;
+                        dateColumn.DataPropertyName = $"Day_{day}";
+                        dateColumn.MinimumWidth = 70;
+                        dateColumn.DefaultCellStyle.Alignment = DataGridViewContentAlignment.MiddleCenter;
+                        StaffDGV.Columns.Add(dateColumn);
+                    }
+                    #endregion
+
+                    staffBindingSource.DataSource = StaffList;
+                    StaffDGV.DataSource = staffBindingSource;
+
+                    FillDGVCells();
+
+                    #region Форматирование и обработчики
+                    StaffDGV.CellFormatting += (s, e) =>
+                    {
+                        if (e.RowIndex >= 0 && e.RowIndex < StaffDGV.RowCount)
                         {
-                            DataGridViewRow row = StaffDGV.Rows[e.RowIndex];
-                            StaffModel staff = (StaffModel)row.DataBoundItem;
+                            int columnIndex = e.ColumnIndex;
+                            int day = columnIndex - 1;
 
-                            if (staff != null)
+                            if (day > 0)
                             {
-                                DateTime currentDateForCell = new DateTime(currentDate.Year, currentDate.Month, day);
-                                bool isRecordExists = CheckRecordExists(staff.STAFF_ID, currentDateForCell);
-                                bool hasAbsence = HasAbsence(staff.STAFF_ID, currentDateForCell);
+                                DataGridViewRow row = StaffDGV.Rows[e.RowIndex];
+                                StaffModel staff = (StaffModel)row.DataBoundItem;
 
-                                if (hasAbsence && isRecordExists)
-                                    e.CellStyle.BackColor = System.Drawing.Color.Orange;
+                                if (staff != null)
+                                {
+                                    DateTime currentDateForCell = new DateTime(currentDate.Year, currentDate.Month, day);
+                                    bool isRecordExists = CheckRecordExists(staff.STAFF_ID, currentDateForCell);
+                                    bool hasAbsence = HasAbsence(staff.STAFF_ID, currentDateForCell);
+
+                                    if (hasAbsence && isRecordExists)
+                                        e.CellStyle.BackColor = System.Drawing.Color.Orange;
+                                    else
+                                        e.CellStyle.BackColor = isRecordExists ? System.Drawing.Color.LightGreen : System.Drawing.Color.LightBlue;
+                                }
+                            }
+                        }
+                    };
+
+                    StaffDGV.CellMouseEnter += (s, e) =>
+                    {
+                        if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
+                        {
+                            DataGridViewCell cell = StaffDGV.Rows[e.RowIndex].Cells[e.ColumnIndex];
+
+                            if (e.ColumnIndex == 0 || e.ColumnIndex == 1)
+                            {
+                                DataGridViewRow row = StaffDGV.Rows[e.RowIndex];
+                                StaffModel staff = (StaffModel)row.DataBoundItem;
+
+                                if (staff != null)
+                                {
+                                    string toolTipText = $"{staff.SHORT_FIO}\nТабельный номер: {staff.TABEL_ID}\nДолжность: {staff.Subdivision}\n\n(Двойной клик чтобы выделить все дни)";
+
+                                    StaffDGV.Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText = toolTipText;
+                                }
+                            }
+                            else if (cell.Value is DateAndSchedule dateAndSchedule)
+                            {
+                                if (dateAndSchedule.ToString() == "Р")
+                                    StaffDGV.Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText = "Работает";
                                 else
-                                    e.CellStyle.BackColor = isRecordExists ? System.Drawing.Color.LightGreen : System.Drawing.Color.LightBlue;
+                                    StaffDGV.Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText = "Не работает";
                             }
                         }
-                    }
-                };
+                    };
 
-                StaffDGV.CellMouseEnter += (s, e) =>
-                {
-                    if (e.RowIndex >= 0 && e.ColumnIndex >= 0)
+                    StaffDGV.CellMouseClick += (s, e) =>
                     {
-                        DataGridViewCell cell = StaffDGV.Rows[e.RowIndex].Cells[e.ColumnIndex];
-
-                        if (e.ColumnIndex == 0 || e.ColumnIndex == 1)
+                        if (e.Button == MouseButtons.Right && e.RowIndex >= 0 && e.ColumnIndex >= 0)
                         {
-                            DataGridViewRow row = StaffDGV.Rows[e.RowIndex];
-                            StaffModel staff = (StaffModel)row.DataBoundItem;
+                            ContextMenu contextMenu = new ContextMenu();
+                            contextMenu.MenuItems.Add(new MenuItem("Сменные задания", DeleteAbsenceMenuItem_Click));
+                            contextMenu.MenuItems.Add(new MenuItem("Удалить отсутствие", DeleteAbsenceMenuItem_Click));
 
-                            if (staff != null)
-                            {
-                                string toolTipText = $"{staff.SHORT_FIO}\nТабельный номер: {staff.TABEL_ID}\nДолжность: {staff.Subdivision}\n\n(Двойной клик чтобы выделить все дни)";
+                            Rectangle cellRectangle = StaffDGV.GetCellDisplayRectangle(e.ColumnIndex, e.RowIndex, false);
 
-                                StaffDGV.Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText = toolTipText;
-                            }
+                            contextMenu.Show(StaffDGV, new System.Drawing.Point(cellRectangle.Right, cellRectangle.Top));
                         }
-                        else if (cell.Value is DateAndSchedule dateAndSchedule)
-                        {
-                            if (dateAndSchedule.ToString() == "Р")
-                                StaffDGV.Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText = "Работает";
-                            else
-                                StaffDGV.Rows[e.RowIndex].Cells[e.ColumnIndex].ToolTipText = "Не работает";
-                        }
-                    }
-                };
+                    };
 
-                StaffDGV.CellMouseClick += (s, e) =>
-                {
-                    if (e.Button == MouseButtons.Right && e.RowIndex >= 0 && e.ColumnIndex >= 0)
+                    StaffDGV.KeyDown += (s, e) =>
                     {
-                        ContextMenu contextMenu = new ContextMenu();
-                        contextMenu.MenuItems.Add(new MenuItem("Сменные задания", DeleteAbsenceMenuItem_Click));
-                        contextMenu.MenuItems.Add(new MenuItem("Удалить отсутствие", DeleteAbsenceMenuItem_Click));
-
-                        Rectangle cellRectangle = StaffDGV.GetCellDisplayRectangle(e.ColumnIndex, e.RowIndex, false);
-
-                        contextMenu.Show(StaffDGV, new System.Drawing.Point(cellRectangle.Right, cellRectangle.Top));
-                    }
-                };
-
-                StaffDGV.KeyDown += (s, e) =>
-                {
-                    if (e.KeyData == Keys.Delete)
-                        DeleteRow();
-                };
-                #endregion
-            });
+                        if (e.KeyData == Keys.Delete)
+                            DeleteRow();
+                    };
+                    #endregion
+                });
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при обновлении таблицы: {ex.Message}");
+            }
         }
 
         private void SearchTBX_TextChanged(object sender, TextChangedEventArgs e)
@@ -314,58 +321,65 @@ namespace PlanningScheduleApp.Pages
         // заполнение ячеек данными
         private void FillDGVCells()
         {
-            DateTime currentDate = fromDate;
-            int daysInMonth = DateTime.DaysInMonth(currentDate.Year, currentDate.Month);
-            for (int day = 1; day <= daysInMonth; day++)
+            try
             {
-                DateTime currentDateForCell = new DateTime(currentDate.Year, currentDate.Month, day);
-
-                for (int rowIndex = 0; rowIndex < StaffList.Count; rowIndex++)
+                DateTime currentDate = fromDate;
+                int daysInMonth = DateTime.DaysInMonth(currentDate.Year, currentDate.Month);
+                for (int day = 1; day <= daysInMonth; day++)
                 {
-                    StaffModel staff = StaffList[rowIndex];
+                    DateTime currentDateForCell = new DateTime(currentDate.Year, currentDate.Month, day);
 
-                    bool isRecordExists = CheckRecordExists(staff.STAFF_ID, currentDateForCell);
-                    int hasAbsenceFullDay = Odb.db.Database.SqlQuery<int>("select count(*) from Zarplats.dbo.Schedule_Absence where id_Staff = @idstaff and DateBegin <= @date and DateEnd >= @date and TimeBegin is null and TimeEnd is null", new SqlParameter("date", currentDateForCell.Date), new SqlParameter("idstaff", staff.STAFF_ID)).FirstOrDefault();
-
-                    int? idSchedule = Odb.db.Database.SqlQuery<int?>("select ID_Schedule from Zarplats.dbo.Staff_Schedule where STAFF_ID = @idstaff and DTA = @date",
-                        new SqlParameter("idstaff", staff.STAFF_ID), new SqlParameter("date", currentDateForCell.Date)).FirstOrDefault();
-                    int? idAbsence = Odb.db.Database.SqlQuery<int?>("select b.ID_Absence from Zarplats.dbo.Staff_Schedule as a left join Zarplats.dbo.Schedule_Absence as b on a.STAFF_ID = b.id_Staff and a.DTA between b.DateBegin and b.DateEnd where STAFF_ID = @idstaff and DTA = @date",
-                        new SqlParameter("idstaff", staff.STAFF_ID), new SqlParameter("date", currentDateForCell.Date)).FirstOrDefault();
-
-                    DataGridViewCell cell = StaffDGV.Rows[rowIndex].Cells[day + 1];
-
-                    cell.Value = new DateAndSchedule
+                    for (int rowIndex = 0; rowIndex < StaffList.Count; rowIndex++)
                     {
-                        ID_Schedule = idSchedule ?? 0,
-                        ID_Absence = idAbsence ?? 0,
-                        DTA = currentDateForCell,
-                        cellText = "Н"
-                    };
+                        StaffModel staff = StaffList[rowIndex];
 
-                    if (isRecordExists)
-                    {
-                        if (hasAbsenceFullDay > 0)
+                        bool isRecordExists = CheckRecordExists(staff.STAFF_ID, currentDateForCell);
+                        int hasAbsenceFullDay = Odb.db.Database.SqlQuery<int>("select count(*) from Zarplats.dbo.Schedule_Absence where id_Staff = @idstaff and DateBegin <= @date and DateEnd >= @date and TimeBegin is null and TimeEnd is null", new SqlParameter("date", currentDateForCell.Date), new SqlParameter("idstaff", staff.STAFF_ID)).FirstOrDefault();
+
+                        int? idSchedule = Odb.db.Database.SqlQuery<int?>("select ID_Schedule from Zarplats.dbo.Staff_Schedule where STAFF_ID = @idstaff and DTA = @date",
+                            new SqlParameter("idstaff", staff.STAFF_ID), new SqlParameter("date", currentDateForCell.Date)).FirstOrDefault();
+                        int? idAbsence = Odb.db.Database.SqlQuery<int?>("select b.ID_Absence from Zarplats.dbo.Staff_Schedule as a left join Zarplats.dbo.Schedule_Absence as b on a.STAFF_ID = b.id_Staff and a.DTA between b.DateBegin and b.DateEnd where STAFF_ID = @idstaff and DTA = @date",
+                            new SqlParameter("idstaff", staff.STAFF_ID), new SqlParameter("date", currentDateForCell.Date)).FirstOrDefault();
+
+                        DataGridViewCell cell = StaffDGV.Rows[rowIndex].Cells[day + 1];
+
+                        cell.Value = new DateAndSchedule
                         {
-                            cell.Value = new DateAndSchedule
-                            {
-                                ID_Schedule = idSchedule ?? 0,
-                                ID_Absence = idAbsence ?? 0,
-                                DTA = currentDateForCell,
-                                cellText = "Н"
-                            };
-                        }
-                        else
+                            ID_Schedule = idSchedule ?? 0,
+                            ID_Absence = idAbsence ?? 0,
+                            DTA = currentDateForCell,
+                            cellText = "Н"
+                        };
+
+                        if (isRecordExists)
                         {
-                            cell.Value = new DateAndSchedule
+                            if (hasAbsenceFullDay > 0)
                             {
-                                ID_Schedule = idSchedule ?? 0,
-                                ID_Absence = idAbsence ?? 0,
-                                DTA = currentDateForCell,
-                                cellText = "Р"
-                            };
+                                cell.Value = new DateAndSchedule
+                                {
+                                    ID_Schedule = idSchedule ?? 0,
+                                    ID_Absence = idAbsence ?? 0,
+                                    DTA = currentDateForCell,
+                                    cellText = "Н"
+                                };
+                            }
+                            else
+                            {
+                                cell.Value = new DateAndSchedule
+                                {
+                                    ID_Schedule = idSchedule ?? 0,
+                                    ID_Absence = idAbsence ?? 0,
+                                    DTA = currentDateForCell,
+                                    cellText = "Р"
+                                };
+                            }
                         }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при заполнении ячееек данными: {ex.Message}");
             }
         }
 
@@ -417,6 +431,7 @@ namespace PlanningScheduleApp.Pages
                                 MessageBox.Show("Выбран некорректный день");
                             }
                         }
+                        StaffDGV.ContextMenu = null;
                         Task.Run(() => UpdateDGV());
                     }
                 }
@@ -438,12 +453,9 @@ namespace PlanningScheduleApp.Pages
                                 // получаем дату из колонки
                                 DateTime currentDateForCell = new DateTime(DateTime.Now.Year, DateTime.Now.Month, columnIndex - 1);
 
-                                // временное исправление бага
-                                if (smenZadaniaWindow != null && smenZadaniaWindow.IsVisible)
-                                    smenZadaniaWindow.Close();
-
                                 smenZadaniaWindow = new SmenZadaniaWindow(selectedModel.STAFF_ID, currentDateForCell.Date);
-                                smenZadaniaWindow.ShowDialog();
+                                smenZadaniaWindow.Show();
+                                StaffDGV.ContextMenu = null;
                             }
                             else
                                 MessageBox.Show("Выбран некорректный день");
@@ -457,12 +469,24 @@ namespace PlanningScheduleApp.Pages
         {
             try
             {
-                int checkExisting = Odb.db.Database.SqlQuery<int>("select count(*) from Zarplats.dbo.Staff_Schedule where STAFF_ID = @staffId and DTA = @dta", new SqlParameter("staffId", staffId), new SqlParameter("dta", date)).FirstOrDefault();
-                return checkExisting > 0;
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+
+                    using (SqlCommand command = new SqlCommand("SELECT COUNT(*) FROM Zarplats.dbo.Staff_Schedule WHERE STAFF_ID = @staffId AND DTA = @dta", connection))
+                    {
+                        command.Parameters.AddWithValue("@staffId", staffId);
+                        command.Parameters.AddWithValue("@dta", date);
+
+                        int checkExisting = (int)command.ExecuteScalar();
+
+                        return checkExisting > 0;
+                    }
+                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Error checking record existence: " + ex.Message);
+                Console.WriteLine("Error checking record existence (CheckRecordExists): " + ex.Message);
                 return false;
             }
         }
@@ -531,7 +555,7 @@ namespace PlanningScheduleApp.Pages
             }
         }
 
-        private async void AddScheduleBtn_Click(object sender, RoutedEventArgs e)
+        private void AddScheduleBtn_Click(object sender, RoutedEventArgs e)
         {
             if (CheckWhatToAdd() == "1100")
             {
@@ -540,36 +564,36 @@ namespace PlanningScheduleApp.Pages
                 else if (!SelectedTemplate.isFlexible)
                     FillStaticSchedule();
             }
-            else if (CheckWhatToAdd() == "1011")
-            {
-                int checkExistingSchedule = Odb.db.Database.SqlQuery<int>("select count(*) from Zarplats.dbo.Staff_Schedule where DTA between @DateBegin and @DateEnd", new SqlParameter("DateBegin", AbsenceStartDP.SelectedDate), new SqlParameter("DateEnd", AbsenceFinishDP.SelectedDate)).SingleOrDefault();
-                if (checkExistingSchedule > 0)
-                    await AddAbsence();
-                else
-                    MessageBox.Show("Для указанного диапазона не найдено рабочих дней!");
-            }
-            else if (CheckWhatToAdd() == "1111")
-            {
-                int checkExistingSchedule = Odb.db.Database.SqlQuery<int>("select count(*) from Zarplats.dbo.Staff_Schedule where DTA between @DateBegin and @DateEnd", new SqlParameter("DateBegin", ScheduleStartDP.SelectedDate), new SqlParameter("DateEnd", ScheduleEndDP.SelectedDate)).SingleOrDefault();
-                if (checkExistingSchedule <= 0)
-                {
-                    if (SelectedTemplate.isFlexible)
-                    {
-                        FillFlexibleSchedule();
-                        await AddAbsence();
-                    }
-                    else if (!SelectedTemplate.isFlexible)
-                    {
-                        FillStaticSchedule();
-                        await AddAbsence();
-                    }
-                }
-                else
-                {
-                    MessageBox.Show("График уже существует, добавляем только отсутствие.");
-                    await AddAbsence();
-                }
-            }
+            //else if (CheckWhatToAdd() == "1011")
+            //{
+            //    int checkExistingSchedule = Odb.db.Database.SqlQuery<int>("select count(*) from Zarplats.dbo.Staff_Schedule where DTA between @DateBegin and @DateEnd", new SqlParameter("DateBegin", AbsenceStartDP.SelectedDate), new SqlParameter("DateEnd", AbsenceFinishDP.SelectedDate)).SingleOrDefault();
+            //    if (checkExistingSchedule > 0)
+            //        await AddAbsence();
+            //    else
+            //        MessageBox.Show("Для указанного диапазона не найдено рабочих дней!");
+            //}
+            //else if (CheckWhatToAdd() == "1111")
+            //{
+            //    int checkExistingSchedule = Odb.db.Database.SqlQuery<int>("select count(*) from Zarplats.dbo.Staff_Schedule where DTA between @DateBegin and @DateEnd", new SqlParameter("DateBegin", ScheduleStartDP.SelectedDate), new SqlParameter("DateEnd", ScheduleEndDP.SelectedDate)).SingleOrDefault();
+            //    if (checkExistingSchedule <= 0)
+            //    {
+            //        if (SelectedTemplate.isFlexible)
+            //        {
+            //            FillFlexibleSchedule();
+            //            await AddAbsence();
+            //        }
+            //        else if (!SelectedTemplate.isFlexible)
+            //        {
+            //            FillStaticSchedule();
+            //            await AddAbsence();
+            //        }
+            //    }
+            //    else
+            //    {
+            //        MessageBox.Show("График уже существует, добавляем только отсутствие.");
+            //        await AddAbsence();
+            //    }
+            //}
             else if (CheckWhatToAdd() == "##0#")
             {
                 MessageBox.Show("Укажите причину отсутствия.");
@@ -584,6 +608,26 @@ namespace PlanningScheduleApp.Pages
             }
             else if (CheckWhatToAdd() == "#0##")
                 MessageBox.Show("Не все поля графика заполнены.");
+            else if (CheckWhatToAdd() == "###0")
+                MessageBox.Show($"Не все поля отсутствия заполнены.");
+        }
+
+        private async void AddAbsenceBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (CheckWhatToAdd() == "1011")
+                await AddAbsence();
+            else if (CheckWhatToAdd() == "##0#")
+            {
+                MessageBox.Show("Укажите причину отсутствия.");
+                CauseLV.Focus();
+            }
+            else if (CheckWhatToAdd() == "1608")
+                MessageBox.Show("Ошибка 1608. Обратитесь к разработчику.");
+            else if (CheckWhatToAdd() == "0###")
+            {
+                MessageBox.Show("Выберите сотрудника.");
+                StaffLV.Focus();
+            }
             else if (CheckWhatToAdd() == "###0")
                 MessageBox.Show($"Не все поля отсутствия заполнены.\nTimeStart: {AbsenceTimeBeginMTBX.Text}, TimeEnd: {AbsenceTimeEndMTBX.Text}");
         }
@@ -631,8 +675,6 @@ namespace PlanningScheduleApp.Pages
                                 var dateAndScheduleToDelete = selectedModel.DatesAndSchedules.FirstOrDefault(ds => ds.ID_Schedule == idScheduleToDelete);
                                 if (dateAndScheduleToDelete != null)
                                 {
-
-
                                     // обновляем объект DateAndSchedule после удаления (надо ли?)
                                     dateAndScheduleToDelete.ID_Schedule = 0; // или другое значение, которое не будет использоваться
                                     dateAndScheduleToDelete.ID_Absence = 0;
@@ -888,15 +930,24 @@ namespace PlanningScheduleApp.Pages
         {
             try
             {
-                StaffModel absence = Odb.db.Database.SqlQuery<StaffModel>("select * from Zarplats.dbo.Schedule_Absence where id_Staff = @idstaff and DateBegin <= @date and DateEnd >= @date", new SqlParameter("date", date), new SqlParameter("idstaff", staffId)).FirstOrDefault();
-                if (absence != null)
-                    return true;
-                else
-                    return false;
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    connection.Open();
+                    using (SqlCommand command = new SqlCommand("select * from Zarplats.dbo.Schedule_Absence where id_Staff = @idstaff and DateBegin <= @date and DateEnd >= @date", connection))
+                    {
+                        command.Parameters.AddWithValue("@idstaff", staffId);
+                        command.Parameters.AddWithValue("@date", date);
+
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            return reader.Read();
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Error checking record existence: " + ex.Message);
+                Console.WriteLine("Error checking record existence (HasAbsence): " + ex.Message);
                 return false;
             }
         }

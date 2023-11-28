@@ -19,11 +19,18 @@ namespace PlanningScheduleApp
 
         public SmenZadaniaWindow(int staffid, DateTime date)
         {
-            InitializeComponent();
-            StaffID = staffid;
-            Date = date;
-            AssignCMB();
-            Task.Run(async () => await LoadSmenZadaniaForStuffAsync());
+            try
+            {
+                InitializeComponent();
+                StaffID = staffid;
+                Date = date;
+                AssignCMB();
+                Task.Run(async () => await LoadSmenZadaniaForStuffAsync());
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при инициализации окна сменных заданий: {ex.Message}");
+            }
         }
 
         private async Task LoadSmenZadaniaForStuffAsync()
@@ -73,7 +80,7 @@ namespace PlanningScheduleApp
                                 NUM = reader["NUM"].ToString(),
                                 PP = reader["PP"].ToString(),
                                 Cost = Convert.ToDouble(reader["Cost"]),
-                                Count = Convert.ToInt32(reader["Count"]),
+                                Count = Convert.ToDouble(reader["Count"]),
                                 WorkingHours = Convert.ToDouble(reader["WorkingHours"]),
                                 DTA = Convert.ToDateTime(reader["DTA"]),
                                 TotalHours = Convert.ToDouble(reader["TotalHours"])

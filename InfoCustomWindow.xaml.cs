@@ -20,12 +20,37 @@ namespace PlanningScheduleApp
 
         public InfoCustomWindow(string whichInfo, StaffModel selectedRow, DateTime date)
         {
-            InitializeComponent();
+            try
+            {
+                InitializeComponent();
 
-            WhichInfo = whichInfo;
-            SelectedRow = selectedRow;
-            Date = date;
+                WhichInfo = whichInfo;
+                SelectedRow = selectedRow;
+                Date = date;
 
+                AssignData();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Ошибка при инициализации окна с информацией\n{ex.Message}");
+            }
+        }
+
+        private void CloseBtn_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+
+        private void InfoTC_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            if (InfoTC.SelectedIndex == 0)
+                this.Height = 245;
+            else if (InfoTC.SelectedIndex == 1)
+                this.Height = 220;
+        }
+
+        private void AssignData()
+        {
             Absence = Odb.db.Database.SqlQuery<StaffModel>("select a.*, b.Cause as CauseAbsence from Zarplats.dbo.Schedule_Absence as a left join Zarplats.dbo.AbsenceRef as b on a.AbsenceRef_ID = b.ID_AbsenceRef where id_Staff = @idstaff and DateBegin <= @date and DateEnd >= @date", new SqlParameter("idstaff", SelectedRow.STAFF_ID), new SqlParameter("date", Date)).FirstOrDefault();
             ScheduleInfo = Odb.db.Database.SqlQuery<StaffModel>("select distinct * from Zarplats.dbo.Staff_Schedule where STAFF_ID = @idstaff and DTA = @date", new SqlParameter("idstaff", SelectedRow.STAFF_ID), new SqlParameter("date", Date)).FirstOrDefault();
             int hasAbsenceFullDay = Odb.db.Database.SqlQuery<int>("select count(*) from Zarplats.dbo.Schedule_Absence where id_Staff = @idstaff and DateBegin <= @date and DateEnd >= @date and TimeBegin is null and TimeEnd is null", new SqlParameter("date", Date), new SqlParameter("idstaff", SelectedRow.STAFF_ID)).FirstOrDefault();
@@ -43,13 +68,13 @@ namespace PlanningScheduleApp
                 WorkingDayTI.Visibility = Visibility.Collapsed;
 
                 if (Absence.TimeBegin != null && Absence.TimeEnd != null)
-                    absenceDynamicStroke = $"Сотрудник: {selectedRow.SHORT_FIO}" + Environment.NewLine +
-                                    $"Дата отсутствия: {date.Date}" + Environment.NewLine +
+                    absenceDynamicStroke = $"Сотрудник: {SelectedRow.SHORT_FIO}" + Environment.NewLine +
+                                    $"Дата отсутствия: {Date.Date}" + Environment.NewLine +
                                     $"Время отсутствия: {Absence.TimeBegin} - {Absence.TimeEnd}" + Environment.NewLine +
                                     $"Причина: {Absence.CauseAbsence} ({Absence.AbsenceDate})";
                 else
-                    absenceDynamicStroke = $"Сотрудник: {selectedRow.SHORT_FIO}" + Environment.NewLine +
-                                    $"Дата отсутствия: {date.Date}" + Environment.NewLine +
+                    absenceDynamicStroke = $"Сотрудник: {SelectedRow.SHORT_FIO}" + Environment.NewLine +
+                                    $"Дата отсутствия: {Date.Date}" + Environment.NewLine +
                                     $"Время отсутствия: весь день" + Environment.NewLine +
                                     $"Причина: {Absence.CauseAbsence} ({Absence.AbsenceDate})";
 
@@ -59,7 +84,7 @@ namespace PlanningScheduleApp
             {
                 AbsenceTI.Visibility = Visibility.Collapsed;
 
-                scheduleDynamicStroke = $"Сотрудник: {selectedRow.SHORT_FIO}" + Environment.NewLine +
+                scheduleDynamicStroke = $"Сотрудник: {SelectedRow.SHORT_FIO}" + Environment.NewLine +
                                 $"Дата: {ScheduleInfo.DTA.ToShortDateString()}" + Environment.NewLine +
                                 $"Время работы: {ScheduleInfo.WorkTime}" + Environment.NewLine +
                                 $"Обед: {ScheduleInfo.LunchTime}" + Environment.NewLine +
@@ -69,16 +94,16 @@ namespace PlanningScheduleApp
             else if (Absence != null && ScheduleInfo != null && hasAbsenceFullDay <= 0)   // если есть и отсутствие и информация о рабочем дне, но отсутствие не на весь день
             {
                 if (Absence.TimeBegin != null && Absence.TimeEnd != null)
-                    absenceDynamicStroke = $"Сотрудник: {selectedRow.SHORT_FIO}" + Environment.NewLine +
-                                    $"Дата отсутствия: {date.Date}" + Environment.NewLine +
+                    absenceDynamicStroke = $"Сотрудник: {SelectedRow.SHORT_FIO}" + Environment.NewLine +
+                                    $"Дата отсутствия: {Date.Date}" + Environment.NewLine +
                                     $"Время отсутствия: {Absence.TimeBegin} - {Absence.TimeEnd}" + Environment.NewLine +
                                     $"Причина: {Absence.CauseAbsence} ({Absence.AbsenceDate})";
                 else
-                    absenceDynamicStroke = $"Сотрудник: {selectedRow.SHORT_FIO}" + Environment.NewLine +
-                                    $"Дата отсутствия: {date.Date}" + Environment.NewLine +
+                    absenceDynamicStroke = $"Сотрудник: {SelectedRow.SHORT_FIO}" + Environment.NewLine +
+                                    $"Дата отсутствия: {Date.Date}" + Environment.NewLine +
                                     $"Время отсутствия: весь день" + Environment.NewLine +
                                     $"Причина: {Absence.CauseAbsence} ({Absence.AbsenceDate})";
-                scheduleDynamicStroke = $"Сотрудник: {selectedRow.SHORT_FIO}" + Environment.NewLine +
+                scheduleDynamicStroke = $"Сотрудник: {SelectedRow.SHORT_FIO}" + Environment.NewLine +
                                 $"Дата: {ScheduleInfo.DTA.ToShortDateString()}" + Environment.NewLine +
                                 $"Время работы: {ScheduleInfo.WorkTime}" + Environment.NewLine +
                                 $"Обед: {ScheduleInfo.LunchTime}" + Environment.NewLine +
@@ -93,31 +118,18 @@ namespace PlanningScheduleApp
                 WorkingDayTI.Visibility = Visibility.Collapsed;
 
                 if (Absence.TimeBegin != null && Absence.TimeEnd != null)
-                    absenceDynamicStroke = $"Сотрудник: {selectedRow.SHORT_FIO}" + Environment.NewLine +
-                                    $"Дата отсутствия: {date.Date}" + Environment.NewLine +
+                    absenceDynamicStroke = $"Сотрудник: {SelectedRow.SHORT_FIO}" + Environment.NewLine +
+                                    $"Дата отсутствия: {Date.Date}" + Environment.NewLine +
                                     $"Время отсутствия: {Absence.TimeBegin} - {Absence.TimeEnd}" + Environment.NewLine +
                                     $"Причина: {Absence.CauseAbsence} ({Absence.AbsenceDate})";
                 else
-                    absenceDynamicStroke = $"Сотрудник: {selectedRow.SHORT_FIO}" + Environment.NewLine +
-                                    $"Дата отсутствия: {date.Date}" + Environment.NewLine +
+                    absenceDynamicStroke = $"Сотрудник: {SelectedRow.SHORT_FIO}" + Environment.NewLine +
+                                    $"Дата отсутствия: {Date.Date}" + Environment.NewLine +
                                     $"Время отсутствия: весь день" + Environment.NewLine +
                                     $"Причина: {Absence.CauseAbsence} ({Absence.AbsenceDate})";
 
                 AbsenceInfoTBX.Text = absenceDynamicStroke;
             }
-        }
-
-        private void CloseBtn_Click(object sender, RoutedEventArgs e)
-        {
-            this.Close();
-        }
-
-        private void InfoTC_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
-        {
-            if (InfoTC.SelectedIndex == 0)
-                this.Height = 245;
-            else if (InfoTC.SelectedIndex == 1)
-                this.Height = 220;
         }
     }
 }

@@ -106,7 +106,7 @@
                             <DatePicker Name="ScheduleEndDP" MinWidth="75" LostFocus="DP_LostFocus" IsEnabled="False"/>
                         </StackPanel>
                     </StackPanel>
-
+                    <Button Name="AddScheduleBtn" Width="95" Content="Добавить" Padding="0" FontSize="12" Margin="0 15 0 0" Click="AddScheduleBtn_Click"/>
                     <Separator Margin="0 10" BorderBrush="LightGray" Width="100" Effect="{StaticResource shadForText}"/>
                     <StackPanel Orientation="Horizontal" Margin="0 0 0 5">
                         <TextBlock Text="Отсутствие" FontSize="14" FontWeight="SemiBold"/>
@@ -145,7 +145,7 @@
                         </StackPanel>
                     </StackPanel>
 
-                    <Button Name="AddScheduleBtn" Width="95" Content="Добавить" Padding="0" FontSize="12" Margin="0 15 0 0" Click="AddScheduleBtn_Click"/>
+                    <Button Name="AddAbsenceBtn" Width="95" Content="Добавить" Padding="0" FontSize="12" Margin="0 15 0 0" Click="AddAbsenceBtn_Click"/>
                 </StackPanel>
             </Border>
         </DockPanel>
