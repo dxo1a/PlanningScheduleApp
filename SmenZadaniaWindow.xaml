@@ -11,7 +11,6 @@
             <RowDefinition Height="0.1*"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
-        <TextBlock Name="LoadingSZTB" Text="Загрузка сменных заданий..." FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" HorizontalAlignment="Center" Opacity="0.5" Visibility="Visible" Grid.Row="1" Grid.Column="0"/>
         <StackPanel Grid.Row="0" Margin="10 5 10 5" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="0">
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="Поиск " FontSize="16" MaxHeight="30"/>
@@ -20,7 +19,7 @@
                 <ComboBox Name="filterCMB" MinWidth="100" MaxWidth="170" SelectionChanged="filterCMB_SelectionChanged" FontSize="16" MaxHeight="30" Padding="0"/>
             </StackPanel>
         </StackPanel>
-        <DataGrid x:Name="SmenZadaniaDG" Visibility="Collapsed" SelectionMode="Extended" AutoGenerateColumns="False" CanUserAddRows="False" Grid.Row="1" Grid.Column="0" ColumnHeaderHeight="60" Margin="5 0 0 5" CanUserDeleteRows="False" Style="{StaticResource DataGridOwn}">
+        <DataGrid x:Name="SmenZadaniaDG" Visibility="Visible" SelectionMode="Extended" AutoGenerateColumns="False" CanUserAddRows="False" Grid.Row="1" Grid.Column="0" ColumnHeaderHeight="60" Margin="5 0 0 5" CanUserDeleteRows="False" Style="{StaticResource DataGridOwn}">
             <DataGrid.ColumnHeaderStyle>
                 <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
                     <Setter Property="Padding" Value="5 0"/>

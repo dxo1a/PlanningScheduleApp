@@ -535,11 +535,11 @@ namespace PlanningScheduleApp.Pages
             }
         }
 
-        private void StaffDG_MouseDoubleClick(object sender, MouseButtonEventArgs e)
-        {
-            SmenZadaniaWindow smenZadaniaWindow = new SmenZadaniaWindow(SelectedStaffInDG.STAFF_ID, SelectedStaffInDG.DTA.Date);
-            smenZadaniaWindow.ShowDialog();
-        }
+        //private void StaffDG_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        //{
+        //    SmenZadaniaWindow smenZadaniaWindow = new SmenZadaniaWindow(SelectedStaffInDG.STAFF_ID, SelectedStaffInDG.DTA.Date);
+        //    smenZadaniaWindow.ShowDialog();
+        //}
 
         private bool HasAbsence(int staffId, DateTime date)
         {

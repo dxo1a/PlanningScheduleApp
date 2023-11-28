@@ -12,6 +12,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Forms;
 using System.Windows.Input;
+using Xceed.Wpf.AvalonDock.Controls;
 using Application = System.Windows.Application;
 using Clipboard = System.Windows.Clipboard;
 using ContextMenu = System.Windows.Forms.ContextMenu;
@@ -35,6 +36,7 @@ namespace PlanningScheduleApp.Pages
         List<StaffModel> StaffListInPosition = new List<StaffModel>();
         List<StaffModel> tempList = new List<StaffModel>();
         StaffModel SelectedStaff { get; set; }
+        StaffModel SelectedStaffForAbsence { get; set; }
         #endregion
 
         #region ScheduleTemplateModel
@@ -70,6 +72,7 @@ namespace PlanningScheduleApp.Pages
             {
                 StaffListInPosition = Odb.db.Database.SqlQuery<StaffModel>("select distinct b.SHORT_FIO, b.TABEL_ID, b.ID_STAFF as STAFF_ID from perco...staff_ref as a left join perco...staff as b on a.STAFF_ID = b.ID_STAFF left join perco...subdiv_ref as c on a.SUBDIV_ID = c.ID_REF where c.DISPLAY_NAME = @padrazd and b.VALID = 1", new SqlParameter("padrazd", SelectedDep.Position)).OrderBy(s => s.SHORT_FIO).ToList();
                 StaffLV.ItemsSource = StaffListInPosition;
+                StaffAbsenceLV.ItemsSource = StaffListInPosition;
                 CauseList = Odb.db.Database.SqlQuery<AbsenceModel>("select distinct * from Zarplats.dbo.AbsenceRef").ToList();
                 CauseLV.ItemsSource = CauseList;
 
@@ -254,6 +257,7 @@ namespace PlanningScheduleApp.Pages
                         if (e.Button == MouseButtons.Right && e.RowIndex >= 0 && e.ColumnIndex >= 0)
                         {
                             ContextMenu contextMenu = new ContextMenu();
+
                             contextMenu.MenuItems.Add(new MenuItem("Сменные задания", DeleteAbsenceMenuItem_Click));
                             contextMenu.MenuItems.Add(new MenuItem("Удалить отсутствие", DeleteAbsenceMenuItem_Click));
 
@@ -283,8 +287,7 @@ namespace PlanningScheduleApp.Pages
 
             var groupedData = tempList
                 .Where(x => (filterCMB.SelectedIndex == 0 && x.SHORT_FIO.ToLower().Contains(searchText)) ||
-                      (filterCMB.SelectedIndex == 1 && x.TABEL_ID.ToLower().Contains(searchText)) ||
-                      (filterCMB.SelectedIndex == 2 && x.WorkingHours.ToString().ToLower().Contains(searchText)))
+                      (filterCMB.SelectedIndex == 1 && x.TABEL_ID.ToLower().Contains(searchText)))
                 .GroupBy(x => x.STAFF_ID)
                 .Select(g => new StaffModel
                 {
@@ -385,7 +388,7 @@ namespace PlanningScheduleApp.Pages
 
         private SmenZadaniaWindow smenZadaniaWindow;
         private int? previousIdAbsence;
-        private void DeleteAbsenceMenuItem_Click(object sender, EventArgs e)
+        private async void DeleteAbsenceMenuItem_Click(object sender, EventArgs e)
         {
             if (sender is MenuItem menuItem)
             {
@@ -453,9 +456,15 @@ namespace PlanningScheduleApp.Pages
                                 // получаем дату из колонки
                                 DateTime currentDateForCell = new DateTime(DateTime.Now.Year, DateTime.Now.Month, columnIndex - 1);
 
-                                smenZadaniaWindow = new SmenZadaniaWindow(selectedModel.STAFF_ID, currentDateForCell.Date);
-                                smenZadaniaWindow.Show();
-                                StaffDGV.ContextMenu = null;
+                                List <SmenZadaniaModel> SmenZadaniaList = await LoadSmenZadaniaForStuffAsync(selectedModel.STAFF_ID, currentDateForCell.Date);
+                                if (SmenZadaniaList.Any(s => s.Product != null && s.DetailName != null && s.PP != null && s.NUM != null))
+                                {
+                                    smenZadaniaWindow = new SmenZadaniaWindow(SmenZadaniaList);
+                                    smenZadaniaWindow.Show();
+                                    StaffDGV.ContextMenu = null;
+                                }
+                                else
+                                    MessageBox.Show($"Сменные задания для сотрудника {selectedModel.SHORT_FIO} ({selectedModel.TABEL_ID}) [{currentDateForCell.Date.ToShortDateString()}] не найдены.", "Сменные задания", MessageBoxButton.OK, MessageBoxImage.Information);
                             }
                             else
                                 MessageBox.Show("Выбран некорректный день");
@@ -463,6 +472,68 @@ namespace PlanningScheduleApp.Pages
                     }
                 }
             }
+        }
+
+        private async Task<List<SmenZadaniaModel>> LoadSmenZadaniaForStuffAsync(int StaffID, DateTime Date)
+        {
+            List<SmenZadaniaModel> smenZadaniaList = new List<SmenZadaniaModel>();
+
+            using (SqlConnection connection = new SqlConnection("Persist Security Info=False;User ID=sa; Password=server_esa;Initial Catalog=dsl_sp;Server=sql"))
+            {
+                await connection.OpenAsync();
+
+                using (SqlCommand command = new SqlCommand(@"
+                    SELECT DISTINCT
+                        c.SHORT_FIO,
+                        sz.Product,
+                        sz.Detail as DetailNum,
+                        dv.НазваниеД as DetailName,
+                        sz.NUM,
+                        dv.Договор as PP,
+                        CAST(ROUND(sz.Cost, 2) as FLOAT) as Cost,
+                        sz.Count,
+                        a.WorkingHours,
+                        a.DTA,
+                        CAST(ROUND((SELECT SUM(sz.Cost) FROM Zarplats.dbo.SmenZadView sz WHERE LTRIM(c.TABEL_ID) = sz.id_Tabel AND a.DTA = sz.DTE), 2) AS FLOAT) as TotalHours
+                    FROM [Zarplats].[dbo].[Staff_Schedule] as a
+                    LEFT JOIN PERCO...staff_ref as b on a.STAFF_ID = b.STAFF_ID
+                    LEFT JOIN PERCO...staff AS c ON b.STAFF_ID = c.ID_STAFF
+                    LEFT JOIN PERCO...subdiv_ref AS d ON b.SUBDIV_ID = d.ID_REF
+                    LEFT JOIN PERCO...appoint_ref AS e ON b.APPOINT_ID = e.ID_REF
+                    LEFT JOIN Zarplats.dbo.SmenZadView as sz on LTRIM(c.TABEL_ID) = sz.id_Tabel and a.DTA = sz.DTE
+                    LEFT JOIN Cooperation.dbo.DetailsView as dv on sz.NUM = dv.ПрП and sz.Detail = dv.НомерД
+                    WHERE b.STAFF_ID = @staffid and a.DTA = @dta
+                ", connection))
+                {
+                    command.Parameters.AddWithValue("staffid", StaffID);
+                    command.Parameters.AddWithValue("dta", Date);
+
+                    using (SqlDataReader reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            SmenZadaniaModel smenZadania = new SmenZadaniaModel
+                            {
+                                SHORT_FIO = reader["SHORT_FIO"] is DBNull ? null : reader["SHORT_FIO"].ToString(),
+                                Product = reader["Product"] is DBNull ? null : reader["Product"].ToString(),
+                                DetailNum = reader["DetailNum"] is DBNull ? null : reader["DetailNum"].ToString(),
+                                DetailName = reader["DetailName"] is DBNull ? null : reader["DetailName"].ToString(),
+                                NUM = reader["NUM"] is DBNull ? null : reader["NUM"].ToString(),
+                                PP = reader["PP"] is DBNull ? null : reader["PP"].ToString(),
+                                Cost = reader["Cost"] is DBNull ? 0.0 : Convert.ToDouble(reader["Cost"]),
+                                Count = reader["Count"] is DBNull ? 0.0 : Convert.ToDouble(reader["Count"]),
+                                WorkingHours = reader["WorkingHours"] is DBNull ? 0.0 : Convert.ToDouble(reader["WorkingHours"]),
+                                DTA = reader["DTA"] is DBNull ? DateTime.MinValue : Convert.ToDateTime(reader["DTA"]),
+                                TotalHours = reader["TotalHours"] is DBNull ? 0.0 : Convert.ToDouble(reader["TotalHours"])
+                            };
+
+                            smenZadaniaList.Add(smenZadania);
+                        }
+                    }
+                }
+            }
+
+            return smenZadaniaList;
         }
 
         private bool CheckRecordExists(int staffId, DateTime date)
@@ -553,83 +624,6 @@ namespace PlanningScheduleApp.Pages
                     StaffDGV.Rows[e.RowIndex].Cells[columnIndex].Selected = true;
                 }
             }
-        }
-
-        private void AddScheduleBtn_Click(object sender, RoutedEventArgs e)
-        {
-            if (CheckWhatToAdd() == "1100")
-            {
-                if (SelectedTemplate.isFlexible)
-                    FillFlexibleSchedule();
-                else if (!SelectedTemplate.isFlexible)
-                    FillStaticSchedule();
-            }
-            //else if (CheckWhatToAdd() == "1011")
-            //{
-            //    int checkExistingSchedule = Odb.db.Database.SqlQuery<int>("select count(*) from Zarplats.dbo.Staff_Schedule where DTA between @DateBegin and @DateEnd", new SqlParameter("DateBegin", AbsenceStartDP.SelectedDate), new SqlParameter("DateEnd", AbsenceFinishDP.SelectedDate)).SingleOrDefault();
-            //    if (checkExistingSchedule > 0)
-            //        await AddAbsence();
-            //    else
-            //        MessageBox.Show("Для указанного диапазона не найдено рабочих дней!");
-            //}
-            //else if (CheckWhatToAdd() == "1111")
-            //{
-            //    int checkExistingSchedule = Odb.db.Database.SqlQuery<int>("select count(*) from Zarplats.dbo.Staff_Schedule where DTA between @DateBegin and @DateEnd", new SqlParameter("DateBegin", ScheduleStartDP.SelectedDate), new SqlParameter("DateEnd", ScheduleEndDP.SelectedDate)).SingleOrDefault();
-            //    if (checkExistingSchedule <= 0)
-            //    {
-            //        if (SelectedTemplate.isFlexible)
-            //        {
-            //            FillFlexibleSchedule();
-            //            await AddAbsence();
-            //        }
-            //        else if (!SelectedTemplate.isFlexible)
-            //        {
-            //            FillStaticSchedule();
-            //            await AddAbsence();
-            //        }
-            //    }
-            //    else
-            //    {
-            //        MessageBox.Show("График уже существует, добавляем только отсутствие.");
-            //        await AddAbsence();
-            //    }
-            //}
-            else if (CheckWhatToAdd() == "##0#")
-            {
-                MessageBox.Show("Укажите причину отсутствия.");
-                CauseLV.Focus();
-            }
-            else if (CheckWhatToAdd() == "1608")
-                MessageBox.Show("Ошибка 1608. Обратитесь к разработчику.");
-            else if (CheckWhatToAdd() == "0###")
-            {
-                MessageBox.Show("Выберите сотрудника.");
-                StaffLV.Focus();
-            }
-            else if (CheckWhatToAdd() == "#0##")
-                MessageBox.Show("Не все поля графика заполнены.");
-            else if (CheckWhatToAdd() == "###0")
-                MessageBox.Show($"Не все поля отсутствия заполнены.");
-        }
-
-        private async void AddAbsenceBtn_Click(object sender, RoutedEventArgs e)
-        {
-            if (CheckWhatToAdd() == "1011")
-                await AddAbsence();
-            else if (CheckWhatToAdd() == "##0#")
-            {
-                MessageBox.Show("Укажите причину отсутствия.");
-                CauseLV.Focus();
-            }
-            else if (CheckWhatToAdd() == "1608")
-                MessageBox.Show("Ошибка 1608. Обратитесь к разработчику.");
-            else if (CheckWhatToAdd() == "0###")
-            {
-                MessageBox.Show("Выберите сотрудника.");
-                StaffLV.Focus();
-            }
-            else if (CheckWhatToAdd() == "###0")
-                MessageBox.Show($"Не все поля отсутствия заполнены.\nTimeStart: {AbsenceTimeBeginMTBX.Text}, TimeEnd: {AbsenceTimeEndMTBX.Text}");
         }
 
         public async void DeleteRow()
@@ -746,6 +740,16 @@ namespace PlanningScheduleApp.Pages
             StaffLV.Visibility = Visibility.Collapsed;
         }
 
+        private void StaffAbsenceTBX_GotFocus(object sender, RoutedEventArgs e)
+        {
+            StaffAbsenceLV.Visibility = Visibility.Visible;
+        }
+
+        private void StaffAbsenceTBX_LostFocus(object sender, RoutedEventArgs e)
+        {
+            StaffAbsenceLV.Visibility = Visibility.Collapsed;
+        }
+
         private void AbsenceMTBX_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             MaskedTextBox maskedTextBox = sender as MaskedTextBox;
@@ -758,6 +762,15 @@ namespace PlanningScheduleApp.Pages
             if (SelectedStaff != null)
             {
                 StaffTBX.Text = $"{SelectedStaff.SHORT_FIO} ({SelectedStaff.TABEL_ID.Trim()})";
+            }
+        }
+
+        private void StaffAbsenceLV_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            SelectedStaffForAbsence = (StaffModel)StaffAbsenceLV.SelectedItem;
+            if (SelectedStaffForAbsence != null)
+            {
+                StaffAbsenceTBX.Text = $"{SelectedStaffForAbsence.SHORT_FIO} ({SelectedStaffForAbsence.TABEL_ID.Trim()})";
             }
         }
 
@@ -775,6 +788,13 @@ namespace PlanningScheduleApp.Pages
         {
             StaffTBX.Clear();
             StaffLV.SelectedItem = null;
+            SelectedStaff = null;
+        }
+
+        private void ClearStaffAbsenceBtn_Click(object sender, RoutedEventArgs e)
+        {
+            StaffAbsenceTBX.Clear();
+            StaffAbsenceLV.SelectedItem = null;
             SelectedStaff = null;
         }
 
@@ -806,7 +826,6 @@ namespace PlanningScheduleApp.Pages
             {
                 new filterCMB { id = 0, filterName = "ФИО" },
                 new filterCMB { id = 1, filterName = "табельному номеру" },
-                new filterCMB { id = 2, filterName = "рабочим часам" }
             };
             filterCMB.SelectedIndex = 0;
 
@@ -851,32 +870,53 @@ namespace PlanningScheduleApp.Pages
         {
             CauseLV.SelectedItem = null;
             CauseTBX.Clear();
-            AbsenceStartDP.SelectedDate = null;
-            AbsenceFinishDP.SelectedDate = null;
+            AbsenceStartDP.SelectedDate = DateTime.Now;
+            AbsenceFinishDP.SelectedDate = DateTime.Now;
             AbsenceTimeBeginMTBX.Clear();
             AbsenceTimeEndMTBX.Clear();
         }
 
-        private string CheckWhatToAdd() // # - сотрудник, # - поля графика, # - отсутствие, # - поля отсутствия
+        private void AddScheduleBtn_Click(object sender, RoutedEventArgs e)
         {
-            if (StaffLV.SelectedItem != null)
+            if (CheckWhatToAdd() == "10")
             {
-                if (FieldIsFilled("staff") && CauseLV.SelectedItem == null)   // если поля сотрудника заполнены, но отсутствие не выбрано, то добавляем график
-                    return "1100";
-                else if (FieldIsFilled("staff") == false && CauseLV.SelectedItem != null && FieldIsFilled("absence"))  // если выбран сотрудник, но его поля графика не заполнены и поля отсутствия заполнены, то добавляем только отсутствие
-                    return "1011";
-                else if (FieldIsFilled("staff") && CauseLV.SelectedItem != null && FieldIsFilled("absence"))  // если поля сотрудника и отсутствия заполнены
-                    return "1111";
-                else if (CauseLV.SelectedItem == null)
-                    return "##0#";   // причина отсутствия не выбрана
-                else if (!FieldIsFilled("staff"))
-                    return "#0##";
-                else if (!FieldIsFilled("absence"))
-                    return "###0";
-                else
-                    return "1608";     // сотрудник выбран, но неизвестная ошибка - отладить код
+                if (SelectedTemplate.isFlexible)
+                    FillFlexibleSchedule();
+                else if (!SelectedTemplate.isFlexible)
+                    FillStaticSchedule();
             }
-            else return "0###";  // сотрудник не выбран
+            else if (CheckWhatToAdd() == "0#")
+            {
+                MessageBox.Show("Не все поля графика заполнены.");
+            }
+            else if (CheckWhatToAdd() == "1608")
+                MessageBox.Show("Ошибка 1608. Обратитесь к разработчику.");
+        }
+
+        private async void AddAbsenceBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (CheckWhatToAdd() == "01")
+                await AddAbsence();
+            else if (CheckWhatToAdd() == "Не все поля отсутствия заполнены")
+            {
+                MessageBox.Show("#0");
+            }
+            else if (CheckWhatToAdd() == "1608")
+                MessageBox.Show("Ошибка 1608. Обратитесь к разработчику.");
+        }
+
+        private string CheckWhatToAdd() // # - график, # - отсутствие
+        {
+            if (FieldIsFilled("staff") && !FieldIsFilled("absence"))   // если поля сотрудника заполнены, но отсутствие не заполнено, то добавляем график
+                return "10";
+            else if (FieldIsFilled("absence"))  // если поля отсутствия заполнены, то добавляем только отсутствие
+                return "01";
+            else if (!FieldIsFilled("staff"))
+                return "0#";
+            else if (!FieldIsFilled("absence"))
+                return "#0";
+            else
+                return "1608";     // сотрудник выбран, но неизвестная ошибка - отладить код
         }
 
         private bool FieldIsFilled(string whichFields)
@@ -889,7 +929,7 @@ namespace PlanningScheduleApp.Pages
             }
             else if (whichFields == "absence")
             {
-                if (AbsenceStartDP.SelectedDate == null || AbsenceFinishDP.SelectedDate == null)
+                if (StaffAbsenceLV.SelectedItem == null || CauseLV.SelectedItem == null)
                     return false;
                 return true;
             }
@@ -984,17 +1024,26 @@ namespace PlanningScheduleApp.Pages
         private void StaffTBX_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
-                SearchStaff();
+                SearchStaff("schedule");
         }
 
-        private void SearchStaff()
+        private void StaffAbsenceTBX_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+                SearchStaff("absence");
+        }
+
+        private void SearchStaff(string type)
         {
             List<StaffModel> staff = new List<StaffModel>();
             string txt = StaffTBX.Text;
             if (txt.Length == 0)
                 staff = StaffList.ToList();
             staff = StaffListInPosition.Where(u => u.StaffForSearch.ToLower().Contains(txt.ToLower())).ToList();
-            StaffLV.ItemsSource = staff;
+            if (type == "schedule")
+                StaffLV.ItemsSource = staff;
+            else
+                StaffAbsenceLV.ItemsSource = staff;
         }
         #endregion
         #endregion
@@ -1204,12 +1253,12 @@ namespace PlanningScheduleApp.Pages
             string timeBeginValue = AbsenceTimeBeginMTBX.Text;
             string timeEndValue = AbsenceTimeEndMTBX.Text;
 
-            int checkExistingAbsence = Odb.db.Database.SqlQuery<int>("IF EXISTS (SELECT * FROM Zarplats.dbo.Schedule_Absence WHERE DateBegin <= @DateEnd AND DateEnd >= @DateBegin AND id_Staff = @staffid) SELECT 1 ELSE SELECT 0", new SqlParameter("DateBegin", AbsenceStartDP.SelectedDate), new SqlParameter("DateEnd", AbsenceFinishDP.SelectedDate), new SqlParameter("staffid", SelectedStaff.STAFF_ID)).SingleOrDefault();
+            int checkExistingAbsence = Odb.db.Database.SqlQuery<int>("IF EXISTS (SELECT * FROM Zarplats.dbo.Schedule_Absence WHERE DateBegin <= @DateEnd AND DateEnd >= @DateBegin AND id_Staff = @staffid) SELECT 1 ELSE SELECT 0", new SqlParameter("DateBegin", AbsenceStartDP.SelectedDate), new SqlParameter("DateEnd", AbsenceFinishDP.SelectedDate), new SqlParameter("staffid", SelectedStaffForAbsence.STAFF_ID)).SingleOrDefault();
             if (!Convert.ToBoolean(checkExistingAbsence))
             {
                 Odb.db.Database.ExecuteSqlCommand("INSERT INTO Zarplats.dbo.Schedule_Absence (AbsenceRef_ID, id_Staff, DateBegin, DateEnd, TimeBegin, TimeEnd) VALUES (@AbsenceRef_ID, @staffid, @DateBegin, @DateEnd, @TimeBegin, @TimeEnd)",
                     new SqlParameter("AbsenceRef_ID", SelectedCause.ID_AbsenceRef),
-                    new SqlParameter("staffid", SelectedStaff.STAFF_ID),
+                    new SqlParameter("staffid", SelectedStaffForAbsence.STAFF_ID),
                     new SqlParameter("DateBegin", AbsenceStartDP.SelectedDate),
                     new SqlParameter("DateEnd", AbsenceFinishDP.SelectedDate),
                     new SqlParameter("TimeBegin", timeBeginValue.Any(char.IsDigit) ? timeBeginValue : (object)DBNull.Value),
@@ -1219,7 +1268,7 @@ namespace PlanningScheduleApp.Pages
                 DateTime absenceEnd = AbsenceFinishDP.SelectedDate ?? DateTime.Now;
 
                 // обновление рабочих часов
-                await UpdateWorkingHours(new List<StaffModel> { SelectedStaff }, absenceStart, absenceEnd);
+                await UpdateWorkingHours(new List<StaffModel> { SelectedStaffForAbsence }, absenceStart, absenceEnd);
                 MessageBox.Show("Отсутствие добавлено!");
 
                 await UpdateDGV();

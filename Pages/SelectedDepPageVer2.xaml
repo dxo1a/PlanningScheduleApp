@@ -108,13 +108,17 @@
                     </StackPanel>
                     <Button Name="AddScheduleBtn" Width="95" Content="Добавить" Padding="0" FontSize="12" Margin="0 15 0 0" Click="AddScheduleBtn_Click"/>
                     <Separator Margin="0 10" BorderBrush="LightGray" Width="100" Effect="{StaticResource shadForText}"/>
-                    <StackPanel Orientation="Horizontal" Margin="0 0 0 5">
-                        <TextBlock Text="Отсутствие" FontSize="14" FontWeight="SemiBold"/>
-                        <TextBlock Text="(не обязательно)" FontSize="10" Margin="3 3 0 0" Opacity="0.5"/>
+                    <TextBlock Text="Отсутствие" FontSize="14" FontWeight="SemiBold"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                        <TextBox Name="StaffAbsenceTBX" MinWidth="240" Style="{StaticResource TextBoxWithToolTipStyle}"  Tag="Сотрудник" ToolTip="Сотрудник" GotFocus="StaffAbsenceTBX_GotFocus" KeyDown="StaffAbsenceTBX_KeyDown" LostFocus="StaffAbsenceTBX_LostFocus" Margin="5 10 5 0"/>
+                        <Button Width="30" Height="30" HorizontalAlignment="Right" Margin="-35 0 5 0" Style="{StaticResource ClearButton}"  BorderBrush="Transparent" BorderThickness="0" Click="ClearStaffAbsenceBtn_Click" VerticalAlignment="Top">
+                            <Image Source="/Resources/icons/misc/cross_1.ico" MaxWidth="30" MaxHeight="30" ToolTip="Очистить" Opacity="0.5"/>
+                        </Button>
                     </StackPanel>
+                    <ListView Name="StaffAbsenceLV" ScrollViewer.CanContentScroll="False" HorizontalAlignment="Center" MinWidth="240" Visibility="Collapsed" MaxHeight="90" FontSize="12" Margin="0 0" Style="{x:Null}" Background="LightGray" BorderThickness="1 0 1 1" SelectionChanged="StaffAbsenceLV_SelectionChanged"/>
                     <StackPanel Orientation="Vertical">
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <TextBox Name="CauseTBX" MinWidth="240" Style="{StaticResource TextBoxWithToolTipStyle}" Tag="Причина отсутствия" ToolTip="Причина отсутствия" GotFocus="CauseTBX_GotFocus" LostFocus="CauseTBX_LostFocus" Margin="0" IsReadOnly="True"/>
+                            <TextBox Name="CauseTBX" MinWidth="240" Padding="0 5 0 -5" Style="{StaticResource TextBoxWithToolTipStyle}" Tag="Причина отсутствия" ToolTip="Причина отсутствия" GotFocus="CauseTBX_GotFocus" LostFocus="CauseTBX_LostFocus" Margin="0" IsReadOnly="True"/>
                             <!-- функционал поиска причин -->
                             <Button x:Name="ClearAbsenceBtn" Width="30" Height="30" HorizontalAlignment="Right" Margin="-35 0 0 0" Style="{StaticResource ClearButton}"  BorderBrush="Transparent" BorderThickness="0" Click="ClearAbsenceBtn_Click" VerticalAlignment="Top">
                                 <Image Source="/Resources/icons/misc/cross_1.ico" MaxWidth="30" MaxHeight="30" ToolTip="Очистить" Opacity="0.5"/>
