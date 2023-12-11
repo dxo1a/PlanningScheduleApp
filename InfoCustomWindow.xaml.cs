@@ -18,21 +18,22 @@ namespace PlanningScheduleApp
         DateTime Date;
 
         List<StaffModel> AbsenceList = new List<StaffModel>();
-        List<StaffModel> StaffList = new List<StaffModel>();
+        BindingList<StaffModel> StaffList = new BindingList<StaffModel>();
         StaffModel ScheduleInfo { get; set; }
 
         private SelectedDepPageVer2 _SelectedDepPageVer2 { get; set; }
 
+#pragma warning disable CS0067
         public event EventHandler AbsenceRemoved;
+#pragma warning restore CS0067
 
-        public InfoCustomWindow(string whichInfo, StaffModel selectedRow, DateTime date, BindingList<StaffModel> staffList, SelectedDepPageVer2 selectedDepPageVer2)
+        public InfoCustomWindow(StaffModel selectedRow, DateTime date, BindingList<StaffModel> staffList, SelectedDepPageVer2 selectedDepPageVer2)
         {
             try
             {
                 InitializeComponent();
 
                 _SelectedDepPageVer2 = selectedDepPageVer2;
-                WhichInfo = whichInfo;
                 SelectedRow = selectedRow;
                 Date = date;
                 StaffList = staffList;

@@ -7,43 +7,45 @@
         mc:Ignorable="d"
         Title="Управление причинами" Height="450" Width="400" ResizeMode="NoResize">
     <Grid>
-        <Grid Name="CauseWrapPanel">
-            <ListView Name="CauseLV">
-                <ListView.View>
-                    <GridView ScrollViewer.CanContentScroll="False">
-                        <GridViewColumn Header="Причина" DisplayMemberBinding="{Binding Cause}" Width="auto"/>
-                        <GridViewColumn Header="Тип" Width="auto">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock>
-                                        <TextBlock.Style>
-                                            <Style TargetType="TextBlock">
-                                                <Setter Property="Text" Value="Не уважительная"/>
-                                                <Style.Triggers>
-                                                    <DataTrigger Binding="{Binding Type}" Value="True">
-                                                        <Setter Property="Text" Value="Уважительная"/>
-                                                    </DataTrigger>
-                                                </Style.Triggers>
-                                            </Style>
-                                        </TextBlock.Style>
-                                    </TextBlock>
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                        <GridViewColumn Width="auto">
-                            <GridViewColumn.CellTemplate>
-                                <DataTemplate>
-                                    <Button Name="CauseRemoveBtn" Click="CauseRemoveBtn_Click" Padding="0" Background="Transparent" BorderBrush="Transparent" MaxHeight="25">
-                                        <Image Source="Resources/icons/misc/remove.ico"/>
-                                    </Button>
-                                </DataTemplate>
-                            </GridViewColumn.CellTemplate>
-                        </GridViewColumn>
-                    </GridView>
-                </ListView.View>
-            </ListView>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="32"/>
+        </Grid.RowDefinitions>
+        <ListView Name="CauseLV" Grid.Row="0" ScrollViewer.CanContentScroll="False">
+            <ListView.View>
+                <GridView ScrollViewer.CanContentScroll="False">
+                    <GridViewColumn Width="40">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Name="CauseRemoveBtn" Click="CauseRemoveBtn_Click" Padding="0" Background="Transparent" BorderBrush="Transparent" MaxHeight="25">
+                                    <Image Source="Resources/icons/misc/remove_2.ico" Effect="{StaticResource ShadowEffectForIcons}"/>
+                                </Button>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                    <GridViewColumn Header="Причина" DisplayMemberBinding="{Binding Cause}" Width="auto"/>
+                    <GridViewColumn Header="Тип" Width="auto">
+                        <GridViewColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock>
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Text" Value="Не уважительная"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Type}" Value="True">
+                                                    <Setter Property="Text" Value="Уважительная"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </DataTemplate>
+                        </GridViewColumn.CellTemplate>
+                    </GridViewColumn>
+                </GridView>
+            </ListView.View>
+        </ListView>
 
-            <Button Content="Добавить причину" Click="AddAbsenceBtn_Click" Padding="0"  VerticalAlignment="Bottom" HorizontalAlignment="Stretch"/>
-        </Grid>
+            <Button Content="Добавить причину" Click="AddAbsenceBtn_Click" Padding="0" VerticalAlignment="Bottom" HorizontalAlignment="Stretch" Grid.Row="1"/>
     </Grid>
 </Window>

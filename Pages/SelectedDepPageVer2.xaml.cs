@@ -622,7 +622,6 @@ namespace PlanningScheduleApp.Pages
         }
 
         private SmenZadaniaWindow smenZadaniaWindow;
-        private int? previousIdAbsence;
         private async void ContextMenuItem_Click(object sender, EventArgs e)
         {
             if (sender is MenuItem menuItem)
@@ -778,13 +777,13 @@ namespace PlanningScheduleApp.Pages
                         bool isRecordExists = CheckRecordExists(SelectedRow.STAFF_ID, dateAndSchedule.DTA.Date);
                         if (hasAbsence)
                         {
-                            InfoCustomWindow infoCustomWindow = new InfoCustomWindow("Отсутствие", SelectedRow, dateAndSchedule.DTA.Date, StaffList, this);
+                            InfoCustomWindow infoCustomWindow = new InfoCustomWindow(SelectedRow, dateAndSchedule.DTA.Date, StaffList, this);
                             infoCustomWindow.AbsenceRemoved += OnAbsenceRemoved;
                             infoCustomWindow.ShowDialog();
                         }
                         else if (!hasAbsence && isRecordExists)
                         {
-                            InfoCustomWindow infoCustomWindow = new InfoCustomWindow("Информация о рабочем дне", SelectedRow, dateAndSchedule.DTA.Date, StaffList, this);
+                            InfoCustomWindow infoCustomWindow = new InfoCustomWindow(SelectedRow, dateAndSchedule.DTA.Date, StaffList, this);
                             infoCustomWindow.ShowDialog();
                         }
                     }
@@ -1096,9 +1095,9 @@ namespace PlanningScheduleApp.Pages
             if (CheckWhatToAdd() == "10")
             {
                 if (SelectedTemplate.isFlexible)
-                    FillFlexibleSchedule();
+                    await FillFlexibleSchedule();
                 else if (!SelectedTemplate.isFlexible)
-                    FillStaticSchedule();
+                    await FillStaticSchedule();
             }
             else if (CheckWhatToAdd() == "0#")
             {
@@ -1295,7 +1294,7 @@ namespace PlanningScheduleApp.Pages
         #endregion
 
         #region Заполнение графиков
-        private async void FillFlexibleSchedule()
+        private async Task FillFlexibleSchedule()
         {
             List<ScheduleTemplateModel> flexibleDays = Odb.db.Database.SqlQuery<ScheduleTemplateModel>("select distinct * from Zarplats.dbo.Schedule_FlexibleDays where Template_ID = @templateid", new SqlParameter("templateid", SelectedTemplate.ID_Template)).ToList();
 
@@ -1388,7 +1387,7 @@ namespace PlanningScheduleApp.Pages
             await UpdateDGVAsync();
         }
 
-        private async void FillStaticSchedule()
+        private async Task FillStaticSchedule()
         {
             DateTime selectedStartDate = ScheduleStartDP.SelectedDate ?? DateTime.Now;
             DateTime selectedFinishDate = ScheduleEndDP.SelectedDate ?? DateTime.Now;

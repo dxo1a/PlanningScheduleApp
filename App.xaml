@@ -27,6 +27,7 @@
             <DropShadowEffect x:Key="ShadowEffectUp" ShadowDepth="5" Direction="90" BlurRadius="10" Opacity="1" Color="Gray"/>
             <DropShadowEffect x:Key="shadForText" BlurRadius="3" Direction="0" ShadowDepth="1" Color="Black"/>
             <DropShadowEffect x:Key="shadForTextOnLight" BlurRadius="1" Direction="0" ShadowDepth="1" Color="Black"/>
+            <DropShadowEffect x:Key="ShadowEffectForIcons" BlurRadius="3" Direction="0" ShadowDepth="0" Color="Black" Opacity="0.8"/>
             <BlurEffect x:Key="BlurEffect" Radius="10" KernelType="Gaussian"/>
 
             <Style x:Key="ClearButton" TargetType="Button">

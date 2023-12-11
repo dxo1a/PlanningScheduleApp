@@ -311,6 +311,12 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <Resource Include="Resources\icons\misc\add_3.ico" />
+    <Resource Include="Resources\icons\misc\add_2.ico" />
+    <Resource Include="Resources\icons\misc\list.ico" />
+    <Resource Include="Resources\icons\misc\schedule_2.ico" />
+    <Resource Include="Resources\icons\misc\refresh_2.ico" />
+    <Resource Include="Resources\icons\misc\remove_2.ico" />
     <Resource Include="Resources\icons\misc\schedule.ico" />
     <Resource Include="Resources\icons\misc\folder.ico" />
     <Resource Include="icon.ico" />

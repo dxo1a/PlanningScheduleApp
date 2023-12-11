@@ -18,10 +18,10 @@
         </Grid.RowDefinitions>
         <StackPanel Orientation="Horizontal" Grid.Row="0" Margin="5 0" VerticalAlignment="Bottom">
             <Button Name="TemplateAdd" Width="40" Height="40" FontSize="16" Padding="0" Click="TemplateAdd_Click" Style="{StaticResource UpRoundedButtonStyle}" Margin="0 3 0 0" BorderBrush="Transparent">
-                <Image Source="Resources/icons/misc/add.ico" MaxHeight="30" MaxWidth="30"/>
+                <Image Source="Resources/icons/misc/add_3.ico" MaxHeight="30" MaxWidth="30" Effect="{StaticResource ShadowEffectForIcons}"/>
             </Button>
             <Button Name="TemplateDelete" Width="40" Height="40" FontSize="16" Padding="0" Click="TemplateDelete_Click" Style="{StaticResource UpRoundedButtonStyle}" Margin="0 3 0 0" BorderBrush="Transparent">
-                <Image Source="Resources/icons/misc/remove.ico" MaxHeight="30" MaxWidth="30"/>
+                <Image Source="Resources/icons/misc/remove_2.ico" MaxHeight="30" MaxWidth="30" Effect="{StaticResource ShadowEffectForIcons}"/>
             </Button>
         </StackPanel>
         <DataGrid Name="TemplatesDG" AutoGenerateColumns="False" Grid.Row="2" IsReadOnly="True" SelectionMode="Single" Style="{StaticResource DataGridOwn}" CanUserAddRows="False" MouseDoubleClick="TemplatesDG_MouseDoubleClick" SelectionChanged="TemplatesDG_SelectionChanged">

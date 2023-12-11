@@ -35,10 +35,10 @@
             <DockPanel HorizontalAlignment="Stretch">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
                     <Button Name="StaffRemoveBtn" Click="StaffRemoveBtn_Click" Width="40" Height="40" BorderBrush="Transparent" ToolTip="Удалить" Style="{StaticResource UpRoundedButtonStyle}" Background="Transparent" IsEnabled="False">
-                        <Image Source="/Resources/icons/misc/remove.ico" MaxWidth="30" MaxHeight="30"/>
+                        <Image Source="/Resources/icons/misc/remove_2.ico" MaxWidth="30" MaxHeight="30" Effect="{StaticResource ShadowEffectForIcons}"/>
                     </Button>
                     <Button Name="StaffRefreshBtn" Click="StaffRefreshBtn_Click" Width="40" Height="40" BorderBrush="Transparent" ToolTip="Изменить" Style="{StaticResource UpRoundedButtonStyle}" IsEnabled="True">
-                        <Image Source="/Resources/icons/misc/refresh.ico" MaxWidth="30" MaxHeight="30"/>
+                        <Image Source="/Resources/icons/misc/refresh_2.ico" MaxWidth="30" MaxHeight="30" Effect="{StaticResource ShadowEffectForIcons}"/>
                     </Button>
                 </StackPanel>
                 <!--<StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
@@ -66,8 +66,8 @@
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" MinWidth="200">
                         <TextBlock Text="Тип графика" Margin="5 0" VerticalAlignment="Center"/>
                         <ComboBox Name="TemplateCB" Width="100" Padding="0 2.5" SelectionChanged="TemplateCB_SelectionChanged" DropDownOpened="TemplateCB_DropDownOpened"/>
-                        <Button Name="ManageScheduleBtn" Width="25" Height="25" Padding="0" Margin="10 0 0 0" Click="ManageScheduleBtn_Click" Background="LightGray" BorderBrush="LightGray">
-                            <Image Source="/Resources/icons/misc/schedule.ico" MaxWidth="20" MaxHeight="20"/>
+                        <Button Name="ManageScheduleBtn" Width="25" Height="25" Padding="0" Margin="10 0 0 0" Click="ManageScheduleBtn_Click" Background="LightGray" BorderBrush="LightGray" ToolTip="Управление шаблонами">
+                            <Image Source="/Resources/icons/misc/schedule_2.ico" MaxWidth="20" MaxHeight="20"/>
                         </Button>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Margin="0 5">
@@ -95,8 +95,8 @@
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" MinWidth="200" Margin="0 5 0 0">
                         <TextBlock Text="Причина" Margin="5 0" VerticalAlignment="Center"/>
                         <ComboBox Name="CauseCB" MinWidth="100" Padding="0 2.5" SelectionChanged="CauseCB_SelectionChanged"/>
-                        <Button Name="ManageCauseBtn" Width="25" Height="25" Padding="0" Margin="10 0 0 0" Click="ManageCauseBtn_Click" Background="LightGray" BorderBrush="LightGray">
-                            <Image Source="/Resources/icons/misc/add.ico" MaxWidth="20" MaxHeight="20"/>
+                        <Button Name="ManageCauseBtn" Width="25" Height="25" Padding="0" Margin="10 0 0 0" Click="ManageCauseBtn_Click" Background="LightGray" BorderBrush="LightGray" ToolTip="Управление причинами">
+                            <Image Source="/Resources/icons/misc/list.ico" MaxWidth="24" MaxHeight="24"/>
                         </Button>
                     </StackPanel>
                     <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Margin="0 5">
