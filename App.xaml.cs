@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Data;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -15,9 +16,10 @@ namespace PlanningScheduleApp
         {
             //ThemeEx.ChangeCulture += Action<string>;
         }
+
         protected override async void OnStartup(StartupEventArgs e)
         {
-            await ThemeEx.LoadThemeAsync(null);
+            //await ThemeEx.LoadThemeAsync(null);
             //var load_com = new LoadThemeCommand();
             //load_com.Execute(null);
             base.OnStartup(e);

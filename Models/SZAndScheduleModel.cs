@@ -41,7 +41,7 @@ namespace PlanningScheduleApp.Models
 
     }
 
-    public class StaffModel
+    public class StaffModel : INotifyPropertyChanged
     {
         public int ID_Schedule { get; set; }
         public int STAFF_ID { get; set; }
@@ -52,7 +52,7 @@ namespace PlanningScheduleApp.Models
         public string LunchTimeBegin { get; set; }
         public string LunchTimeEnd { get; set; }
         public DateTime DTA { get; set; }
-        public double? WorkingHours { get; set; }
+        private double? _workingHours;
         public int? ID_Absence { get; set; }
         public string CauseAbsence { get; set; }
         public DateTime? DateBegin { get; set; }
@@ -108,7 +108,7 @@ namespace PlanningScheduleApp.Models
                 if (TimeBegin != null && TimeEnd != null && TimeBegin != string.Empty && TimeEnd != string.Empty)
                     return $"{TimeBegin} - {TimeEnd}";
                 else
-                    return null;
+                    return "Весь день";
             }
         }
 
@@ -124,6 +124,26 @@ namespace PlanningScheduleApp.Models
                 else
                     return string.Empty;
             }
+        }
+
+        public double? WorkingHours
+        {
+            get { return _workingHours; }
+            set
+            {
+                if (_workingHours != value)
+                {
+                    _workingHours = value;
+                    OnPropertyChanged(nameof(WorkingHours));
+                }
+            }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 

@@ -5,7 +5,14 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PlanningScheduleApp"
         mc:Ignorable="d"
-        Title="Информация" Height="220" Width="350" ResizeMode="NoResize">
+        Title="Информация" Height="245" Width="495" ResizeMode="NoResize">
+    <Window.Resources>
+        <Style TargetType="GridViewColumnHeader" BasedOn="{StaticResource MaterialDesignToolButton}">
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="IsEnabled" Value="False"/>
+        </Style>
+    </Window.Resources>
     <Grid>
         <TabControl Name="InfoTC" SelectionChanged="InfoTC_SelectionChanged">
             <TabItem Header="Рабочий день" Name="WorkingDayTI">
@@ -15,7 +22,24 @@
             </TabItem>
             <TabItem Header="Отсутствие" Name="AbsenceTI">
                 <StackPanel Orientation="Vertical" Margin="10 5 10 0">
-                    <TextBlock Name="AbsenceInfoTBX" FontSize="14"/>
+                    <ListView Name="AbsenceLV" VerticalContentAlignment="Center" HorizontalAlignment="Center">
+                        <ListView.View>
+                            <GridView>
+                                <GridViewColumn Header="Время" DisplayMemberBinding="{Binding AbsenceTime}" Width="auto"/>
+                                <GridViewColumn Header="Причина" DisplayMemberBinding="{Binding CauseAbsence}" Width="auto"/>
+                                <GridViewColumn Header="Дата" DisplayMemberBinding="{Binding AbsenceDate}" Width="auto"/>
+                                <GridViewColumn Width="auto">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Name="AbsenceRemoveBtn" Click="AbsenceRemoveBtn_Click" Padding="0" Background="Transparent" BorderBrush="Transparent" MaxHeight="25">
+                                                <Image Source="Resources/icons/misc/remove.ico"/>
+                                            </Button>
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
                 </StackPanel>
             </TabItem>
         </TabControl>

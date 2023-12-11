@@ -170,6 +170,12 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="AddCauseWindow.xaml.cs">
+      <DependentUpon>AddCauseWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="ManageCauseWindow.xaml.cs">
+      <DependentUpon>ManageCauseWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="AppSettings.cs" />
     <Compile Include="Converters\DateWithDayConverter.cs" />
     <Compile Include="Converters\DayOfWeekConverter.cs" />
@@ -210,6 +216,14 @@
     <Compile Include="SmenZadaniaWindow.xaml.cs">
       <DependentUpon>SmenZadaniaWindow.xaml</DependentUpon>
     </Compile>
+    <Page Include="AddCauseWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="ManageCauseWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="DialogueCustomWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

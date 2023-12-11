@@ -153,6 +153,8 @@ C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Relea
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Release\Pages\SelectedDepPageVer2.baml
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Release\Resources\Icons.baml
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Release\Resources\IconsNonShared.baml
+C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Release\AddCauseWindow.g.cs
+C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Release\ManageCauseWindow.g.cs
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Release\DialogueCustomWindow.g.cs
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Release\ExportToExcelFilterWindow.g.cs
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Release\InfoCustomWindow.g.cs
@@ -171,6 +173,8 @@ C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Relea
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Release\PlanningScheduleApp_MarkupCompile.cache
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Release\PlanningScheduleApp_MarkupCompile.lref
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Release\App.baml
+C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Release\AddCauseWindow.baml
+C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Release\ManageCauseWindow.baml
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Release\DialogueCustomWindow.baml
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Release\ExportToExcelFilterWindow.baml
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Release\InfoCustomWindow.baml

@@ -28,6 +28,12 @@ namespace PlanningScheduleApp
         {
             InitializeComponent();
             UpdateGrid();
+
+            this.KeyDown += (sender, e) =>
+            {
+                if (e.Key == Key.Escape)
+                    this.Close();
+            };
         }
 
         private void TemplateAdd_Click(object sender, RoutedEventArgs e)

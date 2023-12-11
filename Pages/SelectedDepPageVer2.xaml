@@ -8,33 +8,7 @@
       d:DesignHeight="650" d:DesignWidth="1200"
       Title="SelectedDepPageVer2">
     <Page.Resources>
-        <Style x:Key="TextBoxWithToolTipStyle" TargetType="TextBox" BasedOn="{StaticResource TBXStyle}">
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="TextBox">
-                        <Border BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
-                            <Grid>
-                                <ScrollViewer x:Name="PART_ContentHost" Margin="2"/>
-                                <TextBlock x:Name="PlaceholderText" Text="{TemplateBinding Tag}" Visibility="Collapsed" VerticalAlignment="Center" Foreground="Gray" Padding="5 0"/>
-                            </Grid>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource Self}, Converter={StaticResource ToolTipVisibilityConveter}}" Value="True">
-                                <Setter TargetName="PlaceholderText" Property="Visibility" Value="Visible"/>
-                            </DataTrigger>
-                            <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource Self}, Converter={StaticResource ToolTipVisibilityConveter}}" Value="False">
-                                <Setter TargetName="PlaceholderText" Property="Visibility" Value="Collapsed"/>
-                            </DataTrigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-            <Style.Triggers>
-                <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource Self}, Converter={StaticResource ToolTipVisibilityConveter}}" Value="True">
-                    <Setter Property="ToolTip" Value="Введите текст"/>
-                </DataTrigger>
-            </Style.Triggers>
-        </Style>
+        
         <Style TargetType="DataGridCell" BasedOn="{StaticResource MaterialDesignDataGridCell}">
             <Setter Property="Padding" Value="10 7.5"/>
         </Style>
@@ -47,12 +21,12 @@
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="0.24*"/>
+            <ColumnDefinition Width="0.26*"/>
         </Grid.ColumnDefinitions>
         <StackPanel Grid.Row="0" Margin="10 5 10 5" HorizontalAlignment="Center" VerticalAlignment="Center" Grid.Column="0">
             <StackPanel Orientation="Horizontal">
                 <TextBlock Text="Поиск " FontSize="16" MaxHeight="30"/>
-                <TextBox x:Name="SearchTBX" Width="150" MaxWidth="220" FontSize="16" TextAlignment="Center" Margin="0" MaxHeight="25" Style="{StaticResource TBXStyle}" BorderBrush="LightGray" Padding="0" TextChanged="SearchTBX_TextChanged"/>
+                <TextBox x:Name="SearchTBX" Width="150" MaxWidth="220" FontSize="16" TextAlignment="Center" Margin="0" MaxHeight="25" Style="{StaticResource TBXStyle}" BorderBrush="LightGray" Padding="0" KeyDown="SearchTBX_KeyDown"/>
                 <TextBlock Text="по" FontSize="16" MaxHeight="30" Margin="10 0"/>
                 <ComboBox Name="filterCMB" MinWidth="100" MaxWidth="170" FontSize="16" MaxHeight="30" Padding="0"/>
             </StackPanel>
@@ -67,11 +41,11 @@
                         <Image Source="/Resources/icons/misc/refresh.ico" MaxWidth="30" MaxHeight="30"/>
                     </Button>
                 </StackPanel>
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <!--<StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Name="ExcelBtn" Click="ExcelBtn_Click" Width="40" Height="40" BorderBrush="Transparent" ToolTip="Excel" Style="{StaticResource UpRoundedButtonStyle}" IsEnabled="True">
                         <Image Source="/Resources/icons/software/excel.ico" MaxWidth="30" MaxHeight="30"/>
                     </Button>
-                </StackPanel>
+                </StackPanel>-->
             </DockPanel>
         </StackPanel>
         <ComboBox Name="MonthCMB" MinWidth="100" MaxWidth="170" FontSize="16" MaxHeight="30" MaxDropDownHeight="200" Padding="0" Margin="0 20 10 0" HorizontalAlignment="Right" ScrollViewer.CanContentScroll="False"/>
@@ -107,7 +81,9 @@
                         </StackPanel>
                     </StackPanel>
                     <Button Name="AddScheduleBtn" Width="95" Content="Добавить" Padding="0" FontSize="12" Margin="0 15 0 0" Click="AddScheduleBtn_Click"/>
+                    
                     <Separator Margin="0 10" BorderBrush="LightGray" Width="100" Effect="{StaticResource shadForText}"/>
+                    
                     <TextBlock Text="Отсутствие" FontSize="14" FontWeight="SemiBold"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                         <TextBox Name="StaffAbsenceTBX" MinWidth="240" Style="{StaticResource TextBoxWithToolTipStyle}"  Tag="Сотрудник" ToolTip="Сотрудник" GotFocus="StaffAbsenceTBX_GotFocus" KeyDown="StaffAbsenceTBX_KeyDown" LostFocus="StaffAbsenceTBX_LostFocus" Margin="5 10 5 0"/>
@@ -116,15 +92,12 @@
                         </Button>
                     </StackPanel>
                     <ListView Name="StaffAbsenceLV" ScrollViewer.CanContentScroll="False" HorizontalAlignment="Center" MinWidth="240" Visibility="Collapsed" MaxHeight="90" FontSize="12" Margin="0 0" Style="{x:Null}" Background="LightGray" BorderThickness="1 0 1 1" SelectionChanged="StaffAbsenceLV_SelectionChanged"/>
-                    <StackPanel Orientation="Vertical">
-                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                            <TextBox Name="CauseTBX" MinWidth="240" Padding="0 5 0 -5" Style="{StaticResource TextBoxWithToolTipStyle}" Tag="Причина отсутствия" ToolTip="Причина отсутствия" GotFocus="CauseTBX_GotFocus" LostFocus="CauseTBX_LostFocus" Margin="0" IsReadOnly="True"/>
-                            <!-- функционал поиска причин -->
-                            <Button x:Name="ClearAbsenceBtn" Width="30" Height="30" HorizontalAlignment="Right" Margin="-35 0 0 0" Style="{StaticResource ClearButton}"  BorderBrush="Transparent" BorderThickness="0" Click="ClearAbsenceBtn_Click" VerticalAlignment="Top">
-                                <Image Source="/Resources/icons/misc/cross_1.ico" MaxWidth="30" MaxHeight="30" ToolTip="Очистить" Opacity="0.5"/>
-                            </Button>
-                        </StackPanel>
-                        <ListView Name="CauseLV" ScrollViewer.CanContentScroll="False" HorizontalAlignment="Center" Visibility="Collapsed" MinWidth="240" MaxHeight="90" FontSize="12" Style="{x:Null}" Background="LightGray" BorderThickness="1 0 1 1" SelectionChanged="CauseLV_SelectionChanged"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" MinWidth="200" Margin="0 5 0 0">
+                        <TextBlock Text="Причина" Margin="5 0" VerticalAlignment="Center"/>
+                        <ComboBox Name="CauseCB" MinWidth="100" Padding="0 2.5" SelectionChanged="CauseCB_SelectionChanged"/>
+                        <Button Name="ManageCauseBtn" Width="25" Height="25" Padding="0" Margin="10 0 0 0" Click="ManageCauseBtn_Click" Background="LightGray" BorderBrush="LightGray">
+                            <Image Source="/Resources/icons/misc/add.ico" MaxWidth="20" MaxHeight="20"/>
+                        </Button>
                     </StackPanel>
                     <StackPanel Orientation="Vertical" HorizontalAlignment="Center" Margin="0 5">
                         <StackPanel Orientation="Horizontal" Margin="0 0 0 5">
@@ -148,19 +121,19 @@
                             </StackPanel>
                         </StackPanel>
                     </StackPanel>
-
                     <Button Name="AddAbsenceBtn" Width="95" Content="Добавить" Padding="0" FontSize="12" Margin="0 15 0 0" Click="AddAbsenceBtn_Click"/>
                 </StackPanel>
             </Border>
         </DockPanel>
-        <StackPanel Orientation="Horizontal" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center">
+        <!--<StackPanel Orientation="Horizontal" Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center">
             <TextBlock Name="ResultTB"/>
             <TextBlock Name="ActionTB" Text="33.5" HorizontalAlignment="Center"/>
-        </StackPanel>
+        </StackPanel>-->
         <Border  Grid.Row="1"  Grid.Column="0" BorderBrush="Gray" BorderThickness="0" MinHeight="490" Margin="0 0 0 5" x:Name="DGVBorder">
             <WindowsFormsHost x:Name="windowsFormsHost">
-                <wf:DataGridView x:Name="StaffDGV" RowHeadersVisible="False" ReadOnly="True" AllowUserToResizeRows="False" AllowUserToAddRows="False" AutoSizeColumnsMode="Fill" CellDoubleClick="StaffDGV_CellDoubleClick"  SelectionChanged="StaffDGV_SelectionChanged" AutoGenerateColumns="False" BackgroundColor="White" Dock="Fill"/>
+                <wf:DataGridView x:Name="StaffDGV" RowHeadersVisible="False" ReadOnly="True" AllowUserToResizeRows="False" AllowUserToAddRows="False" AutoSizeColumnsMode="Fill" CellDoubleClick="StaffDGV_CellDoubleClick"  SelectionChanged="StaffDGV_SelectionChanged" AutoGenerateColumns="False" BackgroundColor="White" Dock="Fill" KeyDown="StaffDGV_KeyDown"/>
             </WindowsFormsHost>
         </Border>
+        <TextBlock Name="StatusTB" FontSize="15" Grid.Row="2" Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Center" Opacity="0.5"/>
     </Grid>
 </Page>

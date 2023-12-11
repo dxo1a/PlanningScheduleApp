@@ -31,6 +31,12 @@ namespace PlanningScheduleApp
             UpdateRestingDaysComboBox();
 
             DataContext = this;
+
+            this.KeyDown += (sender, e) =>
+            {
+                if (e.Key == Key.Escape)
+                    this.Close();
+            };
         }
 
         #region Проверка TBX

@@ -37,6 +37,12 @@ namespace PlanningScheduleApp
             AssignDays();
 
             DataContext = this;
+
+            this.KeyDown += (sender, e) =>
+            {
+                if (e.Key == Key.Escape)
+                    this.Close();
+            };
         }
 
         public void UpdateFlexibleDaysCollection()
@@ -86,7 +92,6 @@ namespace PlanningScheduleApp
         {
             if (!SelectedTemplate.isFlexible)
             {
-                this.MinHeight = 430; this.Height = this.MinHeight;
                 FlexibleScheduleTI.Visibility = Visibility.Collapsed;
                 List<ScheduleTemplateModel> staticDays = Odb.db.Database.SqlQuery<ScheduleTemplateModel>("select ID_Day, Day, WorkBegin, WorkEnd, LunchTimeBegin, LunchTimeEnd, isRestingDay from Zarplats.dbo.Schedule_StaticDays where Template_ID = @templateid", new SqlParameter("templateid", SelectedTemplate.ID_Template)).ToList();
                 StaticDays = new ObservableCollection<ScheduleTemplateModel>(staticDays);
@@ -225,7 +230,7 @@ namespace PlanningScheduleApp
                     int restingDaysCount = StaticDays.Count(day => day.isRestingDay);
                     int workingDaysCount = StaticDays.Count(day => !day.isRestingDay);
                     int checkExisting = Odb.db.Database.SqlQuery<int>("IF EXISTS (SELECT 1 FROM Zarplats.dbo.Schedule_Template WHERE TemplateName LIKE @TemplateName) SELECT 1 ELSE SELECT 0", new SqlParameter("TemplateName", $"%{TemplateNameTBX.Text}%")).SingleOrDefault();
-                    if (!Convert.ToBoolean(checkExisting))
+                    if (Convert.ToBoolean(checkExisting))
                     {
                         using (SqlCommand updateTemplateCommand = new SqlCommand("UPDATE Zarplats.dbo.Schedule_Template SET TemplateName = @TemplateName, RestingDaysCount = @RestingDaysCount, WorkingDaysCount = @WorkingDaysCount WHERE ID_Template = @templateid", connection))
                         {
@@ -255,7 +260,7 @@ namespace PlanningScheduleApp
                     }
                     else
                     {
-                        MessageBox.Show("Шаблон с таким названием уже существует!");
+                        MessageBox.Show("Шаблон с таким названием не найден!");
                         return;
                     }
                     connection.Close();
@@ -281,7 +286,7 @@ namespace PlanningScheduleApp
             {
                 connection.Open();
                 int checkExisting = Odb.db.Database.SqlQuery<int>("IF EXISTS (SELECT 1 FROM Zarplats.dbo.Schedule_Template WHERE TemplateName LIKE @TemplateName AND ID_Template <> @templateid) SELECT 1 ELSE SELECT 0", new SqlParameter("TemplateName", $"%{TemplateNameTBX.Text}%"), new SqlParameter("templateid", SelectedTemplate.ID_Template)).SingleOrDefault();
-                if (!Convert.ToBoolean(checkExisting))
+                if (Convert.ToBoolean(checkExisting))
                 {
                     SqlTransaction transaction = connection.BeginTransaction();
                     try
@@ -330,7 +335,7 @@ namespace PlanningScheduleApp
                 }
                 else
                 {
-                    MessageBox.Show("Шаблон с таким названием уже существует!");
+                    MessageBox.Show("Шаблон с таким названием не найден!");
                     return;
                 }
                 connection.Close();
