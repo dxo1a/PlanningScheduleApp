@@ -21,6 +21,7 @@
         </Grid.RowDefinitions>
         <StackPanel Orientation="Vertical" VerticalAlignment="Center" Margin="10">
             <TextBlock x:Name="TaskTB" Text="Выполняется запрос, подождите..." VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="16" TextWrapping="Wrap" TextAlignment="Center"/>
+            <TextBlock x:Name="ProgressTB" Text="(0/N)." VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="16" TextWrapping="Wrap" TextAlignment="Center"/>
             <fa:ImageAwesome Name="Spinner" Icon="Spinner" Spin="True" SpinDuration="2" Width="35" Height="35" Margin="0 15 0 0"/>
         </StackPanel>
         <Button Name="OpenFolderBtn" Grid.Row="1" Margin="10 0 0 0" Width="45" Height="45" Style="{StaticResource RoundedButtonStyle}" HorizontalAlignment="Left" IsEnabled="False" Click="OpenFolderBtn_Click">

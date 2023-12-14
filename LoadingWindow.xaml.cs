@@ -13,13 +13,14 @@ namespace PlanningScheduleApp
         public string filePath, saveFileName, selectedMessageText, selectedUrlText, webhook, urlPreview;
         public int selectedFolder, selectedChat, chatType;
         public Export export;
+        private ExportToExcelFilterWindow Exporter;
 
         private void CloseBtn_Click(object sender, RoutedEventArgs e)
         {
             CloseWindow();
         }
 
-        public LoadingWindow(string task)
+        public LoadingWindow(string task, ExportToExcelFilterWindow exporter)
         {
             InitializeComponent();
             TaskTB.Text = $"Выполняется: {task}.";
@@ -27,6 +28,9 @@ namespace PlanningScheduleApp
             App.DisableAllWindowsExcept(this);
             CanClose = false;
             Closing += LoadingWindow_Closing;
+
+            Exporter = exporter;
+            Exporter.ProgressChanged += UpdateProgress;
         }
 
         private void LoadingWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
@@ -34,13 +38,17 @@ namespace PlanningScheduleApp
             if (!CanClose)
             {
                 e.Cancel = true;
-
             }
             else if (CanClose)
             {
                 e.Cancel = false;
                 App.EnableAllWindows();
             }
+        }
+
+        private void UpdateProgress(string status, int current, int total)
+        {
+            Dispatcher.Invoke(() => ProgressTB.Text = $"{status} ({current}/{total})");
         }
 
         public void ChangeText(string text, bool ready, string FilePath, string SaveFileName, string SelectedMessageText, string SelectedUrlText, string Webhook, string UrlPreview, int SelectedFolder, int SelectedChat, int ChatType)
@@ -57,6 +65,7 @@ namespace PlanningScheduleApp
                 OpenFolderBtn.IsEnabled = true;
                 Bitrix24Export.IsEnabled = true;
                 CloseBtn.IsEnabled = true;
+                ProgressTB.Visibility = Visibility.Collapsed;
             }
             else
             {
@@ -64,7 +73,6 @@ namespace PlanningScheduleApp
                 Bitrix24Export.IsEnabled = false;
                 CloseBtn.IsEnabled = true;
             }
-
         }
 
         private void CloseWindow()

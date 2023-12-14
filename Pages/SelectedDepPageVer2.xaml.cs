@@ -1092,61 +1092,28 @@ namespace PlanningScheduleApp.Pages
         private async void AddScheduleBtn_Click(object sender, RoutedEventArgs e)
         {
             Dispatcher.Invoke(() => App.DisableAllWindows());
-            if (CheckWhatToAdd() == "10")
+            if (StaffLV.SelectedItem != null && TemplateCB.SelectedItem != null && ScheduleStartDP.SelectedDate != null && ScheduleEndDP.SelectedDate != null)
             {
                 if (SelectedTemplate.isFlexible)
                     await FillFlexibleSchedule();
                 else if (!SelectedTemplate.isFlexible)
                     await FillStaticSchedule();
             }
-            else if (CheckWhatToAdd() == "0#")
+            else
             {
                 MessageBox.Show("Не все поля графика заполнены.");
             }
-            else if (CheckWhatToAdd() == "1608")
-                MessageBox.Show("Ошибка 1608. Обратитесь к разработчику.");
             Dispatcher.Invoke(() => App.EnableAllWindows());
         }
 
         private async void AddAbsenceBtn_Click(object sender, RoutedEventArgs e)
         {
             Dispatcher.Invoke(() => App.DisableAllWindows());
-            if (CheckWhatToAdd() == "01")
+            if (StaffAbsenceLV.SelectedItem != null || CauseCB.SelectedItem != null && IsTimeCorrect())
                 await AddAbsence();
             else
                 MessageBox.Show("Не все поля отсутствия заполнены!");
             Dispatcher.Invoke(() => App.EnableAllWindows());
-        }
-
-        private string CheckWhatToAdd() // # - график, # - отсутствие
-        {
-            if (FieldIsFilled("absence") && IsTimeCorrect())  // если поля отсутствия заполнены, то добавляем только отсутствие
-                return "01";
-            else if (FieldIsFilled("staff"))   // если поля сотрудника заполнены, но отсутствие не заполнено, то добавляем график
-                return "10";
-            else if (!FieldIsFilled("staff"))
-                return "0#";
-            else if (!FieldIsFilled("absence"))
-                return "#0";
-            else
-                return "1608";     // сотрудник выбран, но неизвестная ошибка - отладить код
-        }
-
-        private bool FieldIsFilled(string whichFields)
-        {
-            if (whichFields == "staff")
-            {
-                if (TemplateCB.SelectedItem == null || ScheduleStartDP.SelectedDate == null || ScheduleEndDP.SelectedDate == null)
-                    return false;
-                return true;
-            }
-            else if (whichFields == "absence")
-            {
-                if (StaffAbsenceLV.SelectedItem == null || CauseCB.SelectedItem == null)
-                    return false;
-                return true;
-            }
-            else return false;
         }
 
         private bool IsTimeCorrect()

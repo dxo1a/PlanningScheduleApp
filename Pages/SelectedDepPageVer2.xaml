@@ -41,11 +41,11 @@
                         <Image Source="/Resources/icons/misc/refresh_2.ico" MaxWidth="30" MaxHeight="30" Effect="{StaticResource ShadowEffectForIcons}"/>
                     </Button>
                 </StackPanel>
-                <!--<StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Name="ExcelBtn" Click="ExcelBtn_Click" Width="40" Height="40" BorderBrush="Transparent" ToolTip="Excel" Style="{StaticResource UpRoundedButtonStyle}" IsEnabled="True">
                         <Image Source="/Resources/icons/software/excel.ico" MaxWidth="30" MaxHeight="30"/>
                     </Button>
-                </StackPanel>-->
+                </StackPanel>
             </DockPanel>
         </StackPanel>
         <ComboBox Name="MonthCMB" MinWidth="100" MaxWidth="170" FontSize="16" MaxHeight="30" MaxDropDownHeight="200" Padding="0" Margin="0 20 10 0" HorizontalAlignment="Right" ScrollViewer.CanContentScroll="False"/>

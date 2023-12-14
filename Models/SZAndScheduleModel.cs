@@ -21,6 +21,7 @@ namespace PlanningScheduleApp.Models
         public double? WorkingHours { get; set; }
         public DateTime DTA { get; set; }
         public string FIO { get; set; }
+        public string TABEL_ID { get; set; }
 
         public string Detail
         {
@@ -62,10 +63,11 @@ namespace PlanningScheduleApp.Models
 
         public double? TotalHours { get; set; }
         public double? FreeHours { get; set; }
-        public double AcceptableFreeHours { get; set; }
+        private double _acceptableFreeHours { get; set; }
 
         public string Subdivision { get; set; }
         public string Position { get; set; }
+        public string Company { get; set; }
 
         public List<DateAndSchedule> DatesAndSchedules { get; set; }
 
@@ -139,12 +141,64 @@ namespace PlanningScheduleApp.Models
             }
         }
 
+        public double AcceptableFreeHours
+        {
+            get { return _acceptableFreeHours; }
+            set
+            {
+                if (_acceptableFreeHours != value)
+                {
+                    _acceptableFreeHours = value;
+                    OnPropertyChanged(nameof(AcceptableFreeHours));
+                }
+            }
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj == null || GetType() != obj.GetType())
+            {
+                return false;
+            }
+
+            var other = (StaffModel)obj;
+
+            return STAFF_ID == other.STAFF_ID
+                && TABEL_ID == other.TABEL_ID
+                && DTA == other.DTA
+                && Position == other.Position;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = hash * 23 + STAFF_ID.GetHashCode();
+                hash = hash * 23 + (TABEL_ID?.GetHashCode() ?? 0);
+                hash = hash * 23 + DTA.GetHashCode();
+                return hash;
+            }
+        }
+
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected virtual void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
+    }
+
+    public class Company
+    {
+        public string Name { get; set; }
+        public List<Department> Departments { get; set; } = new List<Department>();
+    }
+
+    public class Department
+    {
+        public string Name { get; set; }
+        public List<StaffModel> StaffMembers { get; set; } = new List<StaffModel>();
     }
 
     public class DateAndSchedule
