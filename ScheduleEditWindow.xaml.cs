@@ -229,8 +229,8 @@ namespace PlanningScheduleApp
 
                     int restingDaysCount = StaticDays.Count(day => day.isRestingDay);
                     int workingDaysCount = StaticDays.Count(day => !day.isRestingDay);
-                    int checkExisting = Odb.db.Database.SqlQuery<int>("IF EXISTS (SELECT 1 FROM Zarplats.dbo.Schedule_Template WHERE TemplateName LIKE @TemplateName) SELECT 1 ELSE SELECT 0", new SqlParameter("TemplateName", $"%{TemplateNameTBX.Text}%")).SingleOrDefault();
-                    if (Convert.ToBoolean(checkExisting))
+                    int checkExisting = Odb.db.Database.SqlQuery<int>("IF EXISTS (SELECT 1 FROM Zarplats.dbo.Schedule_Template WHERE TemplateName LIKE @TemplateName AND ID_Template != @templateid) SELECT 1 ELSE SELECT 0", new SqlParameter("TemplateName", $"%{TemplateNameTBX.Text}%"), new SqlParameter("templateid", SelectedTemplate.ID_Template)).SingleOrDefault();
+                    if (!Convert.ToBoolean(checkExisting))
                     {
                         using (SqlCommand updateTemplateCommand = new SqlCommand("UPDATE Zarplats.dbo.Schedule_Template SET TemplateName = @TemplateName, RestingDaysCount = @RestingDaysCount, WorkingDaysCount = @WorkingDaysCount WHERE ID_Template = @templateid", connection))
                         {
@@ -238,6 +238,8 @@ namespace PlanningScheduleApp
                             updateTemplateCommand.Parameters.AddWithValue("@TemplateName", TemplateNameTBX.Text + " " + TemplateAdditionalNameTBX.Text);
                             updateTemplateCommand.Parameters.AddWithValue("@RestingDaysCount", restingDaysCount);
                             updateTemplateCommand.Parameters.AddWithValue("@WorkingDaysCount", workingDaysCount);
+
+                            updateTemplateCommand.ExecuteNonQuery();
 
                             foreach (var day in StaticDays)
                             {
@@ -260,7 +262,7 @@ namespace PlanningScheduleApp
                     }
                     else
                     {
-                        MessageBox.Show("Шаблон с таким названием не найден!");
+                        MessageBox.Show("Шаблон с таким названием уже существует!");
                         return;
                     }
                     connection.Close();
@@ -286,7 +288,7 @@ namespace PlanningScheduleApp
             {
                 connection.Open();
                 int checkExisting = Odb.db.Database.SqlQuery<int>("IF EXISTS (SELECT 1 FROM Zarplats.dbo.Schedule_Template WHERE TemplateName LIKE @TemplateName AND ID_Template <> @templateid) SELECT 1 ELSE SELECT 0", new SqlParameter("TemplateName", $"%{TemplateNameTBX.Text}%"), new SqlParameter("templateid", SelectedTemplate.ID_Template)).SingleOrDefault();
-                if (Convert.ToBoolean(checkExisting))
+                if (!Convert.ToBoolean(checkExisting))
                 {
                     SqlTransaction transaction = connection.BeginTransaction();
                     try
@@ -335,7 +337,7 @@ namespace PlanningScheduleApp
                 }
                 else
                 {
-                    MessageBox.Show("Шаблон с таким названием не найден!");
+                    MessageBox.Show("Шаблон с таким названием уже существует!");
                     return;
                 }
                 connection.Close();
@@ -357,6 +359,29 @@ namespace PlanningScheduleApp
                     day.LunchTimeBegin = string.Empty;
                     day.LunchTimeEnd = string.Empty;
                     day.isRestingDay = true;
+
+                    UpdateWorkingAndRestingDaysCount();
+                }
+            }
+        }
+
+        private void isRestingDayCB_Unchecked(object sender, RoutedEventArgs e)
+        {
+            CheckBox checkBox = sender as CheckBox;
+
+            if (checkBox != null)
+            {
+                ScheduleTemplateModel day = checkBox.DataContext as ScheduleTemplateModel;
+
+                if (day != null)
+                {
+                    day.WorkBegin = "08:00";
+                    day.WorkEnd = "17:00";
+                    day.LunchTimeBegin = "12:00";
+                    day.LunchTimeEnd = "13:00";
+                    day.isRestingDay = false;
+
+                    UpdateWorkingAndRestingDaysCount();
                 }
             }
         }
@@ -379,6 +404,14 @@ namespace PlanningScheduleApp
                     System.Threading.Thread.Sleep(10);
                 }
             }
+        }
+
+        private void UpdateWorkingAndRestingDaysCount()
+        {
+            int workingDaysCount = StaticDays.Count(day => !day.isRestingDay);
+            int restingDaysCount = StaticDays.Count(day => day.isRestingDay);
+
+            TemplateAdditionalNameTBX.Text = $"({workingDaysCount}/{restingDaysCount})";
         }
     }
 }

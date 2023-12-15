@@ -55,27 +55,6 @@
         <TabControl Grid.Row="1" Name="ScheduleTB">
             <TabItem Header="Фиксированный">
                 <StackPanel Orientation="Vertical" VerticalAlignment="Center">
-                    <!--#region Заполнить--><!--
-                    <Border Style="{StaticResource BorderCustom}" Background="#FFEAEAEA"  MinWidth="300" BorderBrush="#FFD2D2D2">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Заполнить" VerticalAlignment="Center" FontSize="14" Margin="5 0 7.5 0"/>
-                            <TextBox Name="FillCountTBX" MinWidth="20" Padding="0 2 0 0" Style="{StaticResource TBXStyle}" Margin="0 0 5.5 0" TextAlignment="Center" Height="22" VerticalAlignment="Bottom" MaxLength="1"/>
-                            <xctk:MaskedTextBox Mask="00:00" MinWidth="45"  PromptChar=" " Margin="0 3 0 0" TextAlignment="Center" Padding="0 2 0 0" LostFocus="MTBX_LostFocus" PreviewTextInput="TBX_PreviewTextInput" PreviewKeyDown="TBX_PreviewKeyDown" GotFocus="MaskedTextBox_GotFocus">
-                                <xctk:MaskedTextBox.Style>
-                                    <Style TargetType="xctk:MaskedTextBox" BasedOn="{StaticResource TBXStyle}"/>
-                                </xctk:MaskedTextBox.Style>
-                            </xctk:MaskedTextBox>
-                            <TextBlock Text="-" VerticalAlignment="Center" Margin="5 0" FontSize="16" FontWeight="Bold"/>
-                            <xctk:MaskedTextBox Mask="00:00" MinWidth="45" PromptChar=" " Margin="0 3 0 0" TextAlignment="Center" Padding="0 2 0 0" LostFocus="MTBX_LostFocus" PreviewTextInput="TBX_PreviewTextInput" PreviewKeyDown="TBX_PreviewKeyDown" GotFocus="MaskedTextBox_GotFocus">
-                                <xctk:MaskedTextBox.Style>
-                                    <Style TargetType="xctk:MaskedTextBox" BasedOn="{StaticResource TBXStyle}"/>
-                                </xctk:MaskedTextBox.Style>
-                            </xctk:MaskedTextBox>
-                            <TextBox Style="{StaticResource TBXStyle}" Margin="5 3 5 0" MinWidth="45" TextAlignment="Center" Padding="0 2 0 0" PreviewTextInput="TBX_PreviewTextInput" PreviewKeyDown="TBX_PreviewKeyDown" MaxLength="4"/>
-                            <CheckBox/>
-                        </StackPanel>
-                    </Border>-->
-                    <!--#endregion-->
                     <ItemsControl Grid.Column="1" ItemsSource="{Binding StaticDays}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
