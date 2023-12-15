@@ -193,3 +193,5 @@ C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Relea
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Release\PlanningScheduleApp.csproj.CopyComplete
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Release\PlanningScheduleApp.exe
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Release\PlanningScheduleApp.pdb
+C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\bin\Release\BouncyCastle.Crypto.dll
+C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\bin\Release\BouncyCastle.Crypto.xml

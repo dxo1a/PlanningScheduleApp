@@ -16,6 +16,7 @@ using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Forms;
+using static System.Windows.Forms.AxHost;
 using Excel = Microsoft.Office.Interop.Excel;
 using MessageBox = System.Windows.MessageBox;
 
@@ -151,6 +152,7 @@ namespace PlanningScheduleApp
         int currentCounter;
         public int processCounter;
         public event Action<string, int, int> ProgressChanged;
+        double acceptableFreeHoursForSZ;
         private async Task ExportToExcel()
         {
             processCounter = 0;
@@ -187,7 +189,7 @@ namespace PlanningScheduleApp
                 processCounter = 0;
                 List<Company> companies = new List<Company>();
 
-                foreach(StaffModel staff in staffWithPositiveFreeHours)
+                foreach (StaffModel staff in staffWithPositiveFreeHours)
                 {
                     double totalHours = await GetTotalHoursAsync(staff.STAFF_ID, staff.DTA);
                     double workingHours = await GetWorkingHoursAsync(staff.STAFF_ID, staff.DTA);
@@ -281,35 +283,36 @@ namespace PlanningScheduleApp
                             double workingHoursValue = sz.WorkingHours.Value;
                             double freeHours = freeHoursDictionary.ContainsKey((staffId, sz.DTA)) ? freeHoursDictionary[(staffId, sz.DTA)] : 0;
                             sz.FreeHours = freeHours;
-                            if (sz.Product != null && sz.Detail != null && sz.NUM != null && sz.Cost != 0 && sz.Count != 0)
-                            {
-                                worksheet2.Cells[rowCountSZ, 1] = sz.TABEL_ID;
-                                worksheet2.Cells[rowCountSZ, 2] = sz.FIO;
-                                worksheet2.Cells[rowCountSZ, 3] = sz.Product;
-                                worksheet2.Cells[rowCountSZ, 4].NumberFormat = "@";
-                                worksheet2.Cells[rowCountSZ, 4] = sz.PP.ToString();
-                                worksheet2.Cells[rowCountSZ, 5] = sz.NUM;
-                                worksheet2.Cells[rowCountSZ, 6] = sz.Detail;
-                                worksheet2.Cells[rowCountSZ, 7] = sz.Count;
-                                worksheet2.Cells[rowCountSZ, 8] = sz.Cost;
-                                worksheet2.Cells[rowCountSZ, 9] = sz.DTA.ToShortDateString();
-
-                                Range range = worksheet2.Range[worksheet2.Cells[rowCountSZ, 1], worksheet2.Cells[rowCountSZ, 9]];
-
-                                if (isAnotherInterior)
+                            
+                            if (sz.Product != null && sz.Detail != null && sz.NUM != null && sz.Cost != 0 && sz.Count != 0 && totalHoursValue < workingHoursValue && totalHoursValue > 0)
                                 {
-                                    range.Interior.Color = Color.White;
-                                }
-                                else
-                                {
-                                    range.Interior.Color = Color.FromArgb(240, 240, 240).ToArgb();
-                                }
-                                range.Borders.LineStyle = XlLineStyle.xlContinuous;
-                                range.Borders.Color = Color.FromArgb(208, 215, 229).ToArgb();
+                                    worksheet2.Cells[rowCountSZ, 1] = sz.TABEL_ID;
+                                    worksheet2.Cells[rowCountSZ, 2] = sz.FIO;
+                                    worksheet2.Cells[rowCountSZ, 3] = sz.Product;
+                                    worksheet2.Cells[rowCountSZ, 4].NumberFormat = "@";
+                                    worksheet2.Cells[rowCountSZ, 4] = sz.PP.ToString();
+                                    worksheet2.Cells[rowCountSZ, 5] = sz.NUM;
+                                    worksheet2.Cells[rowCountSZ, 6] = sz.Detail;
+                                    worksheet2.Cells[rowCountSZ, 7] = sz.Count;
+                                    worksheet2.Cells[rowCountSZ, 8] = sz.Cost;
+                                    worksheet2.Cells[rowCountSZ, 9] = sz.DTA.ToShortDateString();
 
-                                rowCountSZ++;
+                                    Range range = worksheet2.Range[worksheet2.Cells[rowCountSZ, 1], worksheet2.Cells[rowCountSZ, 9]];
+
+                                    if (isAnotherInterior)
+                                    {
+                                        range.Interior.Color = Color.White;
+                                    }
+                                    else
+                                    {
+                                        range.Interior.Color = Color.FromArgb(240, 240, 240).ToArgb();
+                                    }
+                                    range.Borders.LineStyle = XlLineStyle.xlContinuous;
+                                    range.Borders.Color = Color.FromArgb(208, 215, 229).ToArgb();
+
+                                    rowCountSZ++;
+                                }
                             }
-                        }
                     }
                     isAnotherInterior = !isAnotherInterior;
                 }
@@ -502,7 +505,7 @@ namespace PlanningScheduleApp
                     {
                         while (await reader.ReadAsync())
                         {
-                            var szAndScheduleItem = new SZAndScheduleModel
+                            var sz = new SZAndScheduleModel
                             {
                                 TABEL_ID = reader["TABEL_ID"].ToString(),
                                 FIO = reader["FIO"].ToString(),
@@ -518,7 +521,16 @@ namespace PlanningScheduleApp
                                 TotalHours = reader["TotalHours"] != DBNull.Value ? Convert.ToDouble(reader["TotalHours"]) : 0
                             };
 
-                            SZAndScheduleList.Add(szAndScheduleItem);
+                            var dataGridRow = FreeHoursDataGrid.Items.Cast<StaffModel>().FirstOrDefault(item => item.DTA == sz.DTA);
+
+                            if (dataGridRow != null)
+                            {
+                                sz.AcceptableFreeHours = dataGridRow.AcceptableFreeHours;
+                            }
+
+                            double? FreeHours = sz.WorkingHours - sz.TotalHours;
+                            if (sz.Product != null && sz.Detail != null && sz.NUM != null && sz.Cost != 0 && sz.Count != 0 && sz.TotalHours < sz.WorkingHours && sz.TotalHours > 0 && FreeHours > sz.AcceptableFreeHours)
+                                SZAndScheduleList.Add(sz);
                         }
                     }
                 }

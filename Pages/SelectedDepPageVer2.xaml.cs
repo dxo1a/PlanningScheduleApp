@@ -339,8 +339,9 @@ namespace PlanningScheduleApp.Pages
                         {
                             int columnIndex = e.ColumnIndex;
                             int day = columnIndex - 1;
+                            int maxDaysInMonth = DateTime.DaysInMonth(currentDate.Year, currentDate.Month);
 
-                            if (day > 0)
+                            if (day > 0 && day <= maxDaysInMonth)
                             {
                                 DataGridViewRow row = StaffDGV.Rows[e.RowIndex];
                                 StaffModel staff = (StaffModel)row.DataBoundItem;

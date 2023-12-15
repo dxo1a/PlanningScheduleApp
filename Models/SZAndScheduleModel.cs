@@ -12,6 +12,7 @@ namespace PlanningScheduleApp.Models
         public double? TotalHours { get; set; }
         public double? Cost { get; set; }
         public double? FreeHours { get; set; }
+        private double _acceptableFreeHours { get; set; }
         public string DetailNum { get; set; }
         public string DetailName { get; set; }
         public string NUM { get; set; }
@@ -31,6 +32,19 @@ namespace PlanningScheduleApp.Models
             }
         }
 
+        public double AcceptableFreeHours
+        {
+            get { return _acceptableFreeHours; }
+            set
+            {
+                if (_acceptableFreeHours != value)
+                {
+                    _acceptableFreeHours = value;
+                    OnPropertyChanged(nameof(AcceptableFreeHours));
+                }
+            }
+        }
+
         public string ScheduleFull
         {
             get
@@ -39,7 +53,12 @@ namespace PlanningScheduleApp.Models
             }
         }
 
+        public event PropertyChangedEventHandler PropertyChanged;
 
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 
     public class StaffModel : INotifyPropertyChanged
