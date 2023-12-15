@@ -188,7 +188,8 @@ namespace PlanningScheduleApp
 
                 processCounter = 0;
                 List<Company> companies = new List<Company>();
-
+                List<Task<List<SZAndScheduleModel>>> tasks = new List<Task<List<SZAndScheduleModel>>>();
+                List<int> staffIds = new List<int>();
                 foreach (StaffModel staff in staffWithPositiveFreeHours)
                 {
                     double totalHours = await GetTotalHoursAsync(staff.STAFF_ID, staff.DTA);
@@ -227,17 +228,24 @@ namespace PlanningScheduleApp
 
                         // Добавить сотрудника в отдел
                         department.StaffMembers.Add(staff);
+                        staffIds.Add(staff.STAFF_ID);
                         #endregion
 
                         #region Сменные задания
-                        SZAndScheduleList = await GetSZAndScheduleAsync(staff.STAFF_ID, StartDate, FinishDate);
-                        szandschedulesDataDictionary[staff.STAFF_ID] = SZAndScheduleList;
+                        tasks.Add(GetSZAndScheduleAsync(staff.STAFF_ID, StartDate, FinishDate));
                         #endregion
                     }
-
                     processCounter++;
-                    ProgressChanged?.Invoke("Выгрузка...", processCounter, staffWithPositiveFreeHours.Count);
+                    ProgressChanged?.Invoke("Выгрузка...", processCounter, staffWithPositiveFreeHours.Count + 1);
                 };
+                await Task.WhenAll(tasks);
+
+                for (int i = 0; i < staffIds.Count; i++)
+                {
+                    szandschedulesDataDictionary[staffIds[i]] = tasks[i].Result;
+                }
+                processCounter++;
+                ProgressChanged?.Invoke("Выгрузка...", processCounter, staffWithPositiveFreeHours.Count + 1);
 
                 #region Excel
                 Excel.Application excelApp = new Excel.Application();
@@ -284,34 +292,31 @@ namespace PlanningScheduleApp
                             double freeHours = freeHoursDictionary.ContainsKey((staffId, sz.DTA)) ? freeHoursDictionary[(staffId, sz.DTA)] : 0;
                             sz.FreeHours = freeHours;
                             
-                            if (sz.Product != null && sz.Detail != null && sz.NUM != null && sz.Cost != 0 && sz.Count != 0 && totalHoursValue < workingHoursValue && totalHoursValue > 0)
-                                {
-                                    worksheet2.Cells[rowCountSZ, 1] = sz.TABEL_ID;
-                                    worksheet2.Cells[rowCountSZ, 2] = sz.FIO;
-                                    worksheet2.Cells[rowCountSZ, 3] = sz.Product;
-                                    worksheet2.Cells[rowCountSZ, 4].NumberFormat = "@";
-                                    worksheet2.Cells[rowCountSZ, 4] = sz.PP.ToString();
-                                    worksheet2.Cells[rowCountSZ, 5] = sz.NUM;
-                                    worksheet2.Cells[rowCountSZ, 6] = sz.Detail;
-                                    worksheet2.Cells[rowCountSZ, 7] = sz.Count;
-                                    worksheet2.Cells[rowCountSZ, 8] = sz.Cost;
-                                    worksheet2.Cells[rowCountSZ, 9] = sz.DTA.ToShortDateString();
+                            worksheet2.Cells[rowCountSZ, 1] = sz.TABEL_ID;
+                            worksheet2.Cells[rowCountSZ, 2] = sz.FIO;
+                            worksheet2.Cells[rowCountSZ, 3] = sz.Product;
+                            worksheet2.Cells[rowCountSZ, 4].NumberFormat = "@";
+                            worksheet2.Cells[rowCountSZ, 4] = sz.PP.ToString();
+                            worksheet2.Cells[rowCountSZ, 5] = sz.NUM;
+                            worksheet2.Cells[rowCountSZ, 6] = sz.Detail;
+                            worksheet2.Cells[rowCountSZ, 7] = sz.Count;
+                            worksheet2.Cells[rowCountSZ, 8] = sz.Cost;
+                            worksheet2.Cells[rowCountSZ, 9] = sz.DTA.ToShortDateString();
 
-                                    Range range = worksheet2.Range[worksheet2.Cells[rowCountSZ, 1], worksheet2.Cells[rowCountSZ, 9]];
+                            Range range = worksheet2.Range[worksheet2.Cells[rowCountSZ, 1], worksheet2.Cells[rowCountSZ, 9]];
 
-                                    if (isAnotherInterior)
-                                    {
-                                        range.Interior.Color = Color.White;
-                                    }
-                                    else
-                                    {
-                                        range.Interior.Color = Color.FromArgb(240, 240, 240).ToArgb();
-                                    }
-                                    range.Borders.LineStyle = XlLineStyle.xlContinuous;
-                                    range.Borders.Color = Color.FromArgb(208, 215, 229).ToArgb();
+                            if (isAnotherInterior)
+                            {
+                                range.Interior.Color = Color.White;
+                            }
+                            else
+                            {
+                                range.Interior.Color = Color.FromArgb(240, 240, 240).ToArgb();
+                            }
+                            range.Borders.LineStyle = XlLineStyle.xlContinuous;
+                            range.Borders.Color = Color.FromArgb(208, 215, 229).ToArgb();
 
-                                    rowCountSZ++;
-                                }
+                            rowCountSZ++;
                             }
                     }
                     isAnotherInterior = !isAnotherInterior;
