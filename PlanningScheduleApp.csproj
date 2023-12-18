@@ -190,23 +190,23 @@
     <Compile Include="Converters\IsStringNonemptyConverter.cs" />
     <Compile Include="Converters\MinutesConverter.cs" />
     <Compile Include="Converters\ZeroToEmptyConverter.cs" />
-    <Compile Include="DialogueCustomWindow.xaml.cs">
-      <DependentUpon>DialogueCustomWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="ExportToExcelFilterWindow.xaml.cs">
       <DependentUpon>ExportToExcelFilterWindow.xaml</DependentUpon>
     </Compile>
     <Compile Include="InfoCustomWindow.xaml.cs">
       <DependentUpon>InfoCustomWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="LoadingWindow.xaml.cs">
-      <DependentUpon>LoadingWindow.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Models\AbsenceModel.cs" />
     <Compile Include="Models\AddScheduleViewModel.cs" />
     <Compile Include="Models\DateViewModel.cs" />
     <Compile Include="Models\ScheduleModel.cs" />
     <Compile Include="Models\SmenZadaniaModel.cs" />
+    <Compile Include="MVVM\Commands\RelayCommand.cs" />
+    <Compile Include="MVVM\Model\OnPropertyChanged.cs" />
+    <Compile Include="MVVM\ViewModel\ProcessExportToExcelViewModel.cs" />
+    <Compile Include="MVVM\View\ProcessWindow.xaml.cs">
+      <DependentUpon>ProcessWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pages\SelectedDepPageVer2.xaml.cs">
       <DependentUpon>SelectedDepPageVer2.xaml</DependentUpon>
     </Compile>
@@ -232,19 +232,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="DialogueCustomWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="ExportToExcelFilterWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="InfoCustomWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="LoadingWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -261,6 +253,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="MVVM\View\ProcessWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Pages\ChooseDepPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

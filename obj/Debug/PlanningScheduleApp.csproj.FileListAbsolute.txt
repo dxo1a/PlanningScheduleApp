@@ -155,10 +155,8 @@ C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\Resources\IconsNonShared.baml
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\AddCauseWindow.g.cs
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\ManageCauseWindow.g.cs
-C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\DialogueCustomWindow.g.cs
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\ExportToExcelFilterWindow.g.cs
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\InfoCustomWindow.g.cs
-C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\LoadingWindow.g.cs
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\MainWindow.g.cs
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\Pages\ChooseDepPage.g.cs
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\Pages\SelectedDepPage.g.cs
@@ -175,10 +173,8 @@ C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\App.baml
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\AddCauseWindow.baml
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\ManageCauseWindow.baml
-C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\DialogueCustomWindow.baml
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\ExportToExcelFilterWindow.baml
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\InfoCustomWindow.baml
-C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\LoadingWindow.baml
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\MainWindow.baml
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\Pages\ChooseDepPage.baml
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\Pages\SelectedDepPage.baml
@@ -195,3 +191,5 @@ C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\PlanningScheduleApp.pdb
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\bin\Debug\BouncyCastle.Crypto.dll
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\bin\Debug\BouncyCastle.Crypto.xml
+C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\MVVM\View\ProcessWindow.g.cs
+C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\obj\Debug\MVVM\View\ProcessWindow.baml

@@ -10,11 +10,11 @@ none
 false
 DEBUG;TRACE
 C:\Users\it01\Desktop\projects\PlanningScheduleApp\PlanningScheduleApp\App.xaml
-16-596502675
+15-750864514
 8-889547177
-331249848382
+35677618199
 5268650127
-AddCauseWindow.xaml;ManageCauseWindow.xaml;DialogueCustomWindow.xaml;ExportToExcelFilterWindow.xaml;InfoCustomWindow.xaml;LoadingWindow.xaml;MainWindow.xaml;Pages\ChooseDepPage.xaml;Pages\SelectedDepPage.xaml;Pages\SelectedDepPageVer2.xaml;Resources\Icons.xaml;Resources\IconsNonShared.xaml;ScheduleAddWindow.xaml;ScheduleEditWindow.xaml;ScheduleManageWindow.xaml;SmenZadaniaWindow.xaml;
+AddCauseWindow.xaml;ManageCauseWindow.xaml;ExportToExcelFilterWindow.xaml;InfoCustomWindow.xaml;MainWindow.xaml;MVVM\View\ProcessWindow.xaml;Pages\ChooseDepPage.xaml;Pages\SelectedDepPage.xaml;Pages\SelectedDepPageVer2.xaml;Resources\Icons.xaml;Resources\IconsNonShared.xaml;ScheduleAddWindow.xaml;ScheduleEditWindow.xaml;ScheduleManageWindow.xaml;SmenZadaniaWindow.xaml;
 
 False
 
